@@ -52,4 +52,42 @@ export async function createBookAndCopyLinks(page: Page, title = "파리에서 �
   return { workspaceUrl: page.url(), authorLink, designerLink };
 }
 
+/** 데모 1~5단계를 지나 작가로 작업 공간에 들어온 상태를 만든다. */
+export async function enterAsAuthor(page: Page) {
+  const links = await createBookAndCopyLinks(page);
+  await page.goto(links.authorLink);
+  await page.getByLabel("이름").fill("작가 A");
+  await page.getByRole("button", { name: "들어가기" }).click();
+  await expect(page.getByTestId("role-badge")).toHaveText("작가");
+  return links;
+}
+
+export function paragraph(page: Page, id: string) {
+  return page.getByTestId("manuscript").locator(`p[data-paragraph-id="${id}"]`);
+}
+
+/** 문단 끝에 글을 더한다(작가가 지면에서 고치기). */
+export async function typeAtEnd(page: Page, id: string, text: string) {
+  const p = paragraph(page, id);
+  await p.click();
+  // End 키는 화면에 보이는 줄의 끝으로 간다. 문단 끝에 커서를 직접 둔다.
+  await p.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  await page.keyboard.type(text);
+}
+
+export function aiCards(page: Page) {
+  return page.getByTestId("ai-card");
+}
+
+export function card(page: Page, original: string) {
+  return aiCards(page).filter({ has: page.locator("del", { hasText: original }) });
+}
+
 export { WORKSPACE };

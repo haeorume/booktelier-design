@@ -33,9 +33,8 @@ test("패널 배치를 바꾸면 이후 이벤트의 panel_layout이 바뀐다(D
   await page.getByTestId("dev-bar").getByRole("button", { name: "나란히" }).click();
   await page.getByRole("button", { name: "공유" }).click();
   await page.getByTestId("share-author").getByRole("button", { name: "링크 복사" }).click();
-  const copied = (await events(page)).filter((e) => e.name === "role_link_copied").map((e) => e.props.panel_layout);
-  expect(copied.slice(0, 2)).toEqual(["single", "single"]);
-  expect(copied.at(-1)).toBe("split");
+  const layouts = async () => (await events(page)).filter((e) => e.name === "role_link_copied").map((e) => e.props.panel_layout);
+  await expect.poll(layouts).toEqual(["single", "single", "split"]);
 });
 
 test("만든 책이 있으면 /는 편집자 홈으로 가고, 책 카드로 작업 공간에 들어간다", async ({ page }) => {

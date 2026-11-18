@@ -1,8 +1,8 @@
 // 데모 플로우(demo-flow 탭). 만든 단계까지 한 브라우저에서 이어서 누른다. 아직 만들지 않은 단계는 넣지 않는다.
 import { expect, test } from "@playwright/test";
-import { expectEvent, LINK, WORKSPACE } from "./helpers";
+import { aiCards, card, expectEvent, LINK, paragraph, typeAtEnd, WORKSPACE } from "./helpers";
 
-test("데모 1~5단계: 책 만들기 → 공유 → 작가 링크로 들어오기", async ({ page }) => {
+test("데모 1~6단계: 책 만들기 → 공유 → 작가 링크로 들어오기 → 지면에서 고치고 AI 제안 적용", async ({ page }) => {
   const title = "파리에서 보낸 한 달";
 
   // 1. 편집자: 제목이 비어 있으면 만들기를 누를 수 없다(QA-06)
@@ -67,4 +67,36 @@ test("데모 1~5단계: 책 만들기 → 공유 → 작가 링크로 들어오�
   await expect(page.getByRole("button", { name: "공유" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "편집자 홈" })).toHaveCount(0);
   await expectEvent(page, "participant_joined", { role: "author", props: { role: "author" } });
+
+  // 6. 작가: 둘째 문단을 고친다. 입력을 멈추고 1.5초쯤 뒤 그 문단에만 밑줄과 카드가 뜬다(QA-11, QA-27)
+  await expect(aiCards(page)).toHaveCount(0);
+  await typeAtEnd(page, "para_02", " 오래도록.");
+  await expect(paragraph(page, "para_02")).toContainText("서 있었다. 오래도록.");
+  await expectEvent(page, "first_edit", { role: "author", props: { via: "direct" } });
+  await expect(page.getByTestId("ai-status")).toContainText("분석 중");
+  await expect(aiCards(page)).toHaveCount(2);
+  const para02 = paragraph(page, "para_02");
+  await expect(para02.locator(".ai-underline")).toHaveText(["쏟아지는 것이 가능했고", "한참동안"]);
+  await expect(page.getByTestId("manuscript").locator(".ai-underline")).toHaveCount(2); // 고친 문단에만
+  await expectEvent(page, "ai_suggestion_shown", { role: "author", props: { kind: "polish" } });
+
+  // 카드에는 원문, 수정안, 대안, 종류, 이유가 있고, 작가 카드에는 보내기가 없다(QA-20, QA-29, QA-30)
+  const polish = card(page, "쏟아지는 것이 가능했고");
+  await expect(polish).toContainText("윤문");
+  await expect(polish).toContainText("쏟아졌고");
+  await expect(polish).toContainText("쏟아져 내렸고");
+  await expect(polish).toContainText("번역 투 표현이에요");
+  await expect(polish.getByRole("button", { name: "보내기" })).toHaveCount(0);
+  await expect(card(page, "한참동안")).toContainText("띄어쓰기");
+
+  // 적용하면 문장이 수정안으로 바뀌고 그 밑줄과 카드가 사라진다
+  await polish.getByRole("button", { name: "적용" }).click();
+  await expect(para02).toContainText("햇빛이 그림 위로 쏟아졌고, 나는");
+  await expect(aiCards(page)).toHaveCount(1);
+  await expect(para02.locator(".ai-underline")).toHaveText(["한참동안"]);
+  await expectEvent(page, "ai_suggestion_applied", { role: "author", props: { kind: "polish", choice: "replacement" } });
+
+  // 새로고침해도 고친 원고가 남는다(FR-09 ②)
+  await page.reload();
+  await expect(paragraph(page, "para_02")).toContainText("쏟아졌고, 나는 모네의 그림 앞에서 한참동안 서 있었다. 오래도록.");
 });

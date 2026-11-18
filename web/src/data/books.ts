@@ -93,6 +93,18 @@ export async function currentParticipant(deps: BookDeps, projectId: Uuid): Promi
   return p && p.project_id === projectId && p.anon_id === deps.identity.getAnonId() ? p : null;
 }
 
+/** 장 원고를 저장한다(FR-09 ②). 저장할 때마다 version이 1 오른다. */
+export async function saveChapterDoc(deps: Pick<BookDeps, "repo">, chapterId: Uuid, doc: ChapterDoc): Promise<Chapter> {
+  const current = await deps.repo.getChapter(chapterId);
+  if (!current) throw new Error("장을 찾을 수 없어요");
+  return deps.repo.updateChapter({ ...current, doc, version: current.version + 1 });
+}
+
+/** 이 책에서 그 이름의 이벤트가 이미 남았는지. first_edit를 한 번만 남길 때 쓴다(정할 것 8). */
+export async function hasProjectEvent(deps: Pick<BookDeps, "repo">, projectId: Uuid, name: string): Promise<boolean> {
+  return (await deps.repo.listEvents()).some((e) => e.project_id === projectId && e.name === name);
+}
+
 /** 이 책에서 마지막으로 남은 이벤트의 시각(ms). 책 카드의 '최근 변경'. */
 export async function lastActivityTs(deps: BookDeps, projectId: Uuid): Promise<number | null> {
   const events = await deps.repo.listEvents();

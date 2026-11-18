@@ -1,0 +1,47 @@
+.panel {
+  width: 14rem;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.9rem;
+  overflow: auto;
+}
+
+.heading {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.item[aria-current="page"] {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.title {
+  font-size: 0.9rem;
+}
+
+.badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  border: 1px solid var(--foreground);
+  border-radius: 999px;
+  padding: 0 0.5rem;
+}
