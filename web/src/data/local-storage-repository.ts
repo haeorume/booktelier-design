@@ -169,6 +169,9 @@ export function createLocalStorageRepository(options: LocalRepositoryOptions): R
     async getParticipant(id) {
       return byId("participants", id);
     },
+    async updateParticipant(participant) {
+      return replace("participants", participant, "참여자");
+    },
     async listParticipants(projectId) {
       return where("participants", (p) => p.project_id === projectId);
     },

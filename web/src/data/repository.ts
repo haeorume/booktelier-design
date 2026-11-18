@@ -52,6 +52,7 @@ export interface Repository {
   listRoleLinks(projectId: Uuid): Promise<RoleLink[]>;
   createParticipant(input: { project_id: Uuid; anon_id: Uuid; role: Role; display_name: string }): Promise<Participant>;
   getParticipant(id: Uuid): Promise<Participant | null>;
+  updateParticipant(participant: Participant): Promise<Participant>;
   listParticipants(projectId: Uuid): Promise<Participant[]>;
 
   // AI 제안: 보내기 전까지 본인만 본다. 읽기는 언제나 viewer의 것만 돌려준다(FR-23, D-09).

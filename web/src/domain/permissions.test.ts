@@ -15,6 +15,8 @@ const EXPECTED: Record<Action, Role[]> = {
   create_suggested_edit: ["editor"],
   complete_review: ["editor"],
   save_snapshot: ["editor"],
+  share_role_links: ["editor"],
+  open_editor_home: ["editor"],
   view_ai_suggestions: ["author", "editor"],
   dismiss_ai_suggestion: ["author", "editor"],
   keep_ai_suggestion: ["author", "editor"],

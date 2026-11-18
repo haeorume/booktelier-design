@@ -1,12 +1,117 @@
 .main {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  padding: 3rem 1.5rem;
+  gap: 2rem;
+}
+
+.brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.form {
+  width: min(100%, 34rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.75rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   font-weight: 600;
+}
+
+.input {
+  font: inherit;
+  font-weight: 400;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.templates {
+  border: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.templates legend {
+  margin-bottom: 0.4rem;
+}
+
+.template {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.template[data-selected="true"] {
+  border: 2px solid var(--accent);
+  padding: calc(0.9rem - 1px);
+}
+
+.template input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.template:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.templateName {
+  font-weight: 600;
+}
+
+.templateSpec {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.primary,
+.secondary {
+  font: inherit;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 1px solid var(--border);
 }

@@ -1,0 +1,71 @@
+/* 개발용이라는 것이 한눈에 보이도록 줄무늬와 다른 색을 쓴다(FR-41 ④). */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.85rem;
+  color: #1a1a1a;
+  background: repeating-linear-gradient(135deg, #ffe58a, #ffe58a 12px, #ffd84d 12px, #ffd84d 24px);
+  border-bottom: 1px solid #c9a800;
+}
+
+.tag {
+  font-weight: 700;
+  border: 1px dashed #1a1a1a;
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.groupLabel {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.option {
+  font: inherit;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  background: #fffbe8;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.option[aria-pressed="true"] {
+  background: #1a1a1a;
+  color: #fffbe8;
+}
+
+.option:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.dialog {
+  background: var(--background);
+  color: var(--foreground);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}

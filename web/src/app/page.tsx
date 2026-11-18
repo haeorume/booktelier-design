@@ -1,9 +1,10 @@
-import styles from "./page.module.css";
+import { Suspense } from "react";
+import { NewBook } from "./NewBook";
 
 export default function Home() {
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>Booktelier(북틀리에)</h1>
-    </main>
+    <Suspense fallback={null}>
+      <NewBook />
+    </Suspense>
   );
 }
