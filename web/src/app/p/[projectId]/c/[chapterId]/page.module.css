@@ -19,3 +19,13 @@
   overflow: auto;
   padding: 0 1rem;
 }
+
+.reviewSlot {
+  display: flex;
+  min-height: 0;
+}
+
+/* 하나씩 배치에서 조판 설정을 열면 검토 패널은 숨기기만 한다. display: flex가 hidden을 덮지 않게 한다. */
+.reviewSlot[hidden] {
+  display: none;
+}

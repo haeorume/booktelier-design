@@ -13,11 +13,17 @@ interface Props {
   chapterTitle: string;
   participants: Participant[];
   currentId: string;
+  layoutOpen: boolean;
   onShare: () => void;
+  onSnapshots: () => void;
+  onToggleLayout: () => void;
 }
 
-/** 작업 공간 상단 바(WS-10). 권한이 없는 버튼은 숨긴다(D-15). */
-export function TopBar({ role, bookTitle, chapterTitle, participants, currentId, onShare }: Props) {
+/**
+ * 작업 공간 상단 바(WS-10). 권한이 없는 버튼은 숨긴다(D-15).
+ * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 공유는 편집자만.
+ */
+export function TopBar({ role, bookTitle, chapterTitle, participants, currentId, layoutOpen, onShare, onSnapshots, onToggleLayout }: Props) {
   return (
     <header className={styles.bar}>
       <nav className={styles.path} aria-label="경로">
@@ -36,6 +42,14 @@ export function TopBar({ role, bookTitle, chapterTitle, participants, currentId,
       </span>
       <div className={styles.tools}>
         <Participants participants={participants} currentId={currentId} />
+        {can(role, "view_snapshots") && (
+          <button type="button" className={styles.button} onClick={onSnapshots}>
+            검토본
+          </button>
+        )}
+        <button type="button" className={styles.button} aria-pressed={layoutOpen} onClick={onToggleLayout}>
+          조판 설정
+        </button>
         {can(role, "share_role_links") && (
           <button type="button" className={styles.button} onClick={onShare}>
             공유

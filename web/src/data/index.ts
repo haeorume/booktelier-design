@@ -8,6 +8,7 @@ import type { BookDeps } from "./books";
 export * from "./repository";
 export * from "./books";
 export * from "./review";
+export * from "./studio";
 export { createClientIdentityStore, createLocalStorageRepository } from "./local-storage-repository";
 export { createClientSession, type ClientSession } from "./session";
 export { MemoryStorage, type KeyValueStorage } from "./storage";

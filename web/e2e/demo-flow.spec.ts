@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { aiCards, card, events, expectEvent, LINK, NAVIGATE_MS, paragraph, switchRole, typeAtEnd, WORKSPACE } from "./helpers";
 
-test("데모 1~10단계: 책 만들기 → 공유 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락", async ({ page }) => {
+test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락 → 검토본 → 디자이너 → 조판 설정", async ({ page }) => {
   const title = "파리에서 보낸 한 달";
 
   // 1. 편집자: 제목이 비어 있으면 만들기를 누를 수 없다(QA-06)
@@ -162,4 +162,45 @@ test("데모 1~10단계: 책 만들기 → 공유 → 링크로 들어오기 →
   // 편집자 화면에서 원래 AI 제안은 반영됨
   await switchRole(page, "편집자");
   await expect(card(page, "몇일").getByTestId("ai-status-chip")).toHaveText("반영됨");
+
+  // 11. 편집자: 반영된 문장을 보고 검토본에 이름을 넣어 저장한다(QA-16)
+  await expect(paragraph(page, "para_01")).toContainText("며칠이 지나서야");
+  await page.getByRole("button", { name: "검토본" }).click();
+  const snapDialog = page.getByRole("dialog", { name: "검토본" });
+  await expect(snapDialog.getByRole("button", { name: "검토본 저장" })).toBeDisabled();
+  await snapDialog.getByLabel("검토본 이름").fill("1장 1차 검토본");
+  await snapDialog.getByRole("button", { name: "검토본 저장" }).click();
+  await expect(snapDialog.getByTestId("snapshot-item")).toContainText("1장 1차 검토본");
+  await expectEvent(page, "snapshot_saved", { role: "editor" });
+  await snapDialog.getByRole("button", { name: "닫기" }).click();
+
+  // 12. 디자이너: 디자이너 링크를 같은 브라우저에서 열고 이름을 넣어 들어간다(QA-17)
+  await page.goto(designerLink);
+  await expect(page.getByTestId("join-role")).toHaveText("디자이너");
+  await page.getByLabel("이름").fill("디자이너 C");
+  await page.getByRole("button", { name: "들어가기" }).click();
+  await expect(page).toHaveURL(WORKSPACE, { timeout: NAVIGATE_MS });
+  await expect(page.getByTestId("role-badge")).toHaveText("디자이너");
+  await expect(page.getByTestId("manuscript")).toHaveAttribute("contenteditable", "false");
+  await expect(page.getByRole("tab", { name: /내 AI 제안/ })).toHaveCount(0);
+  await expectEvent(page, "participant_joined", { role: "designer", props: { role: "designer" } });
+
+  // 13. 디자이너: 조판 설정에서 행간을 바꾼다. 지면이 다시 그려지고 원고는 그대로다(QA-18)
+  const lineHeight = () => page.getByTestId("page").evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
+  const textBefore = await page.getByTestId("manuscript").textContent();
+  expect(await lineHeight()).toBeCloseTo(1.7, 1);
+  await page.getByRole("button", { name: "조판 설정", exact: true }).click();
+  const layout = page.getByTestId("layout-panel");
+  await layout.getByRole("slider", { name: "행간" }).focus();
+  for (let i = 0; i < 6; i += 1) await page.keyboard.press("ArrowRight");
+  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+  await expect(layout.getByTestId("layout-last-change")).toContainText("디자이너 C");
+  await expectEvent(page, "layout_changed", { role: "designer", props: { field: "line_height" } });
+  expect(await page.getByTestId("manuscript").textContent()).toBe(textBefore);
+
+  // 새로고침해도, 다른 역할로 봐도 바꾼 값이 남는다
+  await page.reload();
+  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+  await switchRole(page, "작가");
+  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
 });

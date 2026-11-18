@@ -32,6 +32,8 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const version = useSessionVersion();
   const [view, setView] = useState<{ key: string; value: View }>({ key: "", value: { kind: "loading" } });
   const [sharing, setSharing] = useState(false);
+  const [layoutOpen, setLayoutOpen] = useState(false);
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
   const key = `${projectId}/${chapterId}/${version}`;
 
   useEffect(() => {
@@ -68,6 +70,11 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
     );
   }, []);
 
+  /** 조판 값이 바뀌면 지면과 조판 설정 패널을 함께 바꾼다(FR-16 ①). */
+  const onProjectChange = useCallback((next: Project) => {
+    setView((v) => (v.value.kind === "ready" && v.value.project.id === next.id ? { ...v, value: { ...v.value, project: next } } : v));
+  }, []);
+
   const closeShare = useCallback(() => setSharing(false), []);
   const current = view.key === key || view.value.kind === "ready" ? view.value : { kind: "loading" as const };
 
@@ -84,7 +91,10 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         chapterTitle={chapter.title}
         participants={participants}
         currentId={me.id}
+        layoutOpen={layoutOpen}
         onShare={() => setSharing(true)}
+        onSnapshots={() => setSnapshotsOpen(true)}
+        onToggleLayout={() => setLayoutOpen((o) => !o)}
       />
       <div className={styles.columns}>
         <ChapterList projectId={project.id} chapters={chapters} currentId={chapter.id} />
@@ -96,6 +106,11 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
           me={me}
           participants={participants}
           onChapterChange={onChapterChange}
+          onProjectChange={onProjectChange}
+          layoutOpen={layoutOpen}
+          onLayoutOpenChange={setLayoutOpen}
+          snapshotsOpen={snapshotsOpen}
+          onSnapshotsClose={() => setSnapshotsOpen(false)}
         />
       </div>
       {sharing && me.role === "editor" && <ShareDialog links={links} onClose={closeShare} />}

@@ -18,7 +18,12 @@ import { mergeUnderlines } from "@/domain/underlines";
 import { track } from "@/events";
 import { createLiveCheck, type LiveCheck, type LiveCheckStatus } from "@/workspace/live-check";
 import { appliedRange, canUndo, placeSuggestions, type LastApplied } from "@/workspace/suggestions";
-import type { AiSuggestion, AiSuggestionKind, Chapter, ChapterDoc, Participant, Project } from "@/types";
+import type { AiSuggestion, AiSuggestionKind, Chapter, ChapterDoc, Layout, Participant, Project, Snapshot } from "@/types";
+import { usePanelLayout } from "@/components/hooks";
+import { LayoutPanel } from "@/components/LayoutPanel";
+import { SnapshotDialog } from "@/components/SnapshotDialog";
+import { saveLayout, saveSnapshot } from "@/data";
+import type { LayoutChange } from "@/domain/layout";
 import { useShared } from "./useShared";
 import styles from "./page.module.css";
 
@@ -28,6 +33,11 @@ interface Props {
   me: Participant;
   participants: Participant[];
   onChapterChange: (chapter: Chapter) => void;
+  onProjectChange: (project: Project) => void;
+  layoutOpen: boolean;
+  onLayoutOpenChange: (open: boolean) => void;
+  snapshotsOpen: boolean;
+  onSnapshotsClose: () => void;
 }
 
 const NOT_APPLIED = "원고가 먼저 바뀌어 이 제안은 적용하지 못했어요.";
@@ -41,7 +51,11 @@ function eventProps(s: AiSuggestion, role: string) {
  * 한 장의 지면과 검토 패널. 실시간 교정(FR-20), 밑줄(FR-25), 카드 동작(FR-27·28·30)을 잇는다.
  * 보내기 전 AI 제안은 data/ 가 주인 것만 돌려준다(FR-23, D-09).
  */
-export function ChapterWorkspace({ project, chapter, me, participants, onChapterChange }: Props) {
+export function ChapterWorkspace(props: Props) {
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose } = props;
+  const panelLayout = usePanelLayout();
+  const [previewLayout, setPreviewLayout] = useState<Layout | null>(null);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const deps = useMemo(() => bookDeps(), []);
   const viewer: Viewer = useMemo(() => ({ participant_id: me.id, role: me.role }), [me.id, me.role]);
   const editable = can(me.role, "edit_manuscript");
@@ -333,7 +347,37 @@ export function ChapterWorkspace({ project, chapter, me, participants, onChapter
     shared.markSeen(id);
   }
 
+  // 조판 설정과 검토본 --------------------------------------------------------
+
+  /** 조판 값 저장(FR-16). 손을 떼거나 값을 고를 때 한 번 부른다(정할 것 15). */
+  async function commitLayout(change: LayoutChange) {
+    const saved = await saveLayout(deps, project.id, change, me);
+    setPreviewLayout(null);
+    onProjectChange(saved);
+    track("layout_changed", { field: change.field, before: change.before, after: change.after, reset_to_default: change.reset_to_default });
+  }
+
+  // 검토본 창을 열면 이 장의 검토본을 읽는다.
+  useEffect(() => {
+    if (!snapshotsOpen) return;
+    let alive = true;
+    deps.repo.listSnapshots(chapter.id).then((list) => alive && setSnapshots(list));
+    return () => {
+      alive = false;
+    };
+  }, [snapshotsOpen, deps, chapter.id]);
+
+  /** 검토본 저장(FR-38). 저장 중인 원고까지 기다린 뒤 그때의 원고를 남긴다. */
+  async function storeSnapshot(label: string) {
+    await saving.current;
+    await saveSnapshot(deps, chapter.id, label, me);
+    setSnapshots(await deps.repo.listSnapshots(chapter.id));
+    track("snapshot_saved");
+  }
+
   function onMarkClick(click: MarkClick) {
+    // 하나씩 배치에서는 지면 표시를 누르면 검토 패널로 돌아온다(N-15 A안).
+    if (panelLayout === "single") onLayoutOpenChange(false);
     if (click.kind === "suggestion") {
       panel.current?.reveal(click.ids); // AI 제안 탭을 열고 가리는 거르기를 푼다(N-07)
       setSelected(click.ids);
@@ -353,7 +397,7 @@ export function ChapterWorkspace({ project, chapter, me, participants, onChapter
           initialDoc={chapter.doc}
           editable={editable}
           templateId={project.template_id}
-          layout={project.layout}
+          layout={previewLayout ?? project.layout}
           chapterTitle={chapter.title}
           header={
             <ChapterHead
@@ -395,6 +439,11 @@ export function ChapterWorkspace({ project, chapter, me, participants, onChapter
           }}
         />
       </div>
+      {/*
+        오른쪽 패널(D-10, N-15). 하나씩(A안, 기본): 조판 설정을 열면 검토 패널이 닫힌다.
+        나란히(B안): 둘을 함께 연다. 하나씩일 때도 검토 패널은 숨기기만 해서 보던 탭과 거르기가 남는다.
+      */}
+      <div className={styles.reviewSlot} hidden={layoutOpen && panelLayout === "single"} data-testid="review-slot">
       <ReviewPanel
         ref={panel}
         role={me.role}
@@ -438,6 +487,24 @@ export function ChapterWorkspace({ project, chapter, me, participants, onChapter
         onKeep={(s) => void keep(s)}
         onSend={setSending}
       />
+      </div>
+      {layoutOpen && (
+        <LayoutPanel
+          key={project.template_id}
+          project={project}
+          role={me.role}
+          participants={shared.byId}
+          onPreview={setPreviewLayout}
+          onCommit={(change) => void commitLayout(change)}
+          onClose={() => {
+            setPreviewLayout(null);
+            onLayoutOpenChange(false);
+          }}
+        />
+      )}
+      {snapshotsOpen && (
+        <SnapshotDialog role={me.role} snapshots={snapshots} participants={shared.byId} onSave={storeSnapshot} onClose={onSnapshotsClose} />
+      )}
       {sending && <SendDialog suggestion={sending} onSend={(input) => send(sending, input)} onClose={() => setSending(null)} />}
       {composing && (
         <ComposeDialog kind={composing.kind} quote={composing.picked.text} onSubmit={submitCompose} onClose={() => setComposing(null)} />
