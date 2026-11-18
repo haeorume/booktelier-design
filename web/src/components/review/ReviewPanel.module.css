@@ -255,3 +255,146 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
 }
+
+.statusChip {
+  font-size: 0.75rem;
+  border: 1px solid var(--foreground);
+  border-radius: 999px;
+  padding: 0 0.5rem;
+}
+
+.typeTag {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.reflected {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1b5e20;
+  border: 1.5px solid #1b5e20;
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.replyCount {
+  font-size: 0.75rem;
+  border: 1px dashed var(--muted);
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.unseen {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8d4b00;
+  margin-left: auto;
+}
+
+.unseen::before {
+  content: "● ";
+}
+
+.decided {
+  background: var(--surface);
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.authorName {
+  font-weight: 600;
+}
+
+.roleBadge {
+  font-size: 0.7rem;
+  border: 1px solid var(--foreground);
+  border-radius: 999px;
+  padding: 0 0.4rem;
+}
+
+.editDel {
+  text-decoration-color: #6a1b9a;
+  color: var(--muted);
+}
+
+.editIns {
+  text-decoration-style: dashed;
+  text-decoration-color: #6a1b9a;
+  color: #4a148c;
+  font-weight: 600;
+}
+
+.aiOrigin {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.quoteLine {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.body {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.replies {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--border);
+}
+
+.reply {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.replyForm {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.replyInput {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.reviewRun {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.summary {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}

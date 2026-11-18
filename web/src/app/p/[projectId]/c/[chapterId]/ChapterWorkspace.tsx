@@ -2,23 +2,32 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAiProvider } from "@/ai";
-import { ManuscriptEditor, type ChangeSource, type EditorHandle } from "@/components/editor/ManuscriptEditor";
-import { ReviewPanel, type ReviewPanelHandle } from "@/components/review/ReviewPanel";
-import { bookDeps, hasProjectEvent, saveChapterDoc, type Viewer } from "@/data";
+import { ChapterHead } from "@/components/ChapterHead";
+import { ManuscriptEditor, type ChangeSource, type EditorHandle, type MarkClick } from "@/components/editor/ManuscriptEditor";
+import type { PickedText } from "@/components/editor/selection";
+import { ComposeDialog, type ComposeKind } from "@/components/review/ComposeDialog";
+import { ReviewPanel, type ChapterReviewState, type ReviewPanelHandle } from "@/components/review/ReviewPanel";
+import { SendDialog } from "@/components/review/SendDialog";
+import { SharedTab } from "@/components/review/SharedTab";
+import { bookDeps, hasProjectEvent, saveChapterDoc, sendAiSuggestion, type SendMethod, type Viewer } from "@/data";
 import { locate } from "@/domain/anchor";
+import { KIND_ORDER } from "@/domain/labels";
 import { can } from "@/domain/permissions";
-import { transitionAiSuggestion } from "@/domain/transitions";
+import { transitionAiSuggestion, transitionChapter, type ChapterAction } from "@/domain/transitions";
 import { mergeUnderlines } from "@/domain/underlines";
 import { track } from "@/events";
 import { createLiveCheck, type LiveCheck, type LiveCheckStatus } from "@/workspace/live-check";
 import { appliedRange, canUndo, placeSuggestions, type LastApplied } from "@/workspace/suggestions";
-import type { AiSuggestion, Chapter, ChapterDoc, Participant, Project } from "@/types";
+import type { AiSuggestion, AiSuggestionKind, Chapter, ChapterDoc, Participant, Project } from "@/types";
+import { useShared } from "./useShared";
 import styles from "./page.module.css";
 
 interface Props {
   project: Project;
   chapter: Chapter;
   me: Participant;
+  participants: Participant[];
+  onChapterChange: (chapter: Chapter) => void;
 }
 
 const NOT_APPLIED = "원고가 먼저 바뀌어 이 제안은 적용하지 못했어요.";
@@ -32,7 +41,7 @@ function eventProps(s: AiSuggestion, role: string) {
  * 한 장의 지면과 검토 패널. 실시간 교정(FR-20), 밑줄(FR-25), 카드 동작(FR-27·28·30)을 잇는다.
  * 보내기 전 AI 제안은 data/ 가 주인 것만 돌려준다(FR-23, D-09).
  */
-export function ChapterWorkspace({ project, chapter, me }: Props) {
+export function ChapterWorkspace({ project, chapter, me, participants, onChapterChange }: Props) {
   const deps = useMemo(() => bookDeps(), []);
   const viewer: Viewer = useMemo(() => ({ participant_id: me.id, role: me.role }), [me.id, me.role]);
   const editable = can(me.role, "edit_manuscript");
@@ -44,6 +53,11 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
   const [notice, setNotice] = useState<string | null>(null);
   const [lastApplied, setLastApplied] = useState<LastApplied | null>(null);
   const [busy, setBusy] = useState(false);
+  const [review, setReview] = useState<ChapterReviewState>({ kind: "idle" });
+  const [sending, setSending] = useState<AiSuggestion | null>(null);
+  const [picked, setPicked] = useState<PickedText | null>(null);
+  const [composing, setComposing] = useState<{ kind: ComposeKind; picked: PickedText } | null>(null);
+  const [chapterBusy, setChapterBusy] = useState(false);
 
   const editor = useRef<EditorHandle>(null);
   const panel = useRef<ReviewPanelHandle>(null);
@@ -147,6 +161,10 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
     [placement],
   );
 
+  // 함께 봄: 의견과 수정 제안
+  const shared = useShared({ deps, viewer, projectId: project.id, chapterId: chapter.id, doc, participants });
+  const { relocate } = shared;
+
   // 밑줄과 카드가 처음 보일 때 한 번 남긴다.
   useEffect(() => {
     for (const p of placement.placed) {
@@ -157,7 +175,7 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
   }, [placement, me.role]);
 
   const firstEdit = useCallback(
-    async (via: "direct" | "apply") => {
+    async (via: "direct" | "apply" | "accept") => {
       if (firstEditChecked.current || me.role !== "author") return;
       firstEditChecked.current = true;
       if (!(await hasProjectEvent(deps, project.id, "first_edit"))) track("first_edit", { via });
@@ -174,6 +192,7 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
         version.current = saved.version;
       });
       void reconcile(next);
+      void relocate(next); // 의견·수정 제안의 자리도 원문으로 다시 찾아 저장한다(NFR-05)
       if (source === "typing" && changed.length > 0) {
         rememberApplied(null);
         setNotice(null);
@@ -181,7 +200,7 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
         void firstEdit("direct");
       }
     },
-    [deps, chapter.id, firstEdit, reconcile, rememberApplied],
+    [deps, chapter.id, firstEdit, reconcile, relocate, rememberApplied],
   );
 
   async function apply(s: AiSuggestion, text: string, choice: number) {
@@ -248,6 +267,84 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
       track("ai_suggestion_kept", eventProps(s, me.role));
     });
 
+  /** 장 상태 바꾸기(FR-13, FR-14). 저장 중인 원고를 덮지 않게 최신 장을 다시 읽고 상태만 바꾼다. */
+  async function changeChapter(action: ChapterAction) {
+    setChapterBusy(true);
+    try {
+      await saving.current;
+      const latest = await deps.repo.getChapter(chapter.id);
+      if (!latest) return;
+      const next = await deps.repo.updateChapter(transitionChapter(latest, action));
+      onChapterChange(next);
+      if (action === "request_review") track("review_requested");
+    } finally {
+      setChapterBusy(false);
+    }
+  }
+
+  /** 장 검토(FR-21). 편집자가 눌러야만 돌고, 결과는 실행한 편집자에게만 보인다. */
+  async function runReview() {
+    setReview({ kind: "running" });
+    track("chapter_review_run");
+    try {
+      await saving.current;
+      const result = await getAiProvider().chapterReview({ chapter_id: chapter.id, base_version: version.current, requester_participant_id: me.id });
+      const saved = await deps.repo.saveAiSuggestions(result.suggestions);
+      await reload();
+      // 요약과 '발견된 항목이 없어요'는 정리(reload) 뒤 지금 원고에서 보이는 제안으로 센다.
+      // 원문이 이미 바뀐 제안은 무효가 되어 카드로 뜨지 않기 때문이다(FR-21 ②, FR-22).
+      const savedIds = new Set(saved.map((s) => s.id));
+      const shownNow = placeSuggestions(docRef.current, mineRef.current).placed.map((p) => p.suggestion).filter((s) => savedIds.has(s.id));
+      const summary = Object.fromEntries(KIND_ORDER.map((k) => [k, shownNow.filter((s) => s.kind === k).length])) as Record<AiSuggestionKind, number>;
+      setReview({ kind: "done", summary, total: shownNow.length });
+    } catch {
+      setReview({ kind: "failed" });
+    }
+  }
+
+  /** 보내기(FR-29). 누르는 순간의 원고에서 자리를 다시 찾는다. */
+  async function send(s: AiSuggestion, input: { method: SendMethod; replacement: string; text: string }) {
+    const found = locate(docRef.current, s);
+    if (!found) {
+      await save(transitionAiSuggestion(s, "invalidate"));
+      setNotice(NOT_APPLIED);
+      setSending(null);
+      return;
+    }
+    const result = await sendAiSuggestion(deps, viewer, s, { ...input, anchor: found.anchor });
+    replaceOne(result.suggestion);
+    await shared.reload();
+    track("ai_suggestion_sent", { ...eventProps(s, me.role), method: input.method });
+    setSending(null);
+  }
+
+  async function submitCompose(text: string) {
+    if (!composing) return;
+    const { kind, picked: p } = composing;
+    if (kind === "comment") await shared.addComment(p.anchor, p.text, text);
+    else await shared.addEdit(p.anchor, p.text, text);
+    setComposing(null);
+    setPicked(null);
+    window.getSelection()?.removeAllRanges();
+  }
+
+  function selectShared(id: string) {
+    setSelected([id]);
+    shared.markSeen(id);
+  }
+
+  function onMarkClick(click: MarkClick) {
+    if (click.kind === "suggestion") {
+      panel.current?.reveal(click.ids); // AI 제안 탭을 열고 가리는 거르기를 푼다(N-07)
+      setSelected(click.ids);
+    } else {
+      panel.current?.revealShared();
+      selectShared(click.id);
+    }
+  }
+
+  const sent = mine.filter((s) => s.status === "sent" || s.status === "merged");
+
   return (
     <>
       <div className={styles.desk}>
@@ -258,13 +355,38 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
           templateId={project.template_id}
           layout={project.layout}
           chapterTitle={chapter.title}
+          header={
+            <ChapterHead
+              chapter={chapter}
+              role={me.role}
+              busy={chapterBusy}
+              onRequestReview={() => void changeChapter("request_review")}
+              onCompleteReview={() => void changeChapter("complete_review")}
+            />
+          }
           spans={spans}
+          edits={shared.editMarks}
+          comments={shared.commentMarks}
           selected={selected}
           onDocChange={onDocChange}
-          onUnderlineClick={(ids) => {
-            panel.current?.reveal(ids); // AI 제안 탭을 열고 가리는 거르기를 푼다(N-07)
-            setSelected(ids);
-          }}
+          onMarkClick={onMarkClick}
+          onPick={setPicked}
+          selectionMenu={
+            picked && (
+              <>
+                {can(me.role, "create_comment") && (
+                  <button type="button" onClick={() => setComposing({ kind: "comment", picked })}>
+                    의견 남기기
+                  </button>
+                )}
+                {can(me.role, "create_suggested_edit") && (
+                  <button type="button" onClick={() => setComposing({ kind: "suggested_edit", picked })}>
+                    수정 제안하기
+                  </button>
+                )}
+              </>
+            )
+          }
           onUndoShortcut={() => {
             // 적용 직후면 Ctrl/Cmd+Z가 원고와 제안을 함께 되돌린다(G-11). 아니면 편집기 되돌리기.
             if (!lastAppliedRef.current) return false;
@@ -277,18 +399,49 @@ export function ChapterWorkspace({ project, chapter, me }: Props) {
         ref={panel}
         role={me.role}
         suggestions={placement.placed.map((p) => p.suggestion)}
+        sent={sent}
         selected={selected}
         status={status}
+        review={review}
         notice={notice}
         canUndo={lastApplied !== null}
         busy={busy}
+        sharedCount={shared.pendingCount}
+        shared={
+          <SharedTab
+            role={me.role}
+            items={shared.items}
+            participants={shared.byId}
+            selected={selected}
+            unseen={shared.unseen}
+            busy={busy}
+            notice={shared.notice}
+            onSelect={selectShared}
+            onAccept={(edit) =>
+              void shared
+                .accept(edit, (a, text) => editor.current?.replaceText(a.paragraph_id, a.start, a.end, text) ?? false)
+                // 수락으로 원고가 처음 바뀌었어도 first_edit를 남긴다(정할 것 8: 원고를 처음 바꾼 순간).
+                .then((ok) => {
+                  if (ok) void firstEdit("accept");
+                })
+            }
+            onReject={(edit) => void shared.reject(edit)}
+            onReply={(parent, body) => shared.addComment(parent.anchor, parent.original, body, parent)}
+          />
+        }
+        onRunReview={() => void runReview()}
         onRetry={() => void liveCheck.current?.retry()}
         onUndo={() => void undo()}
         onSelect={setSelected}
         onApply={(s, text, choice) => void apply(s, text, choice)}
         onDismiss={(s) => void dismiss(s)}
         onKeep={(s) => void keep(s)}
+        onSend={setSending}
       />
+      {sending && <SendDialog suggestion={sending} onSend={(input) => send(sending, input)} onClose={() => setSending(null)} />}
+      {composing && (
+        <ComposeDialog kind={composing.kind} quote={composing.picked.text} onSubmit={submitCompose} onClose={() => setComposing(null)} />
+      )}
     </>
   );
 }

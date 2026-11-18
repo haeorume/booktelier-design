@@ -12,11 +12,17 @@ import type { Chapter, Participant, Project, RoleLink } from "@/types";
 import { ChapterWorkspace } from "./ChapterWorkspace";
 import styles from "./page.module.css";
 
-type View =
-  | { kind: "loading" }
-  | { kind: "not_found" }
-  | { kind: "no_role" }
-  | { kind: "ready"; project: Project; chapter: Chapter; chapters: Chapter[]; me: Participant; links: RoleLink[] };
+interface Ready {
+  kind: "ready";
+  project: Project;
+  chapter: Chapter;
+  chapters: Chapter[];
+  me: Participant;
+  participants: Participant[];
+  links: RoleLink[];
+}
+
+type View = { kind: "loading" } | { kind: "not_found" } | { kind: "no_role" } | Ready;
 
 /**
  * 작업 공간(WS-01). 원고 구조 · 지면 · 검토 패널.
@@ -40,9 +46,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         const me = await currentParticipant(deps, project.id);
         if (!me) value = { kind: "no_role" };
         else {
-          const chapters = await deps.repo.listChapters(project.id);
+          const [chapters, participants] = await Promise.all([deps.repo.listChapters(project.id), deps.repo.listParticipants(project.id)]);
           const links = me.role === "editor" ? await deps.repo.listRoleLinks(project.id) : [];
-          value = { kind: "ready", project, chapter, chapters, me, links };
+          value = { kind: "ready", project, chapter, chapters, me, participants, links };
           setTrackContext({ participant_id: me.id, project_id: project.id, chapter_id: chapter.id, role: me.role });
         }
       }
@@ -53,6 +59,15 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
     };
   }, [projectId, chapterId, key]);
 
+  /** 장 상태가 바뀌면 장 머리와 원고 구조의 배지를 함께 바꾼다(FR-12). */
+  const onChapterChange = useCallback((next: Chapter) => {
+    setView((v) =>
+      v.value.kind === "ready" && v.value.chapter.id === next.id
+        ? { ...v, value: { ...v.value, chapter: next, chapters: v.value.chapters.map((c) => (c.id === next.id ? next : c)) } }
+        : v,
+    );
+  }, []);
+
   const closeShare = useCallback(() => setSharing(false), []);
   const current = view.key === key || view.value.kind === "ready" ? view.value : { kind: "loading" as const };
 
@@ -60,14 +75,28 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   if (current.kind === "not_found") return <MessageView {...NOT_FOUND} />;
   if (current.kind === "no_role") return <MessageView title="받은 링크로 다시 들어와 주세요" body="이 브라우저에는 이 책의 역할이 없어요." />;
 
-  const { project, chapter, chapters, me, links } = current;
+  const { project, chapter, chapters, me, participants, links } = current;
   return (
     <div className={styles.workspace}>
-      <TopBar role={me.role} bookTitle={project.title} chapterTitle={chapter.title} onShare={() => setSharing(true)} />
+      <TopBar
+        role={me.role}
+        bookTitle={project.title}
+        chapterTitle={chapter.title}
+        participants={participants}
+        currentId={me.id}
+        onShare={() => setSharing(true)}
+      />
       <div className={styles.columns}>
         <ChapterList projectId={project.id} chapters={chapters} currentId={chapter.id} />
         {/* 역할이나 장이 바뀌면 편집 상태를 새로 시작한다. */}
-        <ChapterWorkspace key={`${chapter.id}/${me.id}`} project={project} chapter={chapter} me={me} />
+        <ChapterWorkspace
+          key={`${chapter.id}/${me.id}`}
+          project={project}
+          chapter={chapter}
+          me={me}
+          participants={participants}
+          onChapterChange={onChapterChange}
+        />
       </div>
       {sharing && me.role === "editor" && <ShareDialog links={links} onClose={closeShare} />}
     </div>

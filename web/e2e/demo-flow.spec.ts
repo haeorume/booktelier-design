@@ -1,8 +1,8 @@
 // 데모 플로우(demo-flow 탭). 만든 단계까지 한 브라우저에서 이어서 누른다. 아직 만들지 않은 단계는 넣지 않는다.
 import { expect, test } from "@playwright/test";
-import { aiCards, card, expectEvent, LINK, paragraph, typeAtEnd, WORKSPACE } from "./helpers";
+import { aiCards, card, events, expectEvent, LINK, NAVIGATE_MS, paragraph, switchRole, typeAtEnd, WORKSPACE } from "./helpers";
 
-test("데모 1~6단계: 책 만들기 → 공유 → 작가 링크로 들어오기 → 지면에서 고치고 AI 제안 적용", async ({ page }) => {
+test("데모 1~10단계: 책 만들기 → 공유 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락", async ({ page }) => {
   const title = "파리에서 보낸 한 달";
 
   // 1. 편집자: 제목이 비어 있으면 만들기를 누를 수 없다(QA-06)
@@ -16,7 +16,7 @@ test("데모 1~6단계: 책 만들기 → 공유 → 작가 링크로 들어오�
   for (const name of ["소설", "에세이", "실용서"]) await expect(page.getByText(name, { exact: true })).toBeVisible();
   await page.getByText("에세이", { exact: true }).click();
   await create.click();
-  await expect(page).toHaveURL(WORKSPACE);
+  await expect(page).toHaveURL(WORKSPACE, { timeout: NAVIGATE_MS });
   const sheet = page.getByTestId("page");
   await expect(sheet).toHaveAttribute("data-template", "essay");
   const style = await sheet.evaluate((el) => {
@@ -99,4 +99,67 @@ test("데모 1~6단계: 책 만들기 → 공유 → 작가 링크로 들어오�
   // 새로고침해도 고친 원고가 남는다(FR-09 ②)
   await page.reload();
   await expect(paragraph(page, "para_02")).toContainText("쏟아졌고, 나는 모네의 그림 앞에서 한참동안 서 있었다. 오래도록.");
+
+  // 7. 작가: 검토 요청. 배지가 바뀌고 다시 누를 수 없다. 장 검토는 저절로 돌지 않는다(QA-12)
+  await page.getByRole("button", { name: "검토 요청" }).click();
+  await expect(page.getByTestId("chapter-head-status")).toHaveText("검토 요청");
+  await expect(page.getByTestId("chapter-status")).toHaveText("검토 요청");
+  await expect(page.getByRole("button", { name: "검토 요청" })).toBeDisabled();
+  await expectEvent(page, "review_requested", { role: "author" });
+  expect((await events(page)).filter((e) => e.name === "chapter_review_run")).toHaveLength(0);
+
+  // 8. 편집자: 편집자 홈의 책 카드에서 확인할 일이 늘어 있다. 카드를 눌러 장 검토(QA-13)
+  await switchRole(page, "편집자");
+  await page.getByRole("link", { name: "편집자 홈" }).click();
+  const bookCard = page.getByTestId("book-card").filter({ hasText: title });
+  await expect(bookCard.getByTestId("pending-count")).toHaveText("1");
+  await expect(bookCard).toContainText("검토 요청");
+  await bookCard.click();
+  await expect(page.getByTestId("role-badge")).toHaveText("편집자");
+  const run = page.getByRole("button", { name: "장 검토" });
+  await run.click();
+  await expect(run).toBeDisabled();
+  await expect(page.getByTestId("ai-status")).toContainText("분석 중");
+  await expect(aiCards(page)).toHaveCount(5);
+  await expect(run).toBeEnabled();
+  await expect(page.getByTestId("review-summary")).toHaveText("맞춤법 1 · 띄어쓰기 1 · 표기 통일 2 · 윤문 1");
+  await expectEvent(page, "chapter_review_run", { role: "editor" });
+
+  // 9. 편집자: '몇일' 카드를 수정 제안으로, 문구를 다듬어 보낸다(QA-14)
+  const myeot = card(page, "몇일");
+  await expect(myeot.getByRole("button", { name: "적용" })).toHaveCount(0); // 편집자에게는 적용이 없다
+  await myeot.getByRole("button", { name: "보내기" }).click();
+  const sendDialog = page.getByRole("dialog", { name: "보내기" });
+  await sendDialog.getByLabel("수정 제안").check();
+  await sendDialog.getByLabel("보내는 문구").fill("'며칠'로 고쳐 주세요.");
+  await sendDialog.getByRole("button", { name: "보내기" }).click();
+  await expect(sendDialog).toHaveCount(0);
+  await expect(myeot.getByTestId("ai-status-chip")).toHaveText("보냄");
+  await expect(myeot.getByRole("button", { name: "보내기" })).toHaveCount(0);
+  await expectEvent(page, "ai_suggestion_sent", { role: "editor", props: { method: "suggested_edit", kind: "spelling" } });
+  await page.getByRole("tab", { name: /함께 봄/ }).click();
+  const editCard = page.getByTestId("edit-card");
+  await expect(editCard).toHaveCount(1);
+  await expect(editCard).toContainText("AI 제안에서 보냄");
+  await expect(editCard).toContainText("며칠");
+  await expect(page.getByTestId("comment-card")).toContainText("'며칠'로 고쳐 주세요.");
+
+  // 10. 작가: 지면에 지운 글자와 더한 글자가 보이고, 수락하면 원고가 바뀐다(QA-15)
+  await switchRole(page, "작가");
+  const para01 = paragraph(page, "para_01");
+  await expect(para01.locator(".edit-delete")).toHaveText("몇일");
+  await expect(para01.locator(".edit-insert")).toHaveText("며칠");
+  await expect(aiCards(page)).toHaveCount(1); // 편집자의 장 검토 결과는 작가에게 보이지 않는다(QA-38)
+  await page.getByRole("tab", { name: /함께 봄/ }).click();
+  await page.getByTestId("edit-card").getByRole("button", { name: "수락" }).click();
+  await expect(page.getByTestId("edit-card").getByTestId("edit-status")).toHaveText("수락됨");
+  await expect(page.getByTestId("edit-card")).toContainText("원고에 반영됨");
+  await expect(para01).toContainText("파리에 도착한지 며칠이 지나서야");
+  await expect(para01.locator(".edit-delete")).toHaveCount(0);
+  await expectEvent(page, "suggested_edit_accepted", { role: "author", props: { from_ai: true } });
+  await expectEvent(page, "ai_suggestion_merged", { props: { kind: "spelling" } });
+
+  // 편집자 화면에서 원래 AI 제안은 반영됨
+  await switchRole(page, "편집자");
+  await expect(card(page, "몇일").getByTestId("ai-status-chip")).toHaveText("반영됨");
 });

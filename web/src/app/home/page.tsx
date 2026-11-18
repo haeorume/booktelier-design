@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { bookDeps, lastActivityTs, myEditorProjects } from "@/data";
+import { bookDeps, lastActivityTs, myEditorProjects, unseenCommentCount } from "@/data";
 import { bookStage, pendingTaskCount } from "@/domain/books";
 import { CHAPTER_STATUS_LABEL } from "@/domain/labels";
 import type { ChapterStatus, Project } from "@/types";
@@ -37,7 +37,7 @@ export default function EditorHome() {
           project,
           firstChapterId: chapters[0]?.id ?? null,
           stage: bookStage(chapters),
-          pending: pendingTaskCount(chapters),
+          pending: pendingTaskCount(chapters, await unseenCommentCount(deps, project.id)),
           lastTs: await lastActivityTs(deps, project.id),
         });
       }

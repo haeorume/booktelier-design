@@ -3,18 +3,21 @@
 import Link from "next/link";
 import { can } from "@/domain/permissions";
 import { ROLE_LABEL } from "@/domain/labels";
-import type { Role } from "@/types";
+import type { Participant, Role } from "@/types";
+import { Participants } from "./Participants";
 import styles from "./TopBar.module.css";
 
 interface Props {
   role: Role;
   bookTitle: string;
   chapterTitle: string;
+  participants: Participant[];
+  currentId: string;
   onShare: () => void;
 }
 
 /** 작업 공간 상단 바(WS-10). 권한이 없는 버튼은 숨긴다(D-15). */
-export function TopBar({ role, bookTitle, chapterTitle, onShare }: Props) {
+export function TopBar({ role, bookTitle, chapterTitle, participants, currentId, onShare }: Props) {
   return (
     <header className={styles.bar}>
       <nav className={styles.path} aria-label="경로">
@@ -32,6 +35,7 @@ export function TopBar({ role, bookTitle, chapterTitle, onShare }: Props) {
         {ROLE_LABEL[role]}
       </span>
       <div className={styles.tools}>
+        <Participants participants={participants} currentId={currentId} />
         {can(role, "share_role_links") && (
           <button type="button" className={styles.button} onClick={onShare}>
             공유

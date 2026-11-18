@@ -17,6 +17,11 @@ describe("책 카드의 진행 단계와 확인할 일(FR-02)", () => {
     expect(pendingTaskCount(c)).toBe(0);
   });
 
+  it("열어 보지 않은 의견도 확인할 일에 더한다", () => {
+    expect(pendingTaskCount(chapters("review_requested", "editing"), 2)).toBe(3);
+    expect(pendingTaskCount(chapters("reviewed"), 0)).toBe(0);
+  });
+
   it("그 밖에는 '수정 중'", () => {
     expect(bookStage(chapters("editing", "reviewed"))).toBe("editing");
     expect(bookStage([])).toBe("editing");

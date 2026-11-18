@@ -211,6 +211,12 @@ export function createLocalStorageRepository(options: LocalRepositoryOptions): R
       return replace("ai_suggestions", { ...suggestion, owner_participant_id: current.owner_participant_id }, "AI 제안");
     },
 
+    async mergeAiSuggestion(id) {
+      const current = byId("ai_suggestions", id);
+      if (!current || current.status !== "sent") return null;
+      return replace("ai_suggestions", { ...current, status: "merged" }, "AI 제안");
+    },
+
     async createSuggestedEdit(input) {
       return insert("suggested_edits", { id: newId(), ...input, status: "pending" });
     },

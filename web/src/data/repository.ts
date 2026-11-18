@@ -66,6 +66,12 @@ export interface Repository {
   listAiSuggestions(chapterId: Uuid, viewer: Viewer): Promise<AiSuggestion[]>;
   getAiSuggestion(id: Uuid, viewer: Viewer): Promise<AiSuggestion | null>;
   updateAiSuggestion(suggestion: AiSuggestion, viewer: Viewer): Promise<AiSuggestion>;
+  /**
+   * 시스템 동작: 보낸(sent) AI 제안에서 온 수정 제안이 수락됐을 때 원래 AI 제안을 반영됨(merged)으로 바꾼다.
+   * 받은 사람은 AI 제안의 주인이 아니어서 viewer 없이 부른다. 돌려준 값은 이벤트(종류)에만 쓰고 화면에 보이지 않는다(FR-23).
+   * 보냄 상태가 아니거나 없으면 null.
+   */
+  mergeAiSuggestion(id: Uuid): Promise<AiSuggestion | null>;
 
   // 수정 제안·의견
   createSuggestedEdit(input: {
@@ -81,6 +87,7 @@ export interface Repository {
   createComment(input: {
     chapter_id: Uuid;
     anchor: Anchor;
+    original: string;
     body: string;
     author_id: Uuid;
     parent_id: Uuid | null;

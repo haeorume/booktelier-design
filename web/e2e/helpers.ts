@@ -27,6 +27,9 @@ function matches(e: StoredEvent, m: Partial<StoredEvent> & { props?: Record<stri
   return true;
 }
 
+/** 개발 서버가 작업 공간을 처음 컴파일할 때 화면 이동이 느릴 수 있다. 이 기다림만 길게 둔다. */
+export const NAVIGATE_MS = 30_000;
+
 const WORKSPACE = /\/p\/[0-9a-f-]{36}\/c\/[0-9a-f-]{36}$/;
 export const LINK = /\/j\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -40,7 +43,7 @@ export async function createBookAndCopyLinks(page: Page, title = "파리에서 �
   await expect(create).toBeEnabled();
   await page.getByText("에세이", { exact: true }).click();
   await create.click();
-  await expect(page).toHaveURL(WORKSPACE);
+  await expect(page).toHaveURL(WORKSPACE, { timeout: NAVIGATE_MS });
 
   await page.getByRole("button", { name: "공유" }).click();
   const dialog = page.getByRole("dialog", { name: "공유" });
@@ -88,6 +91,47 @@ export function aiCards(page: Page) {
 
 export function card(page: Page, original: string) {
   return aiCards(page).filter({ has: page.locator("del", { hasText: original }) });
+}
+
+/** 지면의 한 문단에서 글자를 고른다(읽기 전용 지면에서도). start·end는 문단 글자 위치. */
+export async function selectText(page: Page, id: string, start: number, end: number) {
+  await paragraph(page, id).evaluate(
+    (el, [s, e]) => {
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      while (walker.nextNode()) {
+        const n = walker.currentNode as Text;
+        if (!n.parentElement?.closest(".edit-insert")) nodes.push(n);
+      }
+      const at = (offset: number): [Text, number] => {
+        let left = offset;
+        for (const n of nodes) {
+          if (left <= n.length) return [n, left];
+          left -= n.length;
+        }
+        const last = nodes[nodes.length - 1];
+        return [last, last.length];
+      };
+      const range = document.createRange();
+      range.setStart(...at(s));
+      range.setEnd(...at(e));
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+    },
+    [start, end] as const,
+  );
+}
+
+export async function switchRole(page: Page, role: "편집자" | "작가" | "디자이너", name?: string) {
+  await page.getByTestId("dev-bar").getByRole("button", { name: role }).click();
+  if (name) {
+    const ask = page.getByRole("dialog", { name: "이름 넣기" });
+    await ask.getByLabel("이름").fill(name);
+    await ask.getByRole("button", { name: "들어가기" }).click();
+  }
+  await expect(page.getByTestId("role-badge")).toHaveText(role);
 }
 
 export { WORKSPACE };

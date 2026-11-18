@@ -19,6 +19,14 @@ describe("ClientSession", () => {
     expect(createClientSession(storage).getPanelLayout()).toBe("split");
   });
 
+  it("열어 본 의견은 책마다 기억한다", () => {
+    const storage = new MemoryStorage();
+    createClientSession(storage).markCommentSeen("b1", "c1");
+    const s = createClientSession(storage);
+    expect([...s.getSeenComments("b1")]).toEqual(["c1"]);
+    expect(s.getSeenComments("b2").size).toBe(0);
+  });
+
   it("바뀌면 구독자에게 알리고, 끊으면 알리지 않는다", () => {
     const s = createClientSession(new MemoryStorage());
     const listener = vi.fn();

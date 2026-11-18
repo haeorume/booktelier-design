@@ -114,6 +114,11 @@ export interface Comment {
   id: Uuid;
   chapter_id: Uuid;
   anchor: Anchor;
+  /**
+   * 의견을 단 자리의 원문. 위치가 어긋나면 이 글자로 다시 찾는다(NFR-05).
+   * W4 잠정 칸: data-contract의 comment에는 아직 없다(시트 반영 대기).
+   */
+  original: string;
   body: string;
   author_id: Uuid;
   status: CommentStatus;

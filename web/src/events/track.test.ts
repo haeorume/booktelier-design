@@ -46,9 +46,9 @@ describe("track: 공통 칸(QA-46)", () => {
     expect(events[1]).toMatchObject({ participant_id: "p1", project_id: "b1", chapter_id: "c1", role: "author" });
   });
 
-  it("events 탭의 확정 이름은 19개이고, 그 밖의 이름은 막는다", () => {
-    expect(EVENT_NAMES).toHaveLength(19);
-    expect(new Set(EVENT_NAMES).size).toBe(19);
+  it("events 탭의 확정 이름 19개와 잠정 1개만 받고, 그 밖의 이름은 막는다", () => {
+    expect(EVENT_NAMES).toHaveLength(20);
+    expect(new Set(EVENT_NAMES).size).toBe(20);
     const { tracker } = setup();
     expect(() => tracker.track("bookend_opened" as EventName)).toThrow();
   });

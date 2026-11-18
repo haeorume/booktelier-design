@@ -8,6 +8,9 @@ export interface ClientSession {
   /** 이 책에서 지금 이 브라우저가 맡은 참여자. 없으면 null. */
   getCurrentParticipantId(projectId: Uuid): Uuid | null;
   setCurrentParticipantId(projectId: Uuid, participantId: Uuid): void;
+  /** 편집자가 이 브라우저에서 열어 본 의견 id(FR-02 ②: 의견은 카드를 열어 보면 확인할 일에서 줄어든다). */
+  getSeenComments(projectId: Uuid): Set<Uuid>;
+  markCommentSeen(projectId: Uuid, commentId: Uuid): void;
   getPanelLayout(): PanelLayout;
   setPanelLayout(layout: PanelLayout): void;
   /** 값이 바뀌면 부른다. 돌려준 함수로 구독을 끊는다. */
@@ -25,6 +28,15 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
   };
   const currentKey = (projectId: Uuid) => `${STORAGE_PREFIX}current:${projectId}`;
   const PANEL = `${STORAGE_PREFIX}panel_layout`;
+  const seenKey = (projectId: Uuid) => `${STORAGE_PREFIX}seen_comments:${projectId}`;
+  function readSeen(projectId: Uuid): Set<Uuid> {
+    try {
+      const v: unknown = JSON.parse(storage.getItem(seenKey(projectId)) ?? "[]");
+      return new Set(Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+    } catch {
+      return new Set();
+    }
+  }
 
   return {
     getCurrentParticipantId(projectId) {
@@ -32,6 +44,14 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
     },
     setCurrentParticipantId(projectId, participantId) {
       storage.setItem(currentKey(projectId), participantId);
+      notify();
+    },
+    getSeenComments: readSeen,
+    markCommentSeen(projectId, commentId) {
+      const seen = readSeen(projectId);
+      if (seen.has(commentId)) return;
+      seen.add(commentId);
+      storage.setItem(seenKey(projectId), JSON.stringify([...seen]));
       notify();
     },
     getPanelLayout() {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { can } from "@/domain/permissions";
-import { KIND_LABEL } from "@/domain/labels";
+import { AI_STATUS_LABEL, KIND_LABEL } from "@/domain/labels";
 import type { AiSuggestion, Role } from "@/types";
 import styles from "./ReviewPanel.module.css";
 
@@ -14,24 +14,28 @@ interface Props {
   onApply: (text: string, choice: number) => void;
   onDismiss: () => void;
   onKeep: () => void;
+  onSend: () => void;
   onSelect: () => void;
 }
 
 /**
  * AI 제안 카드(WS-46, FR-24). 종류, 원문, 수정안 1개와 대안 최대 2개, 수정 이유.
- * 버튼은 역할에 맞는 것만 보인다(D-15): 적용은 작가만, 무시와 이 표현 유지는 작가·편집자. 보내기는 W4.
+ * 버튼은 역할에 맞는 것만 보인다(D-15): 적용은 작가만, 보내기는 편집자만(FR-29 ④), 무시와 이 표현 유지는 작가·편집자.
+ * 보낸 제안은 '보냄'(받은 사람이 수락하면 '반영됨')으로 남고 버튼이 없다(FR-29 ③).
  */
-export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply, onDismiss, onKeep, onSelect }: Props) {
+export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply, onDismiss, onKeep, onSend, onSelect }: Props) {
   const options = [s.replacement, ...s.alternatives];
   const [choice, setChoice] = useState(0);
-  const canApply = can(role, "apply_ai_suggestion");
+  const pending = s.status === "pending";
+  const canApply = pending && can(role, "apply_ai_suggestion");
 
   return (
     <li
-      className={styles.card}
+      className={`${styles.card} ${pending ? "" : styles.decided}`}
       data-testid="ai-card"
       data-suggestion-id={s.id}
       data-kind={s.kind}
+      data-status={s.status}
       aria-current={selected ? "true" : undefined}
       tabIndex={0}
       onClick={onSelect}
@@ -42,6 +46,11 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
     >
       <div className={styles.cardHead}>
         <span className={`${styles.kind} ${styles[`kind_${s.kind}`]}`}>{KIND_LABEL[s.kind]}</span>
+        {!pending && (
+          <span className={styles.statusChip} data-testid="ai-status-chip">
+            {AI_STATUS_LABEL[s.status]}
+          </span>
+        )}
       </div>
       <p className={styles.original}>
         <del>{s.original}</del>
@@ -68,23 +77,30 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
         </ul>
       )}
       <p className={styles.reason}>{s.reason}</p>
-      <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
-        {canApply && (
-          <button type="button" className={styles.primaryButton} disabled={busy} onClick={() => onApply(options[choice], choice)}>
-            적용
-          </button>
-        )}
-        {can(role, "dismiss_ai_suggestion") && (
-          <button type="button" className={styles.button} disabled={busy} onClick={onDismiss}>
-            무시
-          </button>
-        )}
-        {can(role, "keep_ai_suggestion") && (
-          <button type="button" className={styles.button} disabled={busy} onClick={onKeep}>
-            이 표현 유지
-          </button>
-        )}
-      </div>
+      {pending && (
+        <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
+          {canApply && (
+            <button type="button" className={styles.primaryButton} disabled={busy} onClick={() => onApply(options[choice], choice)}>
+              적용
+            </button>
+          )}
+          {can(role, "send_ai_suggestion") && (
+            <button type="button" className={styles.primaryButton} disabled={busy} onClick={onSend}>
+              보내기
+            </button>
+          )}
+          {can(role, "dismiss_ai_suggestion") && (
+            <button type="button" className={styles.button} disabled={busy} onClick={onDismiss}>
+              무시
+            </button>
+          )}
+          {can(role, "keep_ai_suggestion") && (
+            <button type="button" className={styles.button} disabled={busy} onClick={onKeep}>
+              이 표현 유지
+            </button>
+          )}
+        </div>
+      )}
     </li>
   );
 }

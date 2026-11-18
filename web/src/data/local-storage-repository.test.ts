@@ -34,7 +34,7 @@ describe("저장한 값은 확정 상태 값으로 남고 다시 열어도 그�
     const c = await repo.createChapter({ project_id: p.id, order: 1, title: "1장", doc: parseChapterDoc(manuscript.chapter.doc) });
     const anchor = { paragraph_id: "para_01", start: 0, end: 2 };
     const e = await repo.createSuggestedEdit({ chapter_id: c.id, anchor, original: "파리", replacement: "Paris", author_id: "x", ai_origin_id: null });
-    const m = await repo.createComment({ chapter_id: c.id, anchor, body: "좋아요", author_id: "x", parent_id: null, ai_origin_id: null });
+    const m = await repo.createComment({ chapter_id: c.id, anchor, original: "파리", body: "좋아요", author_id: "x", parent_id: null, ai_origin_id: null });
     expect([c.status, e.status, m.status]).toEqual(["editing", "pending", "open"]);
 
     const reopened = createLocalStorageRepository({ storage });
