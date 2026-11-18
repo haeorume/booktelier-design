@@ -1,9 +1,13 @@
-// 데모 플로우(demo-flow 탭). 만든 단계까지 한 브라우저에서 이어서 누른다. 아직 만들지 않은 단계는 넣지 않는다.
+// 데모 플로우(demo-flow 탭). 1~13단계를 한 브라우저에서 이어서 누른다(QA-04, NFR-17). 콘솔 오류가 없어야 하고(QA-51), 끝에서 퍼널을 본다(QA-45).
 import { expect, test } from "@playwright/test";
 import { aiCards, card, events, expectEvent, LINK, NAVIGATE_MS, paragraph, switchRole, typeAtEnd, WORKSPACE } from "./helpers";
 
 test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락 → 검토본 → 디자이너 → 조판 설정", async ({ page }) => {
   const title = "파리에서 보낸 한 달";
+  // 콘솔의 빨간 오류와 페이지 오류를 모은다(QA-51)
+  const errors: string[] = [];
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  page.on("pageerror", (e) => errors.push(e.message));
 
   // 1. 편집자: 제목이 비어 있으면 만들기를 누를 수 없다(QA-06)
   await page.goto("/");
@@ -203,4 +207,15 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
   await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
   await switchRole(page, "작가");
   await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+
+  // 끝까지 돈 뒤 /dev/events: 13단계 도달 수가 모두 1, 이탈 0(QA-45). 1·2단계는 같고 5·12단계는 역할로 나뉜다
+  await page.goto("/dev/events");
+  const rows = page.getByTestId("funnel-row");
+  await expect(rows).toHaveCount(13);
+  await expect(page.getByTestId("reached")).toHaveText(Array(13).fill("1"));
+  await expect(page.getByTestId("dropped")).toHaveText(Array(13).fill("0"));
+  await expect(rows.nth(4)).toContainText("participant_joined (author)");
+  await expect(rows.nth(11)).toContainText("participant_joined (designer)");
+
+  expect(errors, "콘솔 오류").toEqual([]);
 });

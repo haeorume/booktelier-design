@@ -45,3 +45,17 @@
   border-radius: 999px;
   padding: 0 0.5rem;
 }
+
+/* 좁은 창에서는 패널을 줄여 지면 폭을 지킨다(QA-49). 1280px '나란히'에서도 실용서(152mm) 지면이 들어간다. */
+@media (max-width: 1500px) {
+  .panel {
+    width: 11rem;
+  }
+}
+
+@media (max-width: 1360px) {
+  .panel {
+    width: 9rem;
+    padding: 0.7rem;
+  }
+}

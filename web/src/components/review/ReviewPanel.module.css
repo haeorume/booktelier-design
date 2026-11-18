@@ -398,3 +398,16 @@
   color: var(--muted);
   margin-top: 0.4rem;
 }
+
+/* 좁은 창에서는 패널을 줄여 지면 폭을 지킨다(QA-49). */
+@media (max-width: 1500px) {
+  .panel {
+    width: 21rem;
+  }
+}
+
+@media (max-width: 1360px) {
+  .panel {
+    width: 19rem;
+  }
+}
