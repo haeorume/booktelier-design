@@ -1,0 +1,29 @@
+# 의존성과 빌드 결과
+node_modules/
+.next/
+out/
+web/test-results/
+web/playwright-report/
+web/blob-report/
+*.tsbuildinfo
+__pycache__/
+
+# 비밀값
+.env
+.env.*
+!.env.example
+
+# 사람마다 다른 Claude Code 설정
+.claude/settings.local.json
+
+# 시트에서 내려받은 원본(.md로 바꾼 docs/sheets/만 올려요)
+docs/source/*.xlsx
+docs/source/*.txt
+
+# 북엔드 제공 데이터는 저장소에 올리지 않아요
+*.jsonl
+*북엔드*데이터*
+
+# 운영체제
+.DS_Store
+Thumbs.db
