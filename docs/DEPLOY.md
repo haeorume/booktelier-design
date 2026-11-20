@@ -71,6 +71,7 @@ Vercel 주소가 정해지면 Railway의 `CORS_ORIGINS`에 넣어요.
 | `DATABASE_URL` | api | Neon 직접 연결 주소 하나 | 개발은 `booktelier-dev`의 `dev-이름`, 배포는 `booktelier-prod`의 `main`. Alembic도 같은 주소 |
 | `TEST_DATABASE_URL` | api(로컬만) | `booktelier-dev`의 `test-이름` 주소 | pytest DB 테스트. `DATABASE_URL`과 같으면 테스트가 시작하지 않아요. CI는 컨테이너 주소를 스스로 넣어요 |
 | `CORS_ORIGINS` | api | `http://localhost:3000,https://<vercel 주소>` | 웹 주소만, 쉼표로 |
+| `WEB_URL` | api | `http://localhost:3000` (배포는 `https://<vercel 주소>`) | 웹 주소 하나. 편집자 링크(`/e/…`)·초대 링크(`/j/…`)를 이 주소로 만들어요 |
 | `AI_PROVIDER` | api | `demo` / `llm` | F6 전에는 `demo`. e2e·CI는 늘 `demo` |
 | LLM 키 (이름은 F6에서) | api(배포처·로컬 `.env`만) | 엘리스 플랫폼 발급 키 | 브라우저로 절대 보내지 않아요(D-21) |
 | `NEXT_PUBLIC_API_URL` | web | `http://localhost:8000` / Railway 주소 | 서버 주소 |

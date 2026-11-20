@@ -135,6 +135,7 @@ export interface paths {
         /**
          * A-09 초대 링크 새로 바꾸기
          * @description 편집자만. 옛 링크는 취소되고 같은 역할의 새 링크가 생겨요(FR-08 ①, S-03).
+         *     이미 바꾸었거나 취소한 링크면 409 invite_revoked. 화면은 A-07을 다시 읽어요.
          */
         post: operations["rotate_invite_invites__invite_id__rotate_post"];
         delete?: never;
@@ -177,6 +178,7 @@ export interface paths {
          * @description 링크를 가진 사람. 역할은 링크의 역할로 정해져요(NFR-01). 참여자 토큰은 이 응답에서만 줘요(D-27).
          *
          *     없거나 바꾸었거나 취소한 링크면 404 invite_unusable(FR-08 ③, S-03).
+         *     같은 브라우저가 같은 역할로 다시 들어오면 참여자는 그대로, 이름과 토큰만 바뀌어요.
          */
         post: operations["join_invites__token__join_post"];
         delete?: never;
@@ -216,7 +218,7 @@ export interface paths {
         put?: never;
         /**
          * A-02 책 만들기
-         * @description 누구나 불러요. 편집자 참여자와 편집자 토큰을 같이 만들고, 토큰은 이 응답에서만 줘요(D-27).
+         * @description 누구나 불러요. 책, 빈 첫 장, 편집자 참여자를 만들고 편집자 토큰은 이 응답에서만 줘요(D-27).
          */
         post: operations["create_project_projects_post"];
         delete?: never;
@@ -236,7 +238,8 @@ export interface paths {
         put?: never;
         /**
          * A-03 내 책 목록
-         * @description 브라우저가 가진 편집자 토큰들을 보내면 그 책 카드를 줘요(D-38). 맞지 않는 토큰은 빠져요.
+         * @description 브라우저가 가진 편집자 토큰들을 보내면 그 책 카드를 줘요(D-38).
+         *     맞지 않는 토큰과 편집자가 아닌 토큰은 빠져요.
          */
         post: operations["list_projects_projects_list_post"];
         delete?: never;
@@ -252,7 +255,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A-10 책 열기 */
+        /**
+         * A-10 책 열기
+         * @description F3까지 가짜 응답. 신원과 책 범위는 실제로 확인해요.
+         */
         get: operations["get_project_projects__project_id__get"];
         put?: never;
         post?: never;
@@ -273,7 +279,7 @@ export interface paths {
         put?: never;
         /**
          * A-13 장 추가
-         * @description 편집자·작가(Q-20). 새 장은 원고가 비어 있고 version 1이에요.
+         * @description 편집자·작가(Q-20). F3까지 가짜 응답. 새 장은 원고가 비어 있고 version 1이에요.
          */
         post: operations["create_chapter_projects__project_id__chapters_post"];
         delete?: never;
@@ -291,13 +297,13 @@ export interface paths {
         };
         /**
          * A-07 초대 링크 목록
-         * @description 편집자만. 다시 복사할 수 있게 주소를 같이 줘요(D-37).
+         * @description 편집자만. 다시 복사할 수 있게 주소를 같이 줘요(D-37). 취소한 링크도 상태와 함께 와요.
          */
         get: operations["list_invites_projects__project_id__invites_get"];
         put?: never;
         /**
          * A-08 초대 링크 만들기
-         * @description 편집자만.
+         * @description 편집자만. 그 역할의 쓸 수 있는 링크가 이미 있으면 그것을 돌려줘요(링크가 쌓이지 않게).
          */
         post: operations["create_invite_projects__project_id__invites_post"];
         delete?: never;
@@ -321,7 +327,7 @@ export interface paths {
         head?: never;
         /**
          * A-15 조판 값 바꾸기
-         * @description 편집자·디자이너. 바꾼 값만 보내요. 바꾼 사람과 시각은 서버가 정해요(C-6).
+         * @description 편집자·디자이너(FR-16 ③). F3까지 가짜 응답. 바꾼 사람과 시각은 서버가 정해요(C-6).
          */
         patch: operations["patch_layout_projects__project_id__layout_patch"];
         trace?: never;
@@ -763,6 +769,11 @@ export interface components {
         };
         /** ProjectCreateIn */
         ProjectCreateIn: {
+            /**
+             * Anon Id
+             * Format: uuid
+             */
+            anon_id: string;
             /**
              * First Chapter Id
              * Format: uuid
@@ -1206,6 +1217,15 @@ export interface operations {
             };
             /** @description 찾을 수 없어요 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

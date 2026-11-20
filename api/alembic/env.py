@@ -13,6 +13,7 @@ from alembic import context
 from sqlalchemy import create_engine, pool
 
 from app.config import get_settings, normalize_db_url
+from app.db import models
 from app.db.base import Base
 
 config = context.config
@@ -21,6 +22,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 _ = pgvector.sqlalchemy
+_ = models  # 테이블 모델을 메타데이터에 올려요(F1)
 
 
 def _url() -> str:

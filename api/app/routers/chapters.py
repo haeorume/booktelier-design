@@ -1,10 +1,13 @@
-"""장 API(A-11, A-12, A-14). 지금은 가짜 응답(D-25)."""
+"""장 API(A-11, A-12, A-14). F3까지 가짜 응답(D-25). 토큰은 실제로 확인해요(틀리면 401).
+
+장이 어느 책인지는 F3에서 DB로 알게 되면 책 범위(403)와 역할 확인을 더해요.
+"""
 
 from uuid import UUID
 
 from fastapi import APIRouter
 
-from app.auth.token import BearerToken
+from app.auth.token import Me
 from app.errors import AppError
 from app.routers import _fake
 from app.schemas.common import error_responses
@@ -26,7 +29,7 @@ router = APIRouter(tags=["chapters"])
     response_model=Chapter,
     responses=error_responses(401, 403, 404),
 )
-def get_chapter(chapter_id: UUID, _token: BearerToken) -> Chapter:
+def get_chapter(chapter_id: UUID, _me: Me) -> Chapter:
     return _fake.chapter(chapter_id)
 
 
@@ -39,7 +42,7 @@ def get_chapter(chapter_id: UUID, _token: BearerToken) -> Chapter:
         409: {"model": VersionConflictOut, "description": "base_version이 최신이 아니에요"},
     },
 )
-def save_doc(chapter_id: UUID, body: DocSaveIn, _token: BearerToken) -> DocSaveOut:
+def save_doc(chapter_id: UUID, body: DocSaveIn, _me: Me) -> DocSaveOut:
     """작가만. base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).
 
     가짜 응답: 예시 장의 version은 3이에요. 3을 보내면 4로 저장되고, 다른 값이면 409예요.
@@ -61,7 +64,7 @@ def save_doc(chapter_id: UUID, body: DocSaveIn, _token: BearerToken) -> DocSaveO
     response_model=ChapterSummary,
     responses=error_responses(401, 403, 404),
 )
-def change_status(chapter_id: UUID, body: ChapterStatusIn, _token: BearerToken) -> ChapterSummary:
+def change_status(chapter_id: UUID, body: ChapterStatusIn, _me: Me) -> ChapterSummary:
     """검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14)."""
     return _fake.chapter_summary(chapter_id).model_copy(
         update={"status": body.to, "status_changed_at": _fake.T1}

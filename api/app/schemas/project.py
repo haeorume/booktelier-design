@@ -63,6 +63,9 @@ class ProjectCreateIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)  # 비어 있으면 만들 수 없음(FR-01)
     template_id: TemplateId
     first_chapter_id: UUID
+    anon_id: (
+        UUID  # 이 브라우저의 익명 id. 편집자 참여자에 남겨요(data-contract participant.anon_id)
+    )
 
 
 class ProjectCreateOut(BaseModel):
