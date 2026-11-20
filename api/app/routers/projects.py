@@ -112,6 +112,7 @@ def list_projects(body: ProjectListIn, db: DbSession) -> list[ProjectCard]:
             ],
             todo_count=row.todo_count,
             updated_at=row.project.updated_at,
+            first_chapter_id=row.first_chapter_id,
         )
         for row in project_db.cards_for_editors(db, editors)
     ]

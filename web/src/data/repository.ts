@@ -1,4 +1,5 @@
-// 화면이 데이터를 읽고 쓰는 유일한 길(D-07, NFR-15 ①). 1차는 localStorage 구현, 나중에 HTTP 구현으로 바꾼다.
+// 1차 localStorage 저장소(D-07, D-20). 서버로 옮긴 책·장·참여·링크·검토본은 화면이 library.ts로 부르고,
+// 아직 서버에 없는 AI 제안·의견·수정 제안·표기 원칙·이벤트는 여기를 거친다(F5·F8에서 옮김).
 // 모두 Promise를 돌려주는 것은 HTTP 구현으로 바꿀 때 화면을 고치지 않으려는 것.
 import type {
   AiSuggestion,
@@ -50,6 +51,7 @@ export interface Repository {
   createRoleLink(projectId: Uuid, role: Role): Promise<RoleLink>;
   findRoleLink(token: Uuid): Promise<RoleLink | null>;
   listRoleLinks(projectId: Uuid): Promise<RoleLink[]>;
+  revokeRoleLink(id: Uuid): Promise<RoleLink>;
   createParticipant(input: { project_id: Uuid; anon_id: Uuid; role: Role; display_name: string }): Promise<Participant>;
   getParticipant(id: Uuid): Promise<Participant | null>;
   updateParticipant(participant: Participant): Promise<Participant>;

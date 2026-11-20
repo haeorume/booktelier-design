@@ -27,10 +27,10 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
     const s = getComputedStyle(el);
     return { width: el.getBoundingClientRect().width, lineHeight: parseFloat(s.lineHeight) / parseFloat(s.fontSize), font: s.fontFamily, padding: s.paddingLeft };
   });
-  expect(style.width).toBeCloseTo((130 / 25.4) * 96, 0); // 130mm
-  expect(style.lineHeight).toBeCloseTo(1.7, 1);
+  expect(style.width).toBeCloseTo((148 / 25.4) * 96, 0); // 에세이 148mm(DESIGN.md 4장)
+  expect(style.lineHeight).toBeCloseTo(1.8, 1);
   expect(style.font).toContain("serif");
-  expect(parseFloat(style.padding)).toBeCloseTo((22 / 25.4) * 96, 0); // 22mm
+  expect(parseFloat(style.padding)).toBeCloseTo((23 / 25.4) * 96, 0); // 왼쪽 = 안쪽 20mm + 제본 3mm
   await expect(sheet.locator("[data-paragraph-id=para_02]")).toContainText("오르세 미술관");
   await expect(page.getByTestId("role-badge")).toHaveText("편집자");
   await expectEvent(page, "project_created", { role: "editor" });
@@ -192,21 +192,21 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
   // 13. 디자이너: 조판 설정에서 행간을 바꾼다. 지면이 다시 그려지고 원고는 그대로다(QA-18)
   const lineHeight = () => page.getByTestId("page").evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
   const textBefore = await page.getByTestId("manuscript").textContent();
-  expect(await lineHeight()).toBeCloseTo(1.7, 1);
+  expect(await lineHeight()).toBeCloseTo(1.8, 1);
   await page.getByRole("button", { name: "조판 설정", exact: true }).click();
   const layout = page.getByTestId("layout-panel");
   await layout.getByRole("slider", { name: "행간" }).focus();
   for (let i = 0; i < 6; i += 1) await page.keyboard.press("ArrowRight");
-  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+  await expect.poll(lineHeight).toBeCloseTo(2.1, 1);
   await expect(layout.getByTestId("layout-last-change")).toContainText("디자이너 C");
   await expectEvent(page, "layout_changed", { role: "designer", props: { field: "line_height" } });
   expect(await page.getByTestId("manuscript").textContent()).toBe(textBefore);
 
   // 새로고침해도, 다른 역할로 봐도 바꾼 값이 남는다
   await page.reload();
-  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+  await expect.poll(lineHeight).toBeCloseTo(2.1, 1);
   await switchRole(page, "작가");
-  await expect.poll(lineHeight).toBeCloseTo(2.0, 1);
+  await expect.poll(lineHeight).toBeCloseTo(2.1, 1);
 
   // 끝까지 돈 뒤 /dev/events: 13단계 도달 수가 모두 1, 이탈 0(QA-45). 1·2단계는 같고 5·12단계는 역할로 나뉜다
   await page.goto("/dev/events");

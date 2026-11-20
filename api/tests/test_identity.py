@@ -103,6 +103,7 @@ def test_my_projects_lists_only_editor_tokens(db_client: TestClient, book: Book)
     assert {c["id"] for c in cards} == {book.project_id, other.project_id}
     card = next(c for c in cards if c["id"] == book.project_id)
     assert card["stage"] == "editing"
+    assert card["first_chapter_id"] == book.chapter_id
     assert card["todo_count"] == 0
     assert sorted(p["role"] for p in card["participants"]) == ["author", "designer", "editor"]
 
@@ -121,6 +122,7 @@ def test_check_invite_shows_role_and_actions(db_client: TestClient, book: Book) 
     res = db_client.get(f"/invites/{_token_in(book.author_invite['url'])}").json()
     assert res["state"] == "valid"
     assert res["project_title"] == "테스트 책"
+    assert res["project_id"] == book.project_id
     assert res["role"] == "author"
     assert "edit_manuscript" in res["can"]
     assert "change_layout" not in res["can"]

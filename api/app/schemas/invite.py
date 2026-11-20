@@ -14,6 +14,7 @@ class InviteCheckOut(BaseModel):
     """A-05. 링크를 연 사람에게 보여 줄 것. 쓸 수 없으면 JN-02."""
 
     state: Literal["valid", "unusable"]
+    project_id: UUID | None  # 이벤트의 책 칸(role_link_opened). 쓸 수 없으면 None
     project_title: str | None  # 쓸 수 없으면 None
     role: Role | None
     can: list[str]  # 할 수 있는 일. 권한 표의 action 이름(web/src/domain/permissions.ts)

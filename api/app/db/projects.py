@@ -111,6 +111,7 @@ def update_layout(
 class CardRow:
     project: Project
     chapter_statuses: list[str]
+    first_chapter_id: uuid.UUID | None
     participants: list[Participant]
     todo_count: int
 
@@ -157,13 +158,15 @@ def cards_for_editors(db: Session, editors: list[Participant]) -> list[CardRow]:
         if project is None or project.id in seen:
             continue
         seen.add(project.id)
-        statuses = list(
-            db.scalars(
-                select(Chapter.status)
+        chapters = list(
+            db.execute(
+                select(Chapter.id, Chapter.status)
                 .where(Chapter.project_id == project.id)
                 .order_by(Chapter.sort_order)
             ).all()
         )
+        statuses = [c.status for c in chapters]
+        first_id = chapters[0].id if chapters else None
         people = list(
             db.scalars(
                 select(Participant)
@@ -171,6 +174,8 @@ def cards_for_editors(db: Session, editors: list[Participant]) -> list[CardRow]:
                 .order_by(Participant.created_at, Participant.id)
             ).all()
         )
-        rows.append(CardRow(project, statuses, people, _todo_count(db, project.id, me.id)))
+        rows.append(
+            CardRow(project, statuses, first_id, people, _todo_count(db, project.id, me.id))
+        )
     rows.sort(key=lambda r: r.project.updated_at, reverse=True)
     return rows

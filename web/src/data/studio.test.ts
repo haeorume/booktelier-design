@@ -1,3 +1,4 @@
+import { TEMPLATES } from "@/domain/templates";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createBook, joinWithLink, saveChapterDoc, type BookDeps } from "./books";
 import { createClientIdentityStore, createLocalStorageRepository } from "./local-storage-repository";
@@ -41,16 +42,16 @@ describe("saveLayout(FR-16)", () => {
   it("템플릿을 바꾸면 기본값으로 돌아간 값이 저장된다(④)", async () => {
     const saved = await saveLayout(deps, project.id, changeTemplate(project, "novel"), editor);
     expect(saved.template_id).toBe("novel");
-    expect(saved.layout).toEqual({ trim: "128x188", margin: 20, line_height: 1.8 });
+    expect(saved.layout).toEqual(TEMPLATES.novel.layout);
   });
 
   it("작가는 바꿀 수 없다(③)", async () => {
-    await expect(saveLayout(deps, project.id, changeValue(project, "margin", 15), author)).rejects.toThrow();
-    expect((await deps.repo.getProject(project.id))?.layout.margin).toBe(22);
+    await expect(saveLayout(deps, project.id, changeValue(project, "margin_top", 15), author)).rejects.toThrow();
+    expect((await deps.repo.getProject(project.id))?.layout.margin.top).toBe(20);
   });
 
   it("원고는 그대로다(①)", async () => {
-    await saveLayout(deps, project.id, changeValue(project, "margin", 15), editor);
+    await saveLayout(deps, project.id, changeValue(project, "margin_top", 15), editor);
     expect((await deps.repo.getChapter(chapter.id))?.doc).toEqual(chapter.doc);
   });
 });

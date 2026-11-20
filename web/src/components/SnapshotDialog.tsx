@@ -13,6 +13,8 @@ interface Props {
   snapshots: Snapshot[];
   participants: Map<string, Participant>;
   onSave: (label: string) => Promise<void>;
+  /** 목록에는 원고가 없어서(A-29) 열 때 하나를 다시 읽는다. */
+  onOpen?: (snapshot: Snapshot) => Promise<Snapshot>;
   onClose: () => void;
 }
 
@@ -23,10 +25,11 @@ function when(iso: string) {
 /**
  * 검토본(WS-03, FR-38). 저장은 편집자만(①), 목록과 열어 보기는 모두(②, 읽기 전용).
  */
-export function SnapshotDialog({ role, snapshots, participants, onSave, onClose }: Props) {
+export function SnapshotDialog({ role, snapshots, participants, onSave, onOpen, onClose }: Props) {
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<Snapshot | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const canSave = can(role, "save_snapshot");
   const sorted = [...snapshots].sort((a, b) => b.created_at.localeCompare(a.created_at));
 
@@ -57,9 +60,12 @@ export function SnapshotDialog({ role, snapshots, participants, onSave, onClose 
             e.preventDefault();
             if (!label.trim() || busy) return;
             setBusy(true);
+            setError(null);
             try {
               await onSave(label);
               setLabel("");
+            } catch (e) {
+              setError(e instanceof Error ? e.message : "검토본을 저장하지 못했어요.");
             } finally {
               setBusy(false);
             }
@@ -74,6 +80,7 @@ export function SnapshotDialog({ role, snapshots, participants, onSave, onClose 
           </button>
         </form>
       )}
+      {error && <p role="alert">{error}</p>}
       {sorted.length === 0 ? (
         <p className={styles.empty}>아직 저장한 검토본이 없어요.</p>
       ) : (
@@ -82,7 +89,7 @@ export function SnapshotDialog({ role, snapshots, participants, onSave, onClose 
             const who = participants.get(s.created_by);
             return (
               <li key={s.id}>
-                <button type="button" className={styles.item} data-testid="snapshot-item" onClick={() => setOpen(s)}>
+                <button type="button" className={styles.item} data-testid="snapshot-item" onClick={async () => setOpen(onOpen ? await onOpen(s) : s)}>
                   <span className={styles.name}>{s.label}</span>
                   <span className={styles.meta}>
                     {when(s.created_at)} · {who ? (who.role === "editor" ? ROLE_LABEL.editor : who.display_name) : ""}

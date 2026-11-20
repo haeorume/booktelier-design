@@ -355,6 +355,18 @@
             "title": "Can",
             "type": "array"
           },
+          "project_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
           "project_title": {
             "anyOf": [
               {
@@ -393,6 +405,7 @@
         },
         "required": [
           "state",
+          "project_id",
           "project_title",
           "role",
           "can"
@@ -958,6 +971,18 @@
       },
       "ProjectCard": {
         "properties": {
+          "first_chapter_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Chapter Id"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -1009,7 +1034,8 @@
           "stage",
           "participants",
           "todo_count",
-          "updated_at"
+          "updated_at",
+          "first_chapter_id"
         ],
         "title": "ProjectCard",
         "type": "object"

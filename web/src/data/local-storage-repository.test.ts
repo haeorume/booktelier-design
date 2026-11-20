@@ -1,3 +1,4 @@
+import { TEMPLATES } from "@/domain/templates";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createClientIdentityStore, createLocalStorageRepository } from "./local-storage-repository";
 import { MemoryStorage } from "./storage";
@@ -8,7 +9,7 @@ import chapterReview from "@/fixtures/chapter_review.json";
 import manuscript from "@/fixtures/manuscript.json";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const layout = { trim: "128x188", margin: 20, line_height: 1.7 };
+const layout = structuredClone(TEMPLATES.novel.layout);
 
 let storage: MemoryStorage;
 let repo: Repository;
@@ -24,7 +25,7 @@ describe("ID와 token은 UUID(D-07, QA-48)", () => {
     const c = await repo.createChapter({ project_id: p.id, order: 1, title: "1장", doc: parseChapterDoc(manuscript.chapter.doc) });
     const link = await repo.createRoleLink(p.id, "author");
     const who = await repo.createParticipant({ project_id: p.id, anon_id: crypto.randomUUID(), role: "author", display_name: "작가" });
-    for (const id of [p.id, c.id, link.token, who.id]) expect(id).toMatch(UUID);
+    for (const id of [p.id, c.id, link.id, link.url.slice(3), who.id]) expect(id).toMatch(UUID);
   });
 });
 
@@ -170,5 +171,20 @@ describe("브라우저 id", () => {
   it("깨진 저장 값은 빈 것으로 본다", async () => {
     storage.setItem("booktelier:projects", "{깨짐");
     expect(await repo.listProjects()).toEqual([]);
+  });
+});
+
+describe("1차에 저장된 초대 링크(Codex 검수 11.21)", () => {
+  it("token만 있는 옛 행을 id·주소가 있는 새 모양으로 읽고, 취소도 된다", async () => {
+    const storage = new MemoryStorage();
+    const old = { token: crypto.randomUUID(), project_id: "book", role: "author", revoked_at: null };
+    storage.setItem("booktelier:role_links", JSON.stringify([old]));
+    const legacy = createLocalStorageRepository({ storage });
+    const [link] = await legacy.listRoleLinks("book");
+    expect(link).toMatchObject({ id: old.token, url: `/j/${old.token}`, role: "author", revoked_at: null });
+    expect((await legacy.findRoleLink(old.token))?.url).toBe(`/j/${old.token}`);
+    const revoked = await legacy.revokeRoleLink(link.id);
+    expect(revoked.revoked_at).not.toBeNull();
+    expect((await legacy.listRoleLinks("book"))[0].revoked_at).not.toBeNull();
   });
 });

@@ -97,6 +97,7 @@ class ProjectCard(BaseModel):
     participants: list[ParticipantBrief]
     todo_count: int  # 확인할 일 수. 서버가 first_view로 세요(FR-02 ②)
     updated_at: datetime
+    first_chapter_id: UUID | None  # 카드를 누르면 여는 장(N-09: 없으면 첫 장)
 
 
 # A-10 책 열기

@@ -555,6 +555,8 @@ export interface components {
         InviteCheckOut: {
             /** Can */
             can: string[];
+            /** Project Id */
+            project_id: string | null;
             /** Project Title */
             project_title: string | null;
             /** Role */
@@ -782,6 +784,8 @@ export interface components {
         };
         /** ProjectCard */
         ProjectCard: {
+            /** First Chapter Id */
+            first_chapter_id: string | null;
             /**
              * Id
              * Format: uuid

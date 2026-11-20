@@ -4,6 +4,7 @@
   min-height: var(--page-min-height);
   padding: var(--page-margin);
   font-family: var(--page-font);
+  font-size: var(--page-font-size, 1rem);
   line-height: var(--page-line-height);
   background: var(--paper);
   color: var(--ink);

@@ -17,7 +17,7 @@ export function demoManuscript(): { title: string; doc: ChapterDoc } {
   return { title: manuscriptFixture.chapter.title, doc: parseChapterDoc(manuscriptFixture.chapter.doc) };
 }
 
-export interface CreatedBook {
+export interface NewBookResult {
   project: Project;
   chapter: Chapter;
   editor: Participant;
@@ -28,7 +28,7 @@ export interface CreatedBook {
  * 새 책 만들기(FR-01). 책, 첫 장, 이 브라우저의 편집자 참여자(정할 것 13), 작가·디자이너 링크(FR-05)를 만든다.
  * 1차는 데모 모드라 첫 장을 예시 원고로 채운다(W2 결정, FR-01 비고 '빈 첫 장'과 다름).
  */
-export async function createBook(deps: BookDeps, input: { title: string; template_id: TemplateId }): Promise<CreatedBook> {
+export async function createBook(deps: BookDeps, input: { title: string; template_id: TemplateId }): Promise<NewBookResult> {
   const title = input.title.trim();
   if (!title) throw new Error("책 제목이 비어 있어요");
   const { repo } = deps;

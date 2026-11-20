@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { bookDeps, createBook, myEditorProjects } from "@/data";
+import { bookDeps } from "@/data";
+import { EditorLinkDialog } from "@/components/EditorLinkDialog";
 import { TEMPLATE_ORDER, TEMPLATES } from "@/domain/templates";
 import { setTrackContext, track } from "@/events";
 import type { TemplateId } from "@/types";
@@ -20,11 +21,13 @@ export function NewBook() {
   const [template, setTemplate] = useState<TemplateId>("novel");
   const [busy, setBusy] = useState(false);
   const [hasBooks, setHasBooks] = useState(false);
+  // 만든 뒤 편집자 링크 안내(ST-02, FR-46 ①). 확인하면 작업 공간으로 간다.
+  const [created, setCreated] = useState<{ url: string; href: string } | null>(null);
   const empty = title.trim().length === 0;
 
   useEffect(() => {
     let alive = true;
-    myEditorProjects(bookDeps()).then((books) => {
+    bookDeps().library.myBooks().then((books) => {
       if (!alive || books.length === 0) return;
       if (forceNew) setHasBooks(true);
       else router.replace("/home");
@@ -38,12 +41,14 @@ export function NewBook() {
     if (empty || busy) return;
     setBusy(true);
     try {
-      const { project, chapter, editor } = await createBook(bookDeps(), { title, template_id: template });
+      const { project, chapter, editor, editorUrl } = await bookDeps().library.createBook({ title, template_id: template });
       setTrackContext({ participant_id: editor.id, project_id: project.id, chapter_id: null, role: "editor" });
       // 1·2단계는 만들기 한 번으로 함께 끝난다. 이 순서로 둘을 남긴다(정할 것 6).
       track("project_created");
       track("template_selected", { template_id: template });
-      router.push(`/p/${project.id}/c/${chapter.id}`);
+      const href = `/p/${project.id}/c/${chapter.id}`;
+      if (editorUrl) setCreated({ url: editorUrl, href });
+      else router.push(href);
       // 화면 상태는 다른 화면에 다녀와도 남는다(cacheComponents). 다음 책을 만들 수 있게 비운다.
       setTitle("");
     } finally {
@@ -73,7 +78,7 @@ export function NewBook() {
               <input type="radio" name="template" value={id} checked={template === id} onChange={() => setTemplate(id)} />
               <span className={styles.templateName}>{TEMPLATES[id].label}</span>
               <span className={styles.templateSpec}>
-                {TEMPLATES[id].layout.trim.replace("x", "×")}mm · {TEMPLATES[id].font === "serif" ? "명조" : "고딕"} · 행간 {TEMPLATES[id].layout.line_height}
+                {TEMPLATES[id].layout.trim.replace("x", "×")}mm · {TEMPLATES[id].font === "serif" ? "명조" : "고딕"} {TEMPLATES[id].layout.font_size}pt · 행간 {TEMPLATES[id].layout.line_height}
               </span>
             </label>
           ))}
@@ -89,6 +94,17 @@ export function NewBook() {
           </button>
         </div>
       </form>
+      {created && (
+        <EditorLinkDialog
+          url={created.url}
+          onDone={() => {
+            // 화면 상태는 다른 화면에 다녀와도 남는다(cacheComponents). 다음 책에서 이 안내가 다시 뜨지 않게 비운다.
+            const { href } = created;
+            setCreated(null);
+            router.push(href);
+          }}
+        />
+      )}
     </main>
   );
 }

@@ -9,11 +9,11 @@ import { ComposeDialog, type ComposeKind } from "@/components/review/ComposeDial
 import { ReviewPanel, type ChapterReviewState, type ReviewPanelHandle } from "@/components/review/ReviewPanel";
 import { SendDialog } from "@/components/review/SendDialog";
 import { SharedTab } from "@/components/review/SharedTab";
-import { bookDeps, hasProjectEvent, saveChapterDoc, sendAiSuggestion, type SendMethod, type Viewer } from "@/data";
+import { ApiError, bookDeps, hasProjectEvent, NETWORK, sendAiSuggestion, VersionConflictError, type ChapterInfo, type SendMethod, type Viewer } from "@/data";
 import { locate } from "@/domain/anchor";
 import { KIND_ORDER } from "@/domain/labels";
 import { can } from "@/domain/permissions";
-import { transitionAiSuggestion, transitionChapter, type ChapterAction } from "@/domain/transitions";
+import { nextChapterStatus, transitionAiSuggestion, type ChapterAction } from "@/domain/transitions";
 import { mergeUnderlines } from "@/domain/underlines";
 import { track } from "@/events";
 import { createLiveCheck, type LiveCheck, type LiveCheckStatus } from "@/workspace/live-check";
@@ -22,7 +22,6 @@ import type { AiSuggestion, AiSuggestionKind, Chapter, ChapterDoc, Layout, Parti
 import { usePanelLayout } from "@/components/hooks";
 import { LayoutPanel } from "@/components/LayoutPanel";
 import { SnapshotDialog } from "@/components/SnapshotDialog";
-import { saveLayout, saveSnapshot } from "@/data";
 import type { LayoutChange } from "@/domain/layout";
 import { useShared } from "./useShared";
 import styles from "./page.module.css";
@@ -32,16 +31,23 @@ interface Props {
   chapter: Chapter;
   me: Participant;
   participants: Participant[];
-  onChapterChange: (chapter: Chapter) => void;
+  onChapterChange: (chapter: ChapterInfo) => void;
   onProjectChange: (project: Project) => void;
   layoutOpen: boolean;
   onLayoutOpenChange: (open: boolean) => void;
   snapshotsOpen: boolean;
   onSnapshotsClose: () => void;
+  /** 저장하려던 원고가 그사이 다른 곳에서 바뀌었다(409). 최신 원고로 다시 그린다(C-4). */
+  onConflict: () => void;
 }
+
+/** 원고 저장 상태(L-42). */
+type SaveState = "saved" | "saving" | "failed" | "offline";
+const SAVE_LABEL: Record<SaveState, string> = { saved: "저장됨", saving: "저장 중", failed: "저장 실패", offline: "연결 끊김" };
 
 const NOT_APPLIED = "원고가 먼저 바뀌어 이 제안은 적용하지 못했어요.";
 const NOT_UNDONE = "원고가 바뀌어 실행 취소할 수 없어요.";
+const NOT_SAVED = "원고를 저장하지 못해 진행하지 않았어요. 저장을 다시 시도해 주세요.";
 
 function eventProps(s: AiSuggestion, role: string) {
   return { suggestion_id: s.id, role, kind: s.kind, source: s.source };
@@ -52,7 +58,7 @@ function eventProps(s: AiSuggestion, role: string) {
  * 보내기 전 AI 제안은 data/ 가 주인 것만 돌려준다(FR-23, D-09).
  */
 export function ChapterWorkspace(props: Props) {
-  const { project, chapter, me, participants, onChapterChange, onProjectChange, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose } = props;
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
   const panelLayout = usePanelLayout();
   const [previewLayout, setPreviewLayout] = useState<Layout | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
@@ -72,6 +78,7 @@ export function ChapterWorkspace(props: Props) {
   const [picked, setPicked] = useState<PickedText | null>(null);
   const [composing, setComposing] = useState<{ kind: ComposeKind; picked: PickedText } | null>(null);
   const [chapterBusy, setChapterBusy] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>("saved");
 
   const editor = useRef<EditorHandle>(null);
   const panel = useRef<ReviewPanelHandle>(null);
@@ -80,6 +87,8 @@ export function ChapterWorkspace(props: Props) {
   const mineRef = useRef<AiSuggestion[]>([]);
   const version = useRef(chapter.version);
   const saving = useRef<Promise<unknown>>(Promise.resolve());
+  /** 마지막 원고 저장이 성공했는지. 검토 요청·검토본 전에 본다(NFR-06). */
+  const savedOk = useRef(true);
   const liveCheck = useRef<LiveCheck | null>(null);
   const shown = useRef(new Set<string>());
   const firstEditChecked = useRef(false);
@@ -197,14 +206,61 @@ export function ChapterWorkspace(props: Props) {
     [deps, project.id, me.role],
   );
 
+  /**
+   * 지금 원고(docRef)를 저장한다(A-12). 입력이 이어지면 앞 저장이 끝난 뒤 이어서 저장한다(saving 줄).
+   * 409면 다른 곳에서 원고가 바뀐 것이라 최신 원고로 다시 그린다(C-4, D-30). 연결이 끊기면 원고는
+   * 화면에 남기고 '다시 시도'로 다시 보낸다(NFR-06, 리뷰 B-1). 원고 글자는 이벤트·로그에 넣지 않는다.
+   */
+  const persist = useCallback(async () => {
+    setSaveState("saving");
+    try {
+      const saved = await deps.library.saveChapterDoc(project.id, chapter.id, docRef.current, version.current);
+      version.current = saved.version;
+      savedOk.current = true;
+      setSaveState("saved");
+    } catch (e) {
+      savedOk.current = false;
+      // 실패 종류만 남긴다. 원고 글자는 넣지 않는다(db 1번, events 탭 save_failed).
+      const kind = e instanceof VersionConflictError ? "version_conflict" : e instanceof ApiError && e.code === NETWORK ? "network" : "server_error";
+      track("save_failed", { kind });
+      if (e instanceof VersionConflictError) {
+        setSaveState("saved");
+        onConflict();
+        return;
+      }
+      setSaveState(kind === "network" ? "offline" : "failed");
+    }
+  }, [deps, project.id, chapter.id, onConflict]);
+
+  /**
+   * 저장 중인 원고를 기다리고, 마지막 저장이 실패했으면 한 번 더 저장한다. 그래도 실패면 false.
+   * 검토 요청이나 검토본이 화면의 원고가 빠진 서버 원고로 진행되지 않게 한다(FR-13, FR-38, NFR-06).
+   */
+  const ensureSaved = useCallback(async () => {
+    await saving.current;
+    if (savedOk.current) return true;
+    saving.current = saving.current.then(() => persist());
+    await saving.current;
+    return savedOk.current;
+  }, [persist]);
+
+  const retrySave = useCallback(() => {
+    saving.current = saving.current.then(() => persist());
+  }, [persist]);
+
+  // 연결이 끊겨 저장하지 못했으면 다시 연결될 때 다시 저장한다(QA-F11).
+  useEffect(() => {
+    if (saveState !== "offline") return;
+    const onOnline = () => retrySave();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [saveState, retrySave]);
+
   const onDocChange = useCallback(
     (next: ChapterDoc, changed: string[], source: ChangeSource) => {
       docRef.current = next;
       setDoc(next);
-      saving.current = saving.current.then(async () => {
-        const saved = await saveChapterDoc(deps, chapter.id, next);
-        version.current = saved.version;
-      });
+      saving.current = saving.current.then(() => persist());
       void reconcile(next);
       void relocate(next); // 의견·수정 제안의 자리도 원문으로 다시 찾아 저장한다(NFR-05)
       if (source === "typing" && changed.length > 0) {
@@ -214,7 +270,7 @@ export function ChapterWorkspace(props: Props) {
         void firstEdit("direct");
       }
     },
-    [deps, chapter.id, firstEdit, reconcile, relocate, rememberApplied],
+    [persist, firstEdit, reconcile, relocate, rememberApplied],
   );
 
   async function apply(s: AiSuggestion, text: string, choice: number) {
@@ -285,10 +341,14 @@ export function ChapterWorkspace(props: Props) {
   async function changeChapter(action: ChapterAction) {
     setChapterBusy(true);
     try {
-      await saving.current;
-      const latest = await deps.repo.getChapter(chapter.id);
-      if (!latest) return;
-      const next = await deps.repo.updateChapter(transitionChapter(latest, action));
+      if (!(await ensureSaved())) {
+        setNotice(NOT_SAVED);
+        return;
+      }
+      const to = nextChapterStatus(chapter.status, action);
+      if (!to) return;
+      // 상태만 보낸다(A-14). 원고는 건드리지 않는다(리뷰 B-4).
+      const next = await deps.library.changeChapterStatus(project.id, chapter.id, to);
       onChapterChange(next);
       if (action === "request_review") track("review_requested");
     } finally {
@@ -351,7 +411,7 @@ export function ChapterWorkspace(props: Props) {
 
   /** 조판 값 저장(FR-16). 손을 떼거나 값을 고를 때 한 번 부른다(정할 것 15). */
   async function commitLayout(change: LayoutChange) {
-    const saved = await saveLayout(deps, project.id, change, me);
+    const saved = await deps.library.updateLayout(project.id, change, me);
     setPreviewLayout(null);
     onProjectChange(saved);
     track("layout_changed", { field: change.field, before: change.before, after: change.after, reset_to_default: change.reset_to_default });
@@ -361,17 +421,17 @@ export function ChapterWorkspace(props: Props) {
   useEffect(() => {
     if (!snapshotsOpen) return;
     let alive = true;
-    deps.repo.listSnapshots(chapter.id).then((list) => alive && setSnapshots(list));
+    deps.library.listSnapshots(project.id, chapter.id).then((list) => alive && setSnapshots(list));
     return () => {
       alive = false;
     };
-  }, [snapshotsOpen, deps, chapter.id]);
+  }, [snapshotsOpen, deps, project.id, chapter.id]);
 
   /** 검토본 저장(FR-38). 저장 중인 원고까지 기다린 뒤 그때의 원고를 남긴다. */
   async function storeSnapshot(label: string) {
-    await saving.current;
-    await saveSnapshot(deps, chapter.id, label, me);
-    setSnapshots(await deps.repo.listSnapshots(chapter.id));
+    if (!(await ensureSaved())) throw new Error(NOT_SAVED);
+    await deps.library.createSnapshot(project.id, chapter.id, label);
+    setSnapshots(await deps.library.listSnapshots(project.id, chapter.id));
     track("snapshot_saved");
   }
 
@@ -400,13 +460,25 @@ export function ChapterWorkspace(props: Props) {
           layout={previewLayout ?? project.layout}
           chapterTitle={chapter.title}
           header={
-            <ChapterHead
-              chapter={chapter}
-              role={me.role}
-              busy={chapterBusy}
-              onRequestReview={() => void changeChapter("request_review")}
-              onCompleteReview={() => void changeChapter("complete_review")}
-            />
+            <>
+              <ChapterHead
+                chapter={chapter}
+                role={me.role}
+                busy={chapterBusy}
+                onRequestReview={() => void changeChapter("request_review")}
+                onCompleteReview={() => void changeChapter("complete_review")}
+              />
+              {editable && (
+                <p className={styles.saveState} role="status" data-testid="save-state" data-state={saveState}>
+                  {SAVE_LABEL[saveState]}
+                  {(saveState === "failed" || saveState === "offline") && (
+                    <button type="button" onClick={retrySave}>
+                      다시 시도
+                    </button>
+                  )}
+                </p>
+              )}
+            </>
           }
           spans={spans}
           edits={shared.editMarks}
@@ -503,7 +575,14 @@ export function ChapterWorkspace(props: Props) {
         />
       )}
       {snapshotsOpen && (
-        <SnapshotDialog role={me.role} snapshots={snapshots} participants={shared.byId} onSave={storeSnapshot} onClose={onSnapshotsClose} />
+        <SnapshotDialog
+          role={me.role}
+          snapshots={snapshots}
+          participants={shared.byId}
+          onSave={storeSnapshot}
+          onOpen={async (s) => (await deps.library.getSnapshot(project.id, s.id)) ?? s}
+          onClose={onSnapshotsClose}
+        />
       )}
       {sending && <SendDialog suggestion={sending} onSend={(input) => send(sending, input)} onClose={() => setSending(null)} />}
       {composing && (
