@@ -4,6 +4,65 @@
  */
 
 export interface paths {
+    "/chapters/{chapter_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A-11 장 읽기 */
+        get: operations["get_chapter_chapters__chapter_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/doc": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * A-12 원고 저장
+         * @description 작가만. base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).
+         *
+         *     가짜 응답: 예시 장의 version은 3이에요. 3을 보내면 4로 저장되고, 다른 값이면 409예요.
+         */
+        put: operations["save_doc_chapters__chapter_id__doc_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-14 장 상태 바꾸기
+         * @description 검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14).
+         */
+        post: operations["change_status_chapters__chapter_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -44,16 +103,365 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/invites/{invite_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-09 초대 링크 취소
+         * @description 편집자만. 취소한 링크로는 들어올 수 없어요(FR-08 ②③).
+         */
+        post: operations["revoke_invite_invites__invite_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{invite_id}/rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-09 초대 링크 새로 바꾸기
+         * @description 편집자만. 옛 링크는 취소되고 같은 역할의 새 링크가 생겨요(FR-08 ①, S-03).
+         *     이미 바꾸었거나 취소한 링크면 409 invite_revoked. 화면은 A-07을 다시 읽어요.
+         */
+        post: operations["rotate_invite_invites__invite_id__rotate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-05 초대 링크 확인
+         * @description 누구나. 없거나 바꾸었거나 취소한 링크는 state=unusable(JN-02). 무엇 때문인지는 알려 주지 않아요.
+         */
+        get: operations["check_invite_invites__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invites/{token}/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-06 참여하기
+         * @description 링크를 가진 사람. 역할은 링크의 역할로 정해져요(NFR-01). 참여자 토큰은 이 응답에서만 줘요(D-27).
+         *
+         *     없거나 바꾸었거나 취소한 링크면 404 invite_unusable(FR-08 ③, S-03).
+         *     같은 브라우저가 같은 역할로 다시 들어오면 참여자는 그대로, 이름과 토큰만 바뀌어요.
+         */
+        post: operations["join_invites__token__join_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-01 나 확인 (A-04 편집자 링크로 들어오기도 이것)
+         * @description 화면이 처음 열릴 때 불러요. 편집자 링크(/e/[token])로 들어오면 그 토큰을 헤더에 실어 불러요(A-04).
+         */
+        get: operations["get_me_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-02 책 만들기
+         * @description 누구나 불러요. 책, 빈 첫 장, 편집자 참여자를 만들고 편집자 토큰은 이 응답에서만 줘요(D-27).
+         */
+        post: operations["create_project_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-03 내 책 목록
+         * @description 브라우저가 가진 편집자 토큰들을 보내면 그 책 카드를 줘요(D-38).
+         *     맞지 않는 토큰과 편집자가 아닌 토큰은 빠져요.
+         */
+        post: operations["list_projects_projects_list_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-10 책 열기
+         * @description F3까지 가짜 응답. 신원과 책 범위는 실제로 확인해요.
+         */
+        get: operations["get_project_projects__project_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-13 장 추가
+         * @description 편집자·작가(Q-20). F3까지 가짜 응답. 새 장은 원고가 비어 있고 version 1이에요.
+         */
+        post: operations["create_chapter_projects__project_id__chapters_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-07 초대 링크 목록
+         * @description 편집자만. 다시 복사할 수 있게 주소를 같이 줘요(D-37). 취소한 링크도 상태와 함께 와요.
+         */
+        get: operations["list_invites_projects__project_id__invites_get"];
+        put?: never;
+        /**
+         * A-08 초대 링크 만들기
+         * @description 편집자만. 그 역할의 쓸 수 있는 링크가 이미 있으면 그것을 돌려줘요(링크가 쌓이지 않게).
+         */
+        post: operations["create_invite_projects__project_id__invites_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{project_id}/layout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * A-15 조판 값 바꾸기
+         * @description 편집자·디자이너(FR-16 ③). F3까지 가짜 응답. 바꾼 사람과 시각은 서버가 정해요(C-6).
+         */
+        patch: operations["patch_layout_projects__project_id__layout_patch"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Chapter */
+        Chapter: {
+            doc: components["schemas"]["ChapterDoc"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Order */
+            order: number;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "editing" | "review_requested" | "reviewed";
+            /** Status Changed At */
+            status_changed_at: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Version */
+            version: number;
+        };
+        /** ChapterCreateIn */
+        ChapterCreateIn: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * ChapterDoc
+         * @description 편집기 문서. 문단마다 id가 있어요(data-contract chapter.doc, P1).
+         */
+        ChapterDoc: {
+            /** Content */
+            content?: components["schemas"]["ParagraphNode"][];
+            /**
+             * Type
+             * @constant
+             */
+            type: "doc";
+        };
+        /** ChapterStatusIn */
+        ChapterStatusIn: {
+            /**
+             * To
+             * @enum {string}
+             */
+            to: "editing" | "review_requested" | "reviewed";
+        };
+        /**
+         * ChapterSummary
+         * @description 장 목록의 한 줄. 원고(doc)는 빼요.
+         */
+        ChapterSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Order */
+            order: number;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "editing" | "review_requested" | "reviewed";
+            /** Status Changed At */
+            status_changed_at: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Version */
+            version: number;
+        };
         /** DbHealthOut */
         DbHealthOut: {
             /** Connected */
             connected: boolean;
             /** Pgvector */
             pgvector: boolean;
+        };
+        /** DocSaveIn */
+        DocSaveIn: {
+            /** Base Version */
+            base_version: number;
+            doc: components["schemas"]["ChapterDoc"];
+        };
+        /** DocSaveOut */
+        DocSaveOut: {
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Version */
+            version: number;
+        };
+        /** ErrorOut */
+        ErrorOut: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
         };
         /** HealthOut */
         HealthOut: {
@@ -62,6 +470,396 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /**
+         * Invite
+         * @description 편집자에게만 보여요. 다시 복사할 수 있게 주소를 늘 같이 줘요(D-37).
+         */
+        Invite: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Revoked At */
+            revoked_at: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "author" | "designer";
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "active" | "revoked";
+            /** Url */
+            url: string;
+        };
+        /**
+         * InviteCheckOut
+         * @description A-05. 링크를 연 사람에게 보여 줄 것. 쓸 수 없으면 JN-02.
+         */
+        InviteCheckOut: {
+            /** Can */
+            can: string[];
+            /** Project Title */
+            project_title: string | null;
+            /** Role */
+            role: ("editor" | "author" | "designer") | null;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "valid" | "unusable";
+        };
+        /** InviteCreateIn */
+        InviteCreateIn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "author" | "designer";
+        };
+        /**
+         * InviteRotateOut
+         * @description 새로 바꾸기: 옛 링크는 취소되고 새 링크가 생겨요(FR-08 ①).
+         */
+        InviteRotateOut: {
+            created: components["schemas"]["Invite"];
+            revoked: components["schemas"]["Invite"];
+        };
+        /** JoinIn */
+        JoinIn: {
+            /**
+             * Anon Id
+             * Format: uuid
+             */
+            anon_id: string;
+            /** Display Name */
+            display_name: string;
+        };
+        /** JoinOut */
+        JoinOut: {
+            participant: components["schemas"]["Participant"];
+            /** Participant Token */
+            participant_token: string;
+        };
+        /** Layout */
+        Layout: {
+            /** Binding */
+            binding?: number | null;
+            /** Font Family */
+            font_family?: string | null;
+            /** Font Size */
+            font_size?: number | null;
+            /** Line Height */
+            line_height?: number | null;
+            margin?: components["schemas"]["Margins"] | null;
+            running?: components["schemas"]["Running"] | null;
+            /** Trim */
+            trim?: string | null;
+        };
+        /** LayoutOut */
+        LayoutOut: {
+            layout: components["schemas"]["Layout"];
+            /**
+             * Layout Updated At
+             * Format: date-time
+             */
+            layout_updated_at: string;
+            /**
+             * Layout Updated By
+             * Format: uuid
+             */
+            layout_updated_by: string;
+            /**
+             * Template Id
+             * @enum {string}
+             */
+            template_id: "novel" | "essay" | "practical";
+        };
+        /**
+         * LayoutPatchIn
+         * @description 바꾼 값만 보내요. 템플릿을 바꾸면 조판 값이 그 템플릿 기본값으로 돌아가요(FR-16 ④).
+         */
+        LayoutPatchIn: {
+            layout?: components["schemas"]["Layout"] | null;
+            /** Template Id */
+            template_id?: ("novel" | "essay" | "practical") | null;
+        };
+        /**
+         * Margins
+         * @description 여백 4개(mm). 안쪽·바깥쪽은 펼침면 기준.
+         */
+        Margins: {
+            /** Bottom */
+            bottom?: number | null;
+            /** Inner */
+            inner?: number | null;
+            /** Outer */
+            outer?: number | null;
+            /** Top */
+            top?: number | null;
+        };
+        /**
+         * MeOut
+         * @description A-01·A-04. 토큰을 가진 사람.
+         */
+        MeOut: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "editor" | "participant";
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "editor" | "author" | "designer";
+        };
+        /**
+         * PageSide
+         * @description 한쪽 면(왼쪽 또는 오른쪽)의 쪽 공통 설정(FR-44 ②).
+         */
+        PageSide: {
+            /** Header */
+            header?: ("none" | "book_title" | "chapter_title") | null;
+            /** Page Number */
+            page_number?: string | null;
+        };
+        /** ParagraphAttrs */
+        ParagraphAttrs: {
+            /** Id */
+            id: string;
+        };
+        /** ParagraphNode */
+        ParagraphNode: {
+            attrs: components["schemas"]["ParagraphAttrs"];
+            /** Content */
+            content?: components["schemas"]["TextNode"][] | null;
+            /**
+             * Type
+             * @constant
+             */
+            type: "paragraph";
+        };
+        /** Participant */
+        Participant: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Seen At */
+            last_seen_at: string | null;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "editor" | "author" | "designer";
+        };
+        /** ParticipantBrief */
+        ParticipantBrief: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "editor" | "author" | "designer";
+        };
+        /** Project */
+        Project: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            layout: components["schemas"]["Layout"];
+            /** Layout Updated At */
+            layout_updated_at: string | null;
+            /** Layout Updated By */
+            layout_updated_by: string | null;
+            /**
+             * Template Id
+             * @enum {string}
+             */
+            template_id: "novel" | "essay" | "practical";
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ProjectCard */
+        ProjectCard: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Participants */
+            participants: components["schemas"]["ParticipantBrief"][];
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "editing" | "review_requested" | "reviewed";
+            /**
+             * Template Id
+             * @enum {string}
+             */
+            template_id: "novel" | "essay" | "practical";
+            /** Title */
+            title: string;
+            /** Todo Count */
+            todo_count: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ProjectCreateIn */
+        ProjectCreateIn: {
+            /**
+             * Anon Id
+             * Format: uuid
+             */
+            anon_id: string;
+            /**
+             * First Chapter Id
+             * Format: uuid
+             */
+            first_chapter_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Template Id
+             * @enum {string}
+             */
+            template_id: "novel" | "essay" | "practical";
+            /** Title */
+            title: string;
+        };
+        /** ProjectCreateOut */
+        ProjectCreateOut: {
+            chapter: components["schemas"]["Chapter"];
+            /** Editor Token */
+            editor_token: string;
+            /** Editor Url */
+            editor_url: string;
+            participant: components["schemas"]["Participant"];
+            project: components["schemas"]["Project"];
+        };
+        /** ProjectDetail */
+        ProjectDetail: {
+            /** Chapters */
+            chapters: components["schemas"]["ChapterSummary"][];
+            /** Participants */
+            participants: components["schemas"]["Participant"][];
+            project: components["schemas"]["Project"];
+        };
+        /**
+         * ProjectListIn
+         * @description 브라우저가 가진 편집자 토큰들. 맞지 않는 토큰은 응답에서 빠져요(D-38).
+         */
+        ProjectListIn: {
+            /** Editor Tokens */
+            editor_tokens: string[];
+        };
+        /**
+         * Running
+         * @description 쪽 공통 설정: 쪽 번호와 머리말(FR-44).
+         */
+        Running: {
+            left?: components["schemas"]["PageSide"] | null;
+            right?: components["schemas"]["PageSide"] | null;
+        };
+        /** TextMark */
+        TextMark: {
+            /** Attrs */
+            attrs?: {
+                [key: string]: unknown;
+            } | null;
+            /** Type */
+            type: string;
+        };
+        /** TextNode */
+        TextNode: {
+            /** Marks */
+            marks?: components["schemas"]["TextMark"][] | null;
+            /** Text */
+            text: string;
+            /**
+             * Type
+             * @constant
+             */
+            type: "text";
+        };
+        /**
+         * VersionConflictOut
+         * @description 409. 최신 원고를 같이 줘요(C-4, D-30).
+         */
+        VersionConflictOut: {
+            /**
+             * Code
+             * @constant
+             */
+            code: "version_conflict";
+            latest: components["schemas"]["Chapter"];
+            /** Message */
+            message: string;
         };
     };
     responses: never;
@@ -72,6 +870,197 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_chapter_chapters__chapter_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    save_doc_chapters__chapter_id__doc_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocSaveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocSaveOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description base_version이 최신이 아니에요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    change_status_chapters__chapter_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterSummary"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     health_health_get: {
         parameters: {
             query?: never;
@@ -88,6 +1077,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
                 };
             };
         };
@@ -108,6 +1106,639 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DbHealthOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    revoke_invite_invites__invite_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invite"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    rotate_invite_invites__invite_id__rotate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteRotateOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    check_invite_invites__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteCheckOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    join_invites__token__join_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    get_me_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_project_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectCreateOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    list_projects_projects_list_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectListIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectCard"][];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    get_project_projects__project_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDetail"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_chapter_projects__project_id__chapters_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    list_invites_projects__project_id__invites_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invite"][];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_invite_projects__project_id__invites_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invite"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    patch_layout_projects__project_id__layout_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LayoutPatchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LayoutOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
                 };
             };
         };

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     database_url: str = ""
     # 쉼표로 여러 개. 웹 주소만 넣어요(예: https://booktelier.vercel.app,http://localhost:3000)
     cors_origins: str = "http://localhost:3000"
+    # 웹 주소 하나. 편집자 링크(/e/…)와 초대 링크(/j/…)를 이 주소로 만들어요(11.21 정모 결정).
+    web_url: str = "http://localhost:3000"
     # demo = 예시 JSON을 돌려주는 데모 제공자, llm = 실제 LLM(F6). e2e와 CI는 늘 demo.
     ai_provider: Literal["demo", "llm"] = "demo"
 
