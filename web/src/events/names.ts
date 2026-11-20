@@ -1,4 +1,4 @@
-// events 탭 '2. 이벤트'의 '확정 이름 (정모)' 19개 + 잠정 1개(suggested_edit_rejected). 이 밖의 이름은 남기지 않는다.
+// events 탭 '2. 이벤트'의 이름. 확정 19개 + 잠정 1개(suggested_edit_rejected) + v0.4 초안 중 F2·F3에서 쓰는 것. 이 밖의 이름은 남기지 않는다.
 export const EVENT_NAMES = [
   // 퍼널 1~13단계
   "project_created",
@@ -21,6 +21,13 @@ export const EVENT_NAMES = [
   "ai_suggestion_kept",
   // 잠정(W4): 확정 목록에 없어 더했다. events 탭에 반영되면 이 주석을 지운다.
   "suggested_edit_rejected",
+  // 참여·원고(events 탭 v0.4 혜린 초안 11.20, F2·F3)
+  "chapter_added",
+  "invite_link_created",
+  "invite_link_rotated",
+  "invite_link_revoked",
+  "editor_link_opened",
+  "save_failed",
   // 체류
   "screen_entered",
   "screen_left",

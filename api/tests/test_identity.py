@@ -2,7 +2,6 @@
 
 import hashlib
 import uuid
-from dataclasses import dataclass
 from typing import Any
 
 import pytest
@@ -11,55 +10,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import Participant, RoleLink
+from tests.helpers import Book
+from tests.helpers import auth as _auth
+from tests.helpers import make_book as _make_book
+from tests.helpers import token_in as _token_in
 
 pytestmark = pytest.mark.db
-
-
-@dataclass
-class Book:
-    project_id: str
-    chapter_id: str
-    editor: str
-    author: str
-    designer: str
-    author_invite: dict[str, Any]
-
-
-def _auth(token: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {token}"}
-
-
-def _token_in(url: str) -> str:
-    return url.rsplit("/", 1)[-1]
-
-
-def _make_book(c: TestClient, title: str = "테스트 책") -> Book:
-    pid, cid = str(uuid.uuid4()), str(uuid.uuid4())
-    res = c.post(
-        "/projects",
-        json={
-            "id": pid,
-            "title": title,
-            "template_id": "essay",
-            "first_chapter_id": cid,
-            "anon_id": str(uuid.uuid4()),
-        },
-    )
-    assert res.status_code == 201, res.text
-    editor = res.json()["editor_token"]
-    tokens: dict[str, str] = {}
-    invites: dict[str, dict[str, Any]] = {}
-    for role in ("author", "designer"):
-        inv = c.post(f"/projects/{pid}/invites", json={"role": role}, headers=_auth(editor))
-        assert inv.status_code == 201, inv.text
-        invites[role] = inv.json()
-        joined = c.post(
-            f"/invites/{_token_in(inv.json()['url'])}/join",
-            json={"display_name": f"{role}님", "anon_id": str(uuid.uuid4())},
-        )
-        assert joined.status_code == 201, joined.text
-        tokens[role] = joined.json()["participant_token"]
-    return Book(pid, cid, editor, tokens["author"], tokens["designer"], invites["author"])
 
 
 @pytest.fixture
@@ -147,6 +103,7 @@ def test_my_projects_lists_only_editor_tokens(db_client: TestClient, book: Book)
     assert {c["id"] for c in cards} == {book.project_id, other.project_id}
     card = next(c for c in cards if c["id"] == book.project_id)
     assert card["stage"] == "editing"
+    assert card["first_chapter_id"] == book.chapter_id
     assert card["todo_count"] == 0
     assert sorted(p["role"] for p in card["participants"]) == ["author", "designer", "editor"]
 
@@ -165,6 +122,7 @@ def test_check_invite_shows_role_and_actions(db_client: TestClient, book: Book) 
     res = db_client.get(f"/invites/{_token_in(book.author_invite['url'])}").json()
     assert res["state"] == "valid"
     assert res["project_title"] == "테스트 책"
+    assert res["project_id"] == book.project_id
     assert res["role"] == "author"
     assert "edit_manuscript" in res["can"]
     assert "change_layout" not in res["can"]
@@ -326,6 +284,25 @@ PERMISSION_TABLE: list[tuple[str, str, str, dict[str, Any] | None, set[str]]] = 
         {"layout": {"font_size": 11}},
         {"editor", "designer"},
     ),
+    # F3: 장·원고·검토본. 본문의 "{new}"는 부를 때마다 새 UUID로 바꿔요.
+    ("A-11", "GET", "/chapters/{c}", None, {"editor", "author", "designer"}),
+    (
+        "A-12",
+        "PUT",
+        "/chapters/{c}/doc",
+        {"doc": {"type": "doc", "content": []}, "base_version": 1},
+        {"author"},
+    ),
+    (
+        "A-13",
+        "POST",
+        "/projects/{p}/chapters",
+        {"id": "{new}", "title": "2장"},
+        {"editor", "author"},
+    ),
+    ("A-14", "POST", "/chapters/{c}/status", {"to": "review_requested"}, {"author"}),
+    ("A-29", "GET", "/chapters/{c}/snapshots", None, {"editor", "author", "designer"}),
+    ("A-29", "POST", "/chapters/{c}/snapshots", {"label": "1차 검토"}, {"editor"}),
 ]
 
 
@@ -346,7 +323,9 @@ def test_s05_permission_table(
 ) -> None:
     b = _make_book(db_client)
     token = {"editor": b.editor, "author": b.author, "designer": b.designer}[role]
-    url = path.format(p=b.project_id, i=b.author_invite["id"])
+    url = path.format(p=b.project_id, i=b.author_invite["id"], c=b.chapter_id)
+    if body is not None:
+        body = {k: (str(uuid.uuid4()) if v == "{new}" else v) for k, v in body.items()}
     res = db_client.request(method, url, json=body, headers=_auth(token))
     if role in allowed:
         assert res.status_code < 300, f"{need} {role}: {res.text}"

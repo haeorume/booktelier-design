@@ -23,7 +23,7 @@ from app.schemas.invite import Invite, InviteCheckOut, InviteRotateOut, JoinIn, 
 
 router = APIRouter(tags=["invites"])
 
-_UNUSABLE = InviteCheckOut(state="unusable", project_title=None, role=None, can=[])
+_UNUSABLE = InviteCheckOut(state="unusable", project_id=None, project_title=None, role=None, can=[])
 
 
 def _usable(db: DbSession, token: str) -> RoleLink | None:
@@ -42,6 +42,7 @@ def check_invite(token: str, db: DbSession) -> InviteCheckOut:
         return _UNUSABLE
     return InviteCheckOut(
         state="valid",
+        project_id=project.id,
         project_title=project.title,
         role="author" if link.role == "author" else "designer",
         can=actions_for(link.role),

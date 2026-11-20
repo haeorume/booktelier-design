@@ -28,6 +28,9 @@ PROTECTED: list[tuple[str, str, dict[str, Any] | None]] = [
     ("POST", f"/projects/{PROJECT}/chapters", {"id": CHAPTER, "title": "2장"}),
     ("POST", f"/chapters/{CHAPTER}/status", {"to": "review_requested"}),
     ("PATCH", f"/projects/{PROJECT}/layout", {"layout": {"line_height": 1.8}}),
+    ("GET", f"/chapters/{CHAPTER}/snapshots", None),
+    ("POST", f"/chapters/{CHAPTER}/snapshots", {"label": "1차"}),
+    ("GET", f"/snapshots/{CHAPTER}", None),
 ]
 
 
@@ -89,3 +92,24 @@ def test_missing_token_is_401(
     res = client.request(method, path, json=body)
     assert res.status_code == 401
     assert res.json() == {"code": "unauthorized", "message": "토큰이 없어요"}
+
+
+def test_chapter_doc_round_trips_without_nulls() -> None:
+    # 화면이 보낸 원고와 서버가 돌려주는 원고는 같은 모양이에요(빈 선택 칸을 null로 채우지 않음)
+    from app.schemas.common import ChapterDoc
+
+    doc = {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {"id": "p1"},
+                "content": [
+                    {"type": "text", "text": "가"},
+                    {"type": "text", "text": "나", "marks": [{"type": "bold"}]},
+                ],
+            },
+            {"type": "paragraph", "attrs": {"id": "p2"}},
+        ],
+    }
+    assert ChapterDoc.model_validate(doc).model_dump(mode="json") == doc

@@ -14,15 +14,20 @@ TemplateId = Literal["novel", "essay", "practical"]  # D-11
 ChapterStatus = Literal["editing", "review_requested", "reviewed"]
 
 
+def _is_none(v: object) -> bool:
+    return v is None
+
+
+# 원고 문서의 선택 칸은 값이 없으면 응답에서도 빼요. 화면이 보낸 원고와 받은 원고가 같은 모양이어야 해요.
 class TextMark(BaseModel):
     type: str
-    attrs: dict[str, Any] | None = None
+    attrs: dict[str, Any] | None = Field(default=None, exclude_if=_is_none)
 
 
 class TextNode(BaseModel):
     type: Literal["text"]
     text: str
-    marks: list[TextMark] | None = None
+    marks: list[TextMark] | None = Field(default=None, exclude_if=_is_none)
 
 
 class ParagraphAttrs(BaseModel):
@@ -32,7 +37,7 @@ class ParagraphAttrs(BaseModel):
 class ParagraphNode(BaseModel):
     type: Literal["paragraph"]
     attrs: ParagraphAttrs
-    content: list[TextNode] | None = None
+    content: list[TextNode] | None = Field(default=None, exclude_if=_is_none)
 
 
 class ChapterDoc(BaseModel):

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { bookDeps, currentParticipant, getClientSession, joinWithLink, myParticipant } from "@/data";
+import { bookDeps, getClientSession } from "@/data";
 import { ROLE_LABEL } from "@/domain/labels";
 import { setTrackContext, track } from "@/events";
 import { ROLES, type PanelLayout, type Project, type Role, type RoleLink } from "@/types";
@@ -52,12 +52,13 @@ export function DevBar() {
     let alive = true;
     const deps = bookDeps();
     (async () => {
-      const project = await deps.repo.getProject(projectId);
-      const me = await currentParticipant(deps, projectId);
-      const joined = Object.fromEntries(
-        await Promise.all(ROLES.map(async (r) => [r, !!(await myParticipant(deps, projectId, r))] as const)),
-      ) as Record<Role, boolean>;
-      const links = await deps.repo.listRoleLinks(projectId);
+      const { library } = deps;
+      const project = await library.getProject(projectId).catch(() => null);
+      const me = await library.me(projectId).catch(() => null);
+      const mine = await library.myParticipants(projectId).catch(() => ({}));
+      const joined = Object.fromEntries(ROLES.map((r) => [r, r in mine])) as Record<Role, boolean>;
+      // 링크 목록은 편집자만 읽는다(A-07). 다른 역할로 있으면 빈 목록.
+      const links = await library.listRoleLinks(projectId).catch(() => []);
       if (alive) setState({ projectId, project, current: me?.role ?? null, joined, links });
     })();
     return () => {
@@ -70,10 +71,10 @@ export function DevBar() {
 
   async function switchTo(role: Role) {
     if (!bar) return;
-    const deps = bookDeps();
-    const mine = await myParticipant(deps, bar.projectId, role);
+    const { library } = bookDeps();
+    const mine = (await library.myParticipants(bar.projectId))[role];
     if (mine) {
-      deps.session.setCurrentParticipantId(bar.projectId, mine.id);
+      library.switchParticipant(bar.projectId, mine.id);
       return;
     }
     if (role !== "editor") setJoining(role);
@@ -83,7 +84,8 @@ export function DevBar() {
     if (!bar) return;
     const link = bar.links.find((l) => l.role === role && !l.revoked_at);
     if (!link) return;
-    const { participant, created } = await joinWithLink(bookDeps(), link, name);
+    const token = link.url.split("/").pop() ?? "";
+    const { participant, created } = await bookDeps().library.joinInvite(token, name);
     setTrackContext({ participant_id: participant.id, project_id: bar.projectId, role });
     if (created) track("participant_joined", { role, via: "dev_bar" });
     setJoining(null);

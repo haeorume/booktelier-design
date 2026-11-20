@@ -97,6 +97,7 @@ class ProjectCard(BaseModel):
     participants: list[ParticipantBrief]
     todo_count: int  # 확인할 일 수. 서버가 first_view로 세요(FR-02 ②)
     updated_at: datetime
+    first_chapter_id: UUID | None  # 카드를 누르면 여는 장(N-09: 없으면 첫 장)
 
 
 # A-10 책 열기
@@ -149,3 +150,21 @@ class LayoutOut(BaseModel):
     layout: Layout
     layout_updated_by: UUID
     layout_updated_at: datetime
+
+
+# A-29 검토본
+class SnapshotCreateIn(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+
+
+class SnapshotSummary(BaseModel):
+    id: UUID
+    chapter_id: UUID
+    version: int
+    label: str
+    created_by: UUID
+    created_at: datetime
+
+
+class Snapshot(SnapshotSummary):
+    doc: ChapterDoc

@@ -29,3 +29,19 @@
 .reviewSlot[hidden] {
   display: none;
 }
+
+/* 원고 저장 상태(L-42). 저장 실패·연결 끊김이면 '다시 시도'가 붙는다(NFR-06). */
+.saveState {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: -0.75rem 0 1rem;
+}
+
+.saveState[data-state="failed"],
+.saveState[data-state="offline"] {
+  color: var(--foreground);
+  font-weight: 600;
+}

@@ -27,10 +27,13 @@ export interface LocalRepositoryOptions {
   now?: () => Date;
 }
 
+/** 1차는 브라우저가 링크 token을 만들어 원문 그대로 둔다(서버는 D-37). */
+type LocalRoleLink = RoleLink & { token: Uuid };
+
 interface Rows {
   projects: Project;
   chapters: Chapter;
-  role_links: RoleLink;
+  role_links: LocalRoleLink;
   participants: Participant;
   ai_suggestions: AiSuggestion;
   suggested_edits: SuggestedEdit;
@@ -43,6 +46,22 @@ type Collection = keyof Rows;
 type WithId = { [C in Collection]: Rows[C] extends { id: string } ? C : never }[Collection];
 
 const defaultNewId = () => crypto.randomUUID();
+
+/**
+ * 1차에 저장된 초대 링크는 { token, project_id, role, revoked_at }뿐이다. 읽을 때 새 모양으로 채운다
+ * (id는 token, 주소는 /j/token). 그래야 옛 책의 공유 창이 깨지지 않는다(Codex 검수 11.21).
+ */
+export function upgradeRoleLink(row: Partial<LocalRoleLink> & { token: Uuid; project_id: Uuid; role: RoleLink["role"] }): LocalRoleLink {
+  return {
+    id: row.id ?? row.token,
+    token: row.token,
+    project_id: row.project_id,
+    role: row.role,
+    url: row.url ?? `/j/${row.token}`,
+    revoked_at: row.revoked_at ?? null,
+    created_at: row.created_at ?? new Date(0).toISOString(),
+  };
+}
 
 /** 같은 사람에게 같은 문장·같은 수정안으로 뜬 제안인가(FR-28 ②). */
 function sameSuggestion(a: AiSuggestion, b: AiSuggestion): boolean {
@@ -155,13 +174,22 @@ export function createLocalStorageRepository(options: LocalRepositoryOptions): R
     },
 
     async createRoleLink(projectId, role) {
-      return insert("role_links", { token: newId(), project_id: projectId, role, revoked_at: null });
+      const token = newId();
+      return insert("role_links", { id: newId(), token, project_id: projectId, role, url: `/j/${token}`, revoked_at: null, created_at: nowIso() });
     },
     async findRoleLink(token) {
-      return read("role_links").find((l) => l.token === token) ?? null;
+      const found = read("role_links").find((l) => l.token === token);
+      return found ? upgradeRoleLink(found) : null;
     },
     async listRoleLinks(projectId) {
-      return where("role_links", (l) => l.project_id === projectId);
+      return where("role_links", (l) => l.project_id === projectId).map(upgradeRoleLink);
+    },
+    async revokeRoleLink(id) {
+      const link = read("role_links").map(upgradeRoleLink).find((l) => l.id === id) ?? null;
+      if (!link) throw new NotFoundError("초대 링크", id);
+      // 1차 행은 id가 없어 token으로 찾아 바꾼다.
+      write("role_links", read("role_links").map((l) => (upgradeRoleLink(l).id === id ? { ...link, revoked_at: link.revoked_at ?? nowIso() } : l)));
+      return { ...link, revoked_at: link.revoked_at ?? nowIso() };
     },
     async createParticipant(input) {
       return insert("participants", { id: newId(), ...input });

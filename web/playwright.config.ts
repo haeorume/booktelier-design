@@ -33,6 +33,8 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run dev",
+    // 1차 e2e는 서버 없이 브라우저 저장 구현으로 돈다(안전망, D-20). 서버로 도는 e2e는 F4에서 따로 붙인다.
+    env: { NEXT_PUBLIC_DATA_SOURCE: "local" },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -1,3 +1,4 @@
+import { TEMPLATES } from "@/domain/templates";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createBook,
@@ -35,11 +36,11 @@ describe("createBook: 새 책 만들기(FR-01)", () => {
     const { project, chapter, editor, links } = await createBook(deps, { title: "  파리 일기 ", template_id: "essay" });
     expect(project.title).toBe("파리 일기");
     expect(project.template_id).toBe("essay");
-    expect(project.layout).toEqual({ trim: "130x200", margin: 22, line_height: 1.7 });
+    expect(project.layout).toEqual(TEMPLATES.essay.layout);
     expect(editor).toMatchObject({ role: "editor", project_id: project.id, anon_id: deps.identity.getAnonId() });
     expect(links.map((l) => l.role)).toEqual(["author", "designer"]);
-    expect(new Set(links.map((l) => l.token)).size).toBe(2);
-    for (const l of links) expect(l.token).toMatch(UUID);
+    expect(new Set(links.map((l) => l.url)).size).toBe(2);
+    for (const l of links) expect(l.url).toMatch(/^\/j\/[0-9a-f-]{36}$/);
     expect(chapter).toMatchObject({ project_id: project.id, order: 1, status: "editing" });
   });
 

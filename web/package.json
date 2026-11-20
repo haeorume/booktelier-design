@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
+    "test:e2e:server": "playwright test -c playwright.server.config.ts",
     "check": "npm run lint && npm run typecheck && npm run test && node ../scripts/check-invariants.mjs",
     "gen:api": "openapi-typescript ../api/openapi.json -o src/types/api.ts"
   },

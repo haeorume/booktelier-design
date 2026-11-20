@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { changeTemplate, changeValue, LINE_HEIGHT, MARGIN, trimLabel, TRIM_OPTIONS, type LayoutChange } from "@/domain/layout";
+import {
+  changeTemplate,
+  changeValue,
+  FONT_OPTIONS,
+  fontLabel,
+  LAYOUT_FIELD_LABEL,
+  NUMBER_RANGE,
+  numberValue,
+  trimLabel,
+  TRIM_OPTIONS,
+  type LayoutChange,
+  type NumberField,
+} from "@/domain/layout";
 import { ROLE_LABEL } from "@/domain/labels";
 import { can } from "@/domain/permissions";
 import { TEMPLATE_ORDER, TEMPLATES } from "@/domain/templates";
@@ -29,7 +41,7 @@ function sinceLabel(iso: string | null, now = Date.now()): string {
 }
 
 /**
- * 조판 설정(WS-04, FR-16). 편집자·디자이너는 템플릿·판형·여백·행간을 바꾸고, 작가는 값만 글자로 본다(D-15, 정할 것 16).
+ * 조판 설정(WS-04, FR-16, FR-45). 편집자·디자이너는 템플릿·판형·여백 4개·제본 여백·행간·본문 글꼴·크기를 바꾸고, 작가는 값만 글자로 본다(D-15, 정할 것 16).
  * 템플릿을 바꾸면 확인 창 뒤 그 템플릿 기본값으로 돌아간다(④). 마지막으로 바꾼 사람과 시각이 위에 보인다(⑤).
  */
 export function LayoutPanel({ project, role, participants, onPreview, onCommit, onClose }: Props) {
@@ -46,13 +58,13 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
   const whoName = who ? (who.role === "editor" ? ROLE_LABEL.editor : who.display_name) : null;
   const current = { template_id: project.template_id, layout: project.layout };
 
-  function preview(field: "margin" | "line_height", value: number) {
+  function preview(field: NumberField, value: number) {
     const next = changeValue({ template_id: project.template_id, layout: draft }, field, value).layout;
     setDraft(next);
     onPreview(next);
   }
 
-  function commit(field: "trim" | "margin" | "line_height", value: string | number) {
+  function commit(field: "trim" | "font_family" | NumberField, value: string | number) {
     const change = changeValue(current, field, value);
     onPreview(null);
     if (change.before === change.after) return;
@@ -80,9 +92,17 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
           <dt>판형</dt>
           <dd>{trimLabel(project.layout.trim)}</dd>
           <dt>여백</dt>
-          <dd>{project.layout.margin}mm</dd>
+          <dd>
+            위 {project.layout.margin.top} · 아래 {project.layout.margin.bottom} · 안쪽 {project.layout.margin.inner} · 바깥쪽 {project.layout.margin.outer}mm
+          </dd>
+          <dt>제본 여백</dt>
+          <dd>{project.layout.binding}mm</dd>
           <dt>행간</dt>
           <dd>{project.layout.line_height}</dd>
+          <dt>본문</dt>
+          <dd>
+            {fontLabel(project.layout.font_family)} {project.layout.font_size}pt
+          </dd>
         </dl>
       ) : (
         <div className={styles.controls}>
@@ -113,29 +133,35 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
             </select>
           </label>
 
-          <Slider
-            label="여백"
-            unit="mm"
-            range={MARGIN}
-            value={draft.margin}
-            onInput={(v) => preview("margin", v)}
-            onCommit={(v) => commit("margin", v)}
-          />
-          <Slider
-            label="행간"
-            unit=""
-            range={LINE_HEIGHT}
-            value={draft.line_height}
-            onInput={(v) => preview("line_height", v)}
-            onCommit={(v) => commit("line_height", v)}
-          />
+          <label className={styles.label}>
+            본문 글꼴
+            <select className={styles.select} value={project.layout.font_family} onChange={(e) => commit("font_family", e.target.value)}>
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.family} value={f.family}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {SLIDERS.map(([field, unit]) => (
+            <Slider
+              key={field}
+              label={LAYOUT_FIELD_LABEL[field]}
+              unit={unit}
+              range={NUMBER_RANGE[field]}
+              value={numberValue(draft, field)}
+              onInput={(v) => preview(field, v)}
+              onCommit={(v) => commit(field, v)}
+            />
+          ))}
         </div>
       )}
 
       {confirming && (
         <ConfirmDialog
           title="템플릿 바꾸기"
-          body={`조절한 값이 처음 값으로 돌아가요. ${TEMPLATES[confirming].label} 템플릿의 판형·여백·행간으로 바꿀까요?`}
+          body={`조절한 값이 처음 값으로 돌아가요. ${TEMPLATES[confirming].label} 템플릿의 조판 값으로 바꿀까요?`}
           confirmLabel="바꾸기"
           onCancel={() => setConfirming(null)}
           onConfirm={() => {
@@ -149,6 +175,16 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
     </aside>
   );
 }
+
+const SLIDERS: [NumberField, string][] = [
+  ["margin_top", "mm"],
+  ["margin_bottom", "mm"],
+  ["margin_inner", "mm"],
+  ["margin_outer", "mm"],
+  ["binding", "mm"],
+  ["line_height", ""],
+  ["font_size", "pt"],
+];
 
 /** 슬라이더와 숫자 입력(CS-15). 끄는 동안은 미리 보기만, 손을 떼거나 숫자를 다 넣으면 한 번 저장한다. */
 function Slider({
