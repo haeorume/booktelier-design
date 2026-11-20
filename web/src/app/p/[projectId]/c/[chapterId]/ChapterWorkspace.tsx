@@ -11,7 +11,7 @@ import { SharedTab } from "@/components/review/SharedTab";
 import { usePanelLayout } from "@/components/hooks";
 import { LayoutPanel } from "@/components/LayoutPanel";
 import { SnapshotDialog } from "@/components/SnapshotDialog";
-import { bookDeps, hasProjectEvent, type ChapterInfo, type Ctx } from "@/data";
+import { bookDeps, hasProjectEvent, type ChapterInfo, type Ctx, type PresentPerson } from "@/data";
 import type { LayoutChange } from "@/domain/layout";
 import { can } from "@/domain/permissions";
 import { nextChapterStatus, type ChapterAction } from "@/domain/transitions";
@@ -19,6 +19,7 @@ import { track } from "@/events";
 import type { AiSuggestion, Chapter, ChapterDoc, Layout, Participant, Project, Snapshot } from "@/types";
 import { NOT_SAVED, useAiSuggestions } from "./useAiSuggestions";
 import { SAVE_LABEL, useManuscriptSave } from "./useManuscriptSave";
+import { useLive } from "./useLive";
 import { useShared } from "./useShared";
 import styles from "./page.module.css";
 
@@ -29,6 +30,12 @@ interface Props {
   participants: Participant[];
   onChapterChange: (chapter: ChapterInfo) => void;
   onProjectChange: (project: Project) => void;
+  /** 다른 곳에서 장이 더해지거나 상태가 바뀌었다(F4, A-31) */
+  onChapters: (changed: ChapterInfo[]) => void;
+  /** 지금 이 책을 연 다른 사람(F4, A-31) */
+  onPresence: (people: PresentPerson[]) => void;
+  /** 이 장 안에서 다른 사람의 작업 위치로 간다(FR-47 ②) */
+  jump: { paragraphId: string; n: number } | null;
   layoutOpen: boolean;
   onLayoutOpenChange: (open: boolean) => void;
   snapshotsOpen: boolean;
@@ -42,7 +49,7 @@ interface Props {
  * 함께 봄(useShared)을 이어 붙인다(리뷰 R-3). 보내기 전 AI 제안은 주인 것만 온다(FR-23, D-29).
  */
 export function ChapterWorkspace(props: Props) {
-  const { project, chapter, me, participants, onChapterChange, onProjectChange, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
   const panelLayout = usePanelLayout();
   const deps = useMemo(() => bookDeps(), []);
   const ctx: Ctx = useMemo(
@@ -63,7 +70,8 @@ export function ChapterWorkspace(props: Props) {
   const panel = useRef<ReviewPanelHandle>(null);
   const firstEditChecked = useRef(false);
 
-  const save = useManuscriptSave({ deps, projectId: project.id, chapterId: chapter.id, initialDoc: chapter.doc, initialVersion: chapter.version, editable, onConflict });
+  const redraw = useCallback((next: ChapterDoc) => editor.current?.syncDoc(next) ?? false, []);
+  const save = useManuscriptSave({ deps, projectId: project.id, chapterId: chapter.id, initialDoc: chapter.doc, initialVersion: chapter.version, editable, onConflict, redraw });
 
   const firstEdit = useCallback(
     async (via: "direct" | "apply" | "accept") => {
@@ -90,6 +98,26 @@ export function ChapterWorkspace(props: Props) {
   const shared = useShared({ deps, ctx, doc, participants, save, onConflict });
   const { reconcile, rememberApplied, setNotice, markChanged } = ai;
   const { relocate } = shared;
+
+  // 함께 작업(F4): 내 위치 알리기와 바뀐 것 받기(A-30·31, D-31)
+  useLive({ deps, project, chapterId: chapter.id, editor, save, reloadShared: shared.reload, onChapters, onProjectChange, onPresence, onConflict });
+
+  // 작업 위치로 가기(FR-47 ②). 같은 장이면 jump로, 다른 장에서 왔으면 주소의 #para=로 문단을 받는다.
+  // 편집기가 아직 그려지지 않았을 수 있어 잠깐 동안 다시 시도한다.
+  useEffect(() => {
+    let target = jump?.paragraphId ?? null;
+    if (!jump && window.location.hash.startsWith("#para=")) {
+      target = decodeURIComponent(window.location.hash.slice("#para=".length));
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+    if (!target) return;
+    const id = target;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      if (editor.current?.scrollToParagraph(id) || ++tries > 20) window.clearInterval(timer);
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [jump]);
 
   const onDocChange = useCallback(
     (next: ChapterDoc, changed: string[], source: ChangeSource) => {

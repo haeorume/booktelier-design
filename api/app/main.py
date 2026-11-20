@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.errors import ErrorOut, install_error_handlers
-from app.routers import chapters, health, invites, me, projects, shared, suggestions
+from app.routers import chapters, health, invites, live, me, projects, shared, suggestions
 
 
 def create_app() -> FastAPI:
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
         invites.router,
         suggestions.router,
         shared.router,
+        live.router,
     ):
         app.include_router(r)
     return app

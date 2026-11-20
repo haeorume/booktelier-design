@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChapterList } from "@/components/ChapterList";
 import { useSessionVersion } from "@/components/hooks";
 import { MessageView, NOT_FOUND } from "@/components/MessageView";
 import { ShareDialog } from "@/components/ShareDialog";
 import { TopBar } from "@/components/TopBar";
-import { bookDeps, type ChapterInfo } from "@/data";
+import { bookDeps, type ChapterInfo, type PresentPerson } from "@/data";
+import { mergeChapters } from "@/domain/live";
 import { can } from "@/domain/permissions";
 import { setTrackContext, track } from "@/events";
 import type { Chapter, Participant, Project, Role, RoleLink } from "@/types";
@@ -43,6 +44,10 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   // 원고 저장이 409로 막혀 최신 원고로 다시 그려야 할 때 늘린다(C-4). 편집 상태를 새로 시작한다.
   const [reloads, setReloads] = useState(0);
   const router = useRouter();
+  /** 지금 이 책을 연 다른 사람(F4, A-31). 서버가 없으면 null(1차 데모는 참여자를 모두 보여 준다). */
+  const [present, setPresent] = useState<PresentPerson[] | null>(() => (bookDeps().live ? [] : null));
+  /** 같은 장 안에서 다른 사람의 작업 위치로 갈 때. n은 같은 문단을 다시 눌러도 움직이게 한다. */
+  const [jump, setJump] = useState<{ paragraphId: string; n: number } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -112,6 +117,62 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
     setView((v) => (v.value.kind === "ready" && v.value.project.id === next.id ? { ...v, value: { ...v.value, project: next } } : v));
   }, []);
 
+  /** 다른 곳에서 장이 더해지거나 상태가 바뀌었다(A-31). 원고·버전은 편집기가 따로 받는다(useLive). */
+  const onChapters = useCallback((changed: ChapterInfo[]) => {
+    setView((v) => {
+      const ready = v.value;
+      if (ready.kind !== "ready") return v;
+      const current = changed.find((c) => c.id === ready.chapter.id);
+      return {
+        ...v,
+        value: {
+          ...ready,
+          chapters: mergeChapters(ready.chapters, changed),
+          chapter: current ? { ...ready.chapter, status: current.status, title: current.title } : ready.chapter,
+        },
+      };
+    });
+  }, []);
+
+  /** 접속자를 받는다. 새로 들어온 사람이 있으면 참여자 목록도 다시 읽는다(의견 카드의 이름). */
+  const onPresence = useCallback(
+    (people: PresentPerson[]) => {
+      setPresent(people);
+      setView((v) => {
+        if (v.value.kind !== "ready") return v;
+        const known = new Set(v.value.participants.map((p) => p.id));
+        if (people.some((p) => !known.has(p.participant_id))) {
+          void bookDeps()
+            .library.listParticipants(projectId)
+            .then((participants) => setView((w) => (w.value.kind === "ready" ? { ...w, value: { ...w.value, participants } } : w)))
+            .catch(() => undefined);
+        }
+        return v;
+      });
+    },
+    [projectId],
+  );
+
+  /** 아바타를 눌러 그 사람의 작업 위치로 간다(FR-47 ②, QA-F10). 위치 자체는 이벤트로 남기지 않는다. */
+  const onJump = useCallback(
+    (person: PresentPerson) => {
+      if (!person.chapter_id || view.value.kind !== "ready") return;
+      track("presence_jumped", { target_role: person.role });
+      if (person.chapter_id === view.value.chapter.id) {
+        if (person.paragraph_id) setJump((j) => ({ paragraphId: person.paragraph_id!, n: (j?.n ?? 0) + 1 }));
+        return;
+      }
+      const hash = person.paragraph_id ? `#para=${encodeURIComponent(person.paragraph_id)}` : "";
+      router.push(`/p/${projectId}/c/${person.chapter_id}${hash}`);
+    },
+    [view.value, projectId, router],
+  );
+
+  const chapterTitles = useMemo(
+    () => new Map(view.value.kind === "ready" ? view.value.chapters.map((c) => [c.id, c.title]) : []),
+    [view.value],
+  );
+
   const closeShare = useCallback(() => setSharing(false), []);
   const current = view.key === key || view.value.kind === "ready" ? view.value : { kind: "loading" as const };
 
@@ -128,6 +189,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         chapterTitle={chapter.title}
         participants={participants}
         currentId={me.id}
+        present={present}
+        chapterTitles={chapterTitles}
+        onJump={onJump}
         layoutOpen={layoutOpen}
         onShare={() => setSharing(true)}
         onSnapshots={() => setSnapshotsOpen(true)}
@@ -144,6 +208,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
           participants={participants}
           onChapterChange={onChapterChange}
           onProjectChange={onProjectChange}
+          onChapters={onChapters}
+          onPresence={onPresence}
+          jump={jump}
           layoutOpen={layoutOpen}
           onLayoutOpenChange={setLayoutOpen}
           snapshotsOpen={snapshotsOpen}

@@ -110,6 +110,7 @@ def create(db: Session, *, project_id: uuid.UUID, chapter_id: uuid.UUID, title: 
         sort_order=(last or 0) + 1,
         title=title,
         doc=EMPTY_DOC,
+        updated_at=now,  # A-31이 새 장을 찾을 수 있게 서버 시각으로(now()는 트랜잭션 시작 시각)
     )
     db.add(chapter)
     try:

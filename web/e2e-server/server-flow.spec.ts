@@ -133,6 +133,9 @@ test("다른 탭이 먼저 저장해 409가 나면 최신 원고로 다시 그�
   const author = await freshPage(browser);
   await join(author, url, "김작가");
   const second = await author.context().newPage();
+  // 함께 작업(F4)이 둘째 탭에 최신 원고를 먼저 가져오면 409가 나지 않거나, 다시 그리기 전에 아래 기다림이 끝난다.
+  // 이 테스트는 409 복구를 보려는 것이라 둘째 탭의 바뀐 것 받기(A-31)를 막는다. 받아서 반영하는 쪽은 two-browsers.spec.ts.
+  await second.route("**/changes*", (route) => route.abort());
   await second.goto(author.url());
   await expect(second.getByTestId("manuscript")).toBeVisible({ timeout: NAVIGATE_MS });
 

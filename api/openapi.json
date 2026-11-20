@@ -252,6 +252,62 @@
         "title": "ApplyIn",
         "type": "object"
       },
+      "ChangesOut": {
+        "description": "since 뒤에 바뀐 것. since가 없으면 장 전부와 조판 값.\n\n서버는 since보다 몇 초 앞부터 보므로 같은 변경이 두 번 올 수 있어요. 화면은 version으로 걸러요.",
+        "properties": {
+          "chapters": {
+            "description": "원고·상태가 바뀌었거나 새로 생긴 장",
+            "items": {
+              "$ref": "#/components/schemas/ChapterSummary"
+            },
+            "title": "Chapters",
+            "type": "array"
+          },
+          "cursor": {
+            "description": "다음 요청의 since",
+            "format": "date-time",
+            "title": "Cursor",
+            "type": "string"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Layout"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "조판 값이 바뀌었으면 새 값, 아니면 null"
+          },
+          "presence": {
+            "description": "나를 뺀 지금 접속자와 각자 위치",
+            "items": {
+              "$ref": "#/components/schemas/Presence"
+            },
+            "title": "Presence",
+            "type": "array"
+          },
+          "shared_chapter_ids": {
+            "description": "의견·수정 제안이 바뀐 장(A-22를 다시 읽어요)",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Shared Chapter Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cursor",
+          "chapters",
+          "shared_chapter_ids",
+          "layout",
+          "presence"
+        ],
+        "title": "ChangesOut",
+        "type": "object"
+      },
       "Chapter": {
         "properties": {
           "doc": {
@@ -1382,6 +1438,95 @@
           "display_name"
         ],
         "title": "ParticipantBrief",
+        "type": "object"
+      },
+      "Presence": {
+        "description": "접속자 한 사람. 편집자는 이름 대신 '편집자'로 보여요(FR-19).",
+        "properties": {
+          "chapter_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter Id"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "paragraph_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paragraph Id"
+          },
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "editor",
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "seen_at": {
+            "format": "date-time",
+            "title": "Seen At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant_id",
+          "role",
+          "display_name",
+          "chapter_id",
+          "paragraph_id",
+          "seen_at"
+        ],
+        "title": "Presence",
+        "type": "object"
+      },
+      "PresenceIn": {
+        "description": "지금 보는 장과 문단(문단 단위, FR-47 ③). 이벤트로 쌓지 않아요.",
+        "properties": {
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "paragraph_id": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paragraph Id"
+          }
+        },
+        "required": [
+          "chapter_id"
+        ],
+        "title": "PresenceIn",
         "type": "object"
       },
       "Project": {
@@ -4570,6 +4715,104 @@
         ]
       }
     },
+    "/projects/{project_id}/changes": {
+      "get": {
+        "description": "세 역할 모두. 다른 사람의 보내기 전 AI 제안은 넣지 않아요(D-29).",
+        "operationId": "changes_projects__project_id__changes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "앞 응답의 cursor",
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "앞 응답의 cursor",
+              "title": "Since"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-31 바뀐 것 받기",
+        "tags": [
+          "live"
+        ]
+      }
+    },
     "/projects/{project_id}/chapters": {
       "post": {
         "description": "편집자·작가(Q-20, FR-15). 새 장은 원고가 비어 있고 version 1, 순서는 마지막 다음이에요.",
@@ -4925,6 +5168,88 @@
         "summary": "A-15 조판 값 바꾸기",
         "tags": [
           "projects"
+        ]
+      }
+    },
+    "/projects/{project_id}/presence": {
+      "post": {
+        "description": "내 위치 알리기 전용. 접속자 목록은 A-31로 받아요(D-31). 세 역할 모두.",
+        "operationId": "report_presence_projects__project_id__presence_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresenceIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-30 접속자와 작업 위치",
+        "tags": [
+          "live"
         ]
       }
     },
