@@ -1,6 +1,257 @@
 {
   "components": {
     "schemas": {
+      "AcceptIn": {
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "AcceptIn",
+        "type": "object"
+      },
+      "AcceptOut": {
+        "properties": {
+          "chapter_version": {
+            "title": "Chapter Version",
+            "type": "integer"
+          },
+          "merged_ai_suggestion_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged Ai Suggestion Id"
+          },
+          "suggested_edit": {
+            "$ref": "#/components/schemas/SuggestedEdit"
+          }
+        },
+        "required": [
+          "suggested_edit",
+          "chapter_version",
+          "merged_ai_suggestion_id"
+        ],
+        "title": "AcceptOut",
+        "type": "object"
+      },
+      "AiActionOut": {
+        "properties": {
+          "chapter_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter Version"
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/AiSuggestion"
+          }
+        },
+        "required": [
+          "suggestion",
+          "chapter_version"
+        ],
+        "title": "AiActionOut",
+        "type": "object"
+      },
+      "AiSuggestion": {
+        "description": "보내기 전까지 주인만 봐요(D-29).",
+        "properties": {
+          "alternatives": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Alternatives",
+            "type": "array"
+          },
+          "anchor": {
+            "$ref": "#/components/schemas/Anchor"
+          },
+          "base_version": {
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "spelling",
+              "spacing",
+              "notation",
+              "polish"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "original": {
+            "title": "Original",
+            "type": "string"
+          },
+          "owner_participant_id": {
+            "format": "uuid",
+            "title": "Owner Participant Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "replacement": {
+            "title": "Replacement",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "live_check",
+              "chapter_review"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "applied",
+              "dismissed",
+              "sent",
+              "merged",
+              "stale"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target_role": {
+            "enum": [
+              "editor",
+              "author",
+              "designer"
+            ],
+            "title": "Target Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "chapter_id",
+          "owner_participant_id",
+          "anchor",
+          "original",
+          "replacement",
+          "alternatives",
+          "kind",
+          "reason",
+          "evidence",
+          "source",
+          "target_role",
+          "base_version",
+          "status",
+          "created_at",
+          "decided_at"
+        ],
+        "title": "AiSuggestion",
+        "type": "object"
+      },
+      "Anchor": {
+        "description": "문단 id + 서식 제외 텍스트 기준 글자 위치. start 포함, end 제외, UTF-16 단위(D-19).",
+        "properties": {
+          "end": {
+            "minimum": 0.0,
+            "title": "End",
+            "type": "integer"
+          },
+          "paragraph_id": {
+            "minLength": 1,
+            "title": "Paragraph Id",
+            "type": "string"
+          },
+          "start": {
+            "minimum": 0.0,
+            "title": "Start",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "paragraph_id",
+          "start",
+          "end"
+        ],
+        "title": "Anchor",
+        "type": "object"
+      },
+      "ApplyIn": {
+        "description": "choice 0은 수정안, 1·2는 대안(FR-27 ①).",
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "choice": {
+            "default": 0,
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Choice",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "ApplyIn",
+        "type": "object"
+      },
       "Chapter": {
         "properties": {
           "doc": {
@@ -193,6 +444,216 @@
           "updated_at"
         ],
         "title": "ChapterSummary",
+        "type": "object"
+      },
+      "Comment": {
+        "properties": {
+          "ai_origin_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Origin Id"
+          },
+          "anchor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Anchor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "author_id": {
+            "format": "uuid",
+            "title": "Author Id",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "resolved_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "chapter_id",
+          "author_id",
+          "parent_id",
+          "anchor",
+          "original",
+          "body",
+          "status",
+          "ai_origin_id",
+          "created_at",
+          "resolved_at",
+          "resolved_by"
+        ],
+        "title": "Comment",
+        "type": "object"
+      },
+      "CommentIn": {
+        "properties": {
+          "anchor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Anchor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Original"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          }
+        },
+        "required": [
+          "id",
+          "body"
+        ],
+        "title": "CommentIn",
+        "type": "object"
+      },
+      "ConflictOut": {
+        "description": "409 여러 종류(AI 제안·수정 제안 처리). code로 화면이 안내를 골라요(C-3).\n\n- version_conflict: base_version이 최신이 아님. 이때만 latest(최신 장)가 와요(C-4).\n- source_changed: 원문이 먼저 바뀌었거나 지워짐\n- invalid_transition: 이미 처리된 제안\n- undo_unavailable: 바로 앞 동작이 아니라 실행 취소할 수 없음",
+        "properties": {
+          "code": {
+            "enum": [
+              "version_conflict",
+              "source_changed",
+              "invalid_transition",
+              "undo_unavailable"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Chapter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ConflictOut",
         "type": "object"
       },
       "DbHealthOut": {
@@ -636,6 +1097,31 @@
         "title": "LayoutPatchIn",
         "type": "object"
       },
+      "LiveCheckIn": {
+        "description": "원문은 보내지 않아요. 서버가 저장본을 읽어요(C-9).",
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "paragraph_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Paragraph Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "paragraph_ids",
+          "base_version"
+        ],
+        "title": "LiveCheckIn",
+        "type": "object"
+      },
       "Margins": {
         "description": "여백 4개(mm). 안쪽·바깥쪽은 펼침면 기준.",
         "properties": {
@@ -1057,6 +1543,11 @@
             "title": "Id",
             "type": "string"
           },
+          "start_with_sample": {
+            "default": false,
+            "title": "Start With Sample",
+            "type": "boolean"
+          },
           "template_id": {
             "enum": [
               "novel",
@@ -1160,6 +1651,53 @@
         "title": "ProjectListIn",
         "type": "object"
       },
+      "ReviewIn": {
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "ReviewIn",
+        "type": "object"
+      },
+      "ReviewOut": {
+        "description": "종류별 개수는 지금 원고에서 자리를 찾은 제안으로 세요(FR-21 ②, FR-22).",
+        "properties": {
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/AiSuggestion"
+            },
+            "title": "Suggestions",
+            "type": "array"
+          },
+          "summary": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "spelling",
+                "spacing",
+                "notation",
+                "polish"
+              ]
+            },
+            "title": "Summary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "summary",
+          "suggestions"
+        ],
+        "title": "ReviewOut",
+        "type": "object"
+      },
       "Running": {
         "description": "쪽 공통 설정: 쪽 번호와 머리말(FR-44).",
         "properties": {
@@ -1185,6 +1723,97 @@
           }
         },
         "title": "Running",
+        "type": "object"
+      },
+      "SendIn": {
+        "properties": {
+          "as": {
+            "enum": [
+              "comment",
+              "suggested_edit"
+            ],
+            "title": "As",
+            "type": "string"
+          },
+          "choice": {
+            "default": 0,
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Choice",
+            "type": "integer"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "as",
+          "text"
+        ],
+        "title": "SendIn",
+        "type": "object"
+      },
+      "SendOut": {
+        "description": "수정 제안이면 카드 하나(설명용 의견 없음, FR-29 ⑤).",
+        "properties": {
+          "comment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Comment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suggested_edit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SuggestedEdit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/AiSuggestion"
+          }
+        },
+        "required": [
+          "suggestion",
+          "comment",
+          "suggested_edit"
+        ],
+        "title": "SendOut",
+        "type": "object"
+      },
+      "SharedOut": {
+        "description": "자리는 지금 원고에서 다시 찾은 값이에요(NFR-05). 원문이 지워진 수정 제안은 source_deleted.",
+        "properties": {
+          "comments": {
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            },
+            "title": "Comments",
+            "type": "array"
+          },
+          "suggested_edits": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestedEdit"
+            },
+            "title": "Suggested Edits",
+            "type": "array"
+          }
+        },
+        "required": [
+          "comments",
+          "suggested_edits"
+        ],
+        "title": "SharedOut",
         "type": "object"
       },
       "Snapshot": {
@@ -1290,6 +1919,265 @@
         "title": "SnapshotSummary",
         "type": "object"
       },
+      "StyleRule": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "format": "uuid",
+            "title": "Created By",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "rule",
+              "keep"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "type",
+          "text",
+          "created_by",
+          "created_at"
+        ],
+        "title": "StyleRule",
+        "type": "object"
+      },
+      "StyleRuleIn": {
+        "properties": {
+          "text": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "rule",
+              "keep"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "StyleRuleIn",
+        "type": "object"
+      },
+      "SuggestedEdit": {
+        "properties": {
+          "ai_origin_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Origin Id"
+          },
+          "anchor": {
+            "$ref": "#/components/schemas/Anchor"
+          },
+          "author_id": {
+            "format": "uuid",
+            "title": "Author Id",
+            "type": "string"
+          },
+          "base_version": {
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "spelling",
+                  "spacing",
+                  "notation",
+                  "polish"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "original": {
+            "title": "Original",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "replacement": {
+            "title": "Replacement",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected",
+              "source_deleted"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "chapter_id",
+          "author_id",
+          "anchor",
+          "original",
+          "replacement",
+          "reason",
+          "kind",
+          "status",
+          "ai_origin_id",
+          "base_version",
+          "created_at",
+          "decided_at",
+          "decided_by"
+        ],
+        "title": "SuggestedEdit",
+        "type": "object"
+      },
+      "SuggestedEditIn": {
+        "properties": {
+          "anchor": {
+            "$ref": "#/components/schemas/Anchor"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "spelling",
+                  "spacing",
+                  "notation",
+                  "polish"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "original": {
+            "minLength": 1,
+            "title": "Original",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "replacement": {
+            "title": "Replacement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "anchor",
+          "original",
+          "replacement"
+        ],
+        "title": "SuggestedEditIn",
+        "type": "object"
+      },
       "TextMark": {
         "properties": {
           "attrs": {
@@ -1348,6 +2236,20 @@
         "title": "TextNode",
         "type": "object"
       },
+      "UndoIn": {
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "UndoIn",
+        "type": "object"
+      },
       "VersionConflictOut": {
         "description": "409. 최신 원고를 같이 줘요(C-4, D-30).",
         "properties": {
@@ -1371,6 +2273,29 @@
         ],
         "title": "VersionConflictOut",
         "type": "object"
+      },
+      "ViewIn": {
+        "properties": {
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_type": {
+            "enum": [
+              "comment",
+              "suggested_edit"
+            ],
+            "title": "Target Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_type",
+          "target_id"
+        ],
+        "title": "ViewIn",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -1387,6 +2312,480 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/ai-suggestions/{suggestion_id}/apply": {
+      "post": {
+        "description": "작가만(D-14). 서버가 원고에 반영하고 새 버전을 돌려줘요(D-30, S-08). 그사이 원고가 바뀌었으면 409.",
+        "operationId": "apply_ai_suggestions__suggestion_id__apply_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictOut"
+                }
+              }
+            },
+            "description": "그사이 원고나 제안이 바뀌었어요(code로 구분)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-20 AI 제안 적용",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/ai-suggestions/{suggestion_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_ai_suggestions__suggestion_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-20 AI 제안 무시",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/ai-suggestions/{suggestion_id}/keep": {
+      "post": {
+        "description": "표기 원칙에 유지 표현을 남기고 제안은 무효(FR-30).",
+        "operationId": "keep_ai_suggestions__suggestion_id__keep_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-20 AI 제안 이 표현 유지",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/ai-suggestions/{suggestion_id}/send": {
+      "post": {
+        "description": "편집자만(FR-29 ④). 수정 제안이면 이유·종류가 담긴 카드 하나(⑤).",
+        "operationId": "send_ai_suggestions__suggestion_id__send_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-21 AI 제안 보내기",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/ai-suggestions/{suggestion_id}/undo": {
+      "post": {
+        "description": "작가만. 바로 앞 동작일 때만 서버가 되돌려요(FR-27 ③, X-04).",
+        "operationId": "undo_ai_suggestions__suggestion_id__undo_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiActionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictOut"
+                }
+              }
+            },
+            "description": "그사이 원고나 제안이 바뀌었어요(code로 구분)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-20 AI 제안 실행 취소",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
     "/chapters/{chapter_id}": {
       "get": {
         "operationId": "get_chapter_chapters__chapter_id__get",
@@ -1462,6 +2861,188 @@
         "summary": "A-11 장 읽기",
         "tags": [
           "chapters"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/ai-suggestions": {
+      "get": {
+        "description": "내 제안만(다른 사람 것은 오지 않음, D-29). 지금 원고에 맞춰 자리를 다시 찾고, 원문이 사라진 대기 제안은 무효로 해요.",
+        "operationId": "list_mine_chapters__chapter_id__ai_suggestions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AiSuggestion"
+                  },
+                  "title": "Response List Mine Chapters  Chapter Id  Ai Suggestions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-19 내 AI 제안 목록",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/comments": {
+      "post": {
+        "description": "세 역할 모두(FR-32, D-14). 의견은 원고를 바꾸지 않아요.",
+        "operationId": "create_comment_chapters__chapter_id__comments_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-23 의견 남기기·답글",
+        "tags": [
+          "shared"
         ]
       }
     },
@@ -1561,6 +3142,316 @@
         "summary": "A-12 원고 저장",
         "tags": [
           "chapters"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/live-check": {
+      "post": {
+        "description": "작가가 입력을 멈추면 바뀐 문단만(D-18). 이번에 대기로 뜬 내 제안을 돌려줘요. 실패해도 입력은 막지 않아요(NFR-03).",
+        "operationId": "live_check_chapters__chapter_id__live_check_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveCheckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AiSuggestion"
+                  },
+                  "title": "Response Live Check Chapters  Chapter Id  Live Check Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictOut"
+                }
+              }
+            },
+            "description": "그사이 원고나 제안이 바뀌었어요(code로 구분)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-16 실시간 교정",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/review": {
+      "post": {
+        "description": "편집자가 눌러야만 돌고, 결과는 실행한 사람에게만 보여요(D-18, FR-21 ③). 바로 답해요(A-18 없음, F5 결정).",
+        "operationId": "chapter_review_chapters__chapter_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictOut"
+                }
+              }
+            },
+            "description": "그사이 원고나 제안이 바뀌었어요(code로 구분)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-17 장 검토 실행",
+        "tags": [
+          "ai"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/shared": {
+      "get": {
+        "description": "참여자 모두. 의견(답글 포함)과 수정 제안. '진행 중'(open)은 열린 의견과 대기 수정 제안만(L-63, FR-36).\n자리는 지금 원고에서 다시 찾아 돌려줘요(NFR-05).",
+        "operationId": "list_shared_chapters__chapter_id__shared_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "all",
+                "comment",
+                "suggested_edit"
+              ],
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "all",
+                "open"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-22 함께 봄 목록",
+        "tags": [
+          "shared"
         ]
       }
     },
@@ -1830,6 +3721,281 @@
         "summary": "A-14 장 상태 바꾸기",
         "tags": [
           "chapters"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/suggested-edits": {
+      "post": {
+        "description": "편집자만(FR-33, D-14). 이유는 비워도 돼요(Q-22).",
+        "operationId": "create_edit_chapters__chapter_id__suggested_edits_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestedEditIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestedEdit"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-25 수정 제안 남기기",
+        "tags": [
+          "shared"
+        ]
+      }
+    },
+    "/comments/{comment_id}/reopen": {
+      "post": {
+        "operationId": "reopen_comments__comment_id__reopen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Comment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-24 의견 다시 열기",
+        "tags": [
+          "shared"
+        ]
+      }
+    },
+    "/comments/{comment_id}/resolve": {
+      "post": {
+        "operationId": "resolve_comments__comment_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "comment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Comment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-24 의견 해결",
+        "tags": [
+          "shared"
         ]
       }
     },
@@ -2753,6 +4919,175 @@
         ]
       }
     },
+    "/projects/{project_id}/style-rules": {
+      "get": {
+        "operationId": "list_style_rules_projects__project_id__style_rules_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StyleRule"
+                  },
+                  "title": "Response List Style Rules Projects  Project Id  Style Rules Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-28 표기 원칙 목록",
+        "tags": [
+          "shared"
+        ]
+      },
+      "post": {
+        "description": "추가는 누구나(api-needs A-28). 수정·삭제는 편집자(FR-31, Could, 이번에는 없음).",
+        "operationId": "create_style_rule_projects__project_id__style_rules_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StyleRuleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StyleRule"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-28 표기 원칙 더하기",
+        "tags": [
+          "shared"
+        ]
+      }
+    },
     "/snapshots/{snapshot_id}": {
       "get": {
         "operationId": "get_snapshot_snapshots__snapshot_id__get",
@@ -2828,6 +5163,264 @@
         "summary": "A-29 검토본 하나",
         "tags": [
           "chapters"
+        ]
+      }
+    },
+    "/suggested-edits/{edit_id}/accept": {
+      "post": {
+        "description": "받은 사람(작가)만(FR-34). 서버가 원고에 반영하고 버전을 올려요(D-30, S-08).",
+        "operationId": "accept_suggested_edits__edit_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "edit_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Edit Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictOut"
+                }
+              }
+            },
+            "description": "그사이 원고나 수정 제안이 바뀌었어요(code로 구분)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-26 수정 제안 수락",
+        "tags": [
+          "shared"
+        ]
+      }
+    },
+    "/suggested-edits/{edit_id}/reject": {
+      "post": {
+        "description": "받은 사람(작가)만(FR-35). 원고는 그대로예요.",
+        "operationId": "reject_suggested_edits__edit_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "edit_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Edit Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestedEdit"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-26 수정 제안 거절",
+        "tags": [
+          "shared"
+        ]
+      }
+    },
+    "/views": {
+      "post": {
+        "description": "카드를 화면에 연 때. 처음 한 번만 남아요(first_view). 내 책의 의견·수정 제안만.",
+        "operationId": "add_view_views_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-27 처음 본 기록",
+        "tags": [
+          "shared"
         ]
       }
     }

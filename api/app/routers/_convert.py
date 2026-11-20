@@ -3,6 +3,7 @@
 from typing import Any
 
 from app.config import get_settings
+from app.schemas import review
 from app.schemas.invite import Invite
 from app.schemas.layout import Layout
 from app.schemas.project import (
@@ -85,3 +86,72 @@ def snapshot_summary(row: Any) -> SnapshotSummary:
 
 def snapshot(row: Any) -> Snapshot:
     return Snapshot(**snapshot_summary(row).model_dump(), doc=row.doc)
+
+
+def ai_suggestion(row: Any) -> review.AiSuggestion:
+    return review.AiSuggestion(
+        id=row.id,
+        chapter_id=row.chapter_id,
+        owner_participant_id=row.owner_participant_id,
+        anchor=review.Anchor(**row.anchor),
+        original=row.original,
+        replacement=row.replacement,
+        alternatives=list(row.alternatives or []),
+        kind=row.kind,
+        reason=row.reason,
+        evidence=row.evidence,
+        source=row.source,
+        target_role=row.target_role,
+        base_version=row.base_version,
+        status=row.status,
+        created_at=row.created_at,
+        decided_at=row.decided_at,
+    )
+
+
+def comment(row: Any, anchor: dict[str, Any] | None = None) -> review.Comment:
+    a = anchor if anchor is not None else row.anchor
+    return review.Comment(
+        id=row.id,
+        chapter_id=row.chapter_id,
+        author_id=row.author_id,
+        parent_id=row.parent_id,
+        anchor=review.Anchor(**a) if a else None,
+        original=row.original,
+        body=row.body,
+        status=row.status,
+        ai_origin_id=row.ai_origin_id,
+        created_at=row.created_at,
+        resolved_at=row.resolved_at,
+        resolved_by=row.resolved_by,
+    )
+
+
+def suggested_edit(row: Any) -> review.SuggestedEdit:
+    return review.SuggestedEdit(
+        id=row.id,
+        chapter_id=row.chapter_id,
+        author_id=row.author_id,
+        anchor=review.Anchor(**row.anchor),
+        original=row.original,
+        replacement=row.replacement,
+        reason=row.reason,
+        kind=row.kind,
+        status=row.status,
+        ai_origin_id=row.ai_origin_id,
+        base_version=row.base_version,
+        created_at=row.created_at,
+        decided_at=row.decided_at,
+        decided_by=row.decided_by,
+    )
+
+
+def style_rule(row: Any) -> review.StyleRule:
+    return review.StyleRule(
+        id=row.id,
+        project_id=row.project_id,
+        type=row.type,
+        text=row.text,
+        created_by=row.created_by,
+        created_at=row.created_at,
+    )

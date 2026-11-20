@@ -63,9 +63,10 @@ class ProjectCreateIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)  # 비어 있으면 만들 수 없음(FR-01)
     template_id: TemplateId
     first_chapter_id: UUID
-    anon_id: (
-        UUID  # 이 브라우저의 익명 id. 편집자 참여자에 남겨요(data-contract participant.anon_id)
-    )
+    # 이 브라우저의 익명 id. 편집자 참여자에 남겨요(data-contract participant.anon_id)
+    anon_id: UUID
+    # 발표용: 첫 장을 1차 예시 원고로 채워요(D-39). 기본은 빈 첫 장(FR-01 ①).
+    start_with_sample: bool = False
 
 
 class ProjectCreateOut(BaseModel):
@@ -116,6 +117,20 @@ class DocSaveIn(BaseModel):
 class DocSaveOut(BaseModel):
     version: int
     updated_at: datetime
+
+
+class ConflictOut(BaseModel):
+    """409 여러 종류(AI 제안·수정 제안 처리). code로 화면이 안내를 골라요(C-3).
+
+    - version_conflict: base_version이 최신이 아님. 이때만 latest(최신 장)가 와요(C-4).
+    - source_changed: 원문이 먼저 바뀌었거나 지워짐
+    - invalid_transition: 이미 처리된 제안
+    - undo_unavailable: 바로 앞 동작이 아니라 실행 취소할 수 없음
+    """
+
+    code: Literal["version_conflict", "source_changed", "invalid_transition", "undo_unavailable"]
+    message: str
+    latest: Chapter | None = None
 
 
 class VersionConflictOut(BaseModel):

@@ -56,6 +56,7 @@ def save_doc(
     base_version: int,
     by: uuid.UUID,
     cause: str = "typing",
+    commit: bool = True,
 ) -> Saved:
     """원고 저장(A-12). 버전 확인과 올리기를 UPDATE 한 번으로 해서 동시에 와도 하나만 이겨요.
 
@@ -89,7 +90,11 @@ def save_doc(
         )
     )
     _touch_project(db, project_id, now)
-    db.commit()
+    # 적용·수락처럼 제안 상태도 함께 바꾸는 쪽은 commit=False로 불러 한 트랜잭션으로 묶어요.
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     return Saved(version=version, updated_at=now)
 
 
