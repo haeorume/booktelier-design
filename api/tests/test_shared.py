@@ -133,6 +133,8 @@ def test_first_view_once_and_todo_count(db_client: TestClient, db: Session, book
         select(func.count()).select_from(FirstView).where(FirstView.target_id == uuid.UUID(cid))
     )
     assert n == 1
+    assert _shared(db_client, book, book.editor)["seen"] == [cid]
+    assert _shared(db_client, book, book.author)["seen"] == []  # 본 기록은 사람마다
     card = db_client.post("/projects/list", json={"editor_tokens": [book.editor]}).json()[0]
     assert card["todo_count"] == 0
 

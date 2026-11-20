@@ -338,6 +338,15 @@ PERMISSION_TABLE: list[tuple[str, str, str, dict[str, Any] | None, set[str]]] = 
         {"type": "rule", "text": "루브르"},
         {"editor", "author", "designer"},
     ),
+    # F4: 함께 작업
+    (
+        "A-30",
+        "POST",
+        "/projects/{p}/presence",
+        {"chapter_id": "{c}", "paragraph_id": "para_02"},
+        {"editor", "author", "designer"},
+    ),
+    ("A-31", "GET", "/projects/{p}/changes", None, {"editor", "author", "designer"}),
 ]
 
 
@@ -360,7 +369,8 @@ def test_s05_permission_table(
     token = {"editor": b.editor, "author": b.author, "designer": b.designer}[role]
     url = path.format(p=b.project_id, i=b.author_invite["id"], c=b.chapter_id)
     if body is not None:
-        body = {k: (str(uuid.uuid4()) if v == "{new}" else v) for k, v in body.items()}
+        fill = {"{new}": lambda: str(uuid.uuid4()), "{c}": lambda: b.chapter_id}
+        body = {k: (fill[v]() if isinstance(v, str) and v in fill else v) for k, v in body.items()}
     res = db_client.request(method, url, json=body, headers=_auth(token))
     if role in allowed:
         assert res.status_code < 300, f"{need} {role}: {res.text}"

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { can } from "@/domain/permissions";
-import { AI_ORIGIN_LABEL, EDIT_STATUS_LABEL, ROLE_LABEL } from "@/domain/labels";
+import { AI_ORIGIN_LABEL, EDIT_STATUS_LABEL, KIND_LABEL, ROLE_LABEL } from "@/domain/labels";
 import type { Comment, Participant, Role, SuggestedEdit } from "@/types";
 import styles from "./ReviewPanel.module.css";
 
@@ -12,6 +12,8 @@ export type SharedItem =
 
 interface Props {
   role: Role;
+  /** 지금 보는 사람(참여자 id). 의견을 쓴 사람이면 해결·다시 열기를 할 수 있다(Q-21). */
+  me: string;
   items: SharedItem[];
   participants: Map<string, Participant>;
   selected: string[];
@@ -23,6 +25,16 @@ interface Props {
   onAccept: (edit: SuggestedEdit) => void;
   onReject: (edit: SuggestedEdit) => void;
   onReply: (parent: Comment, body: string) => Promise<void>;
+  /** 의견 해결(true)·다시 열기(false), FR-36 */
+  onResolve: (comment: Comment, resolved: boolean) => void;
+}
+
+type Scope = "open" | "all";
+type Kind = "all" | "comment" | "edit";
+
+/** 진행 중: 열린 의견과 대기 수정 제안만(L-63). */
+function isOpen(item: SharedItem): boolean {
+  return item.kind === "edit" ? item.edit.status === "pending" : item.comment.status === "open";
 }
 
 function Author({ id, participants }: { id: string; participants: Map<string, Participant> }) {
@@ -40,7 +52,10 @@ function Author({ id, participants }: { id: string; participants: Map<string, Pa
  * 수락·거절은 받은 사람(작가)에게만 보인다(D-14, D-15). 답글만 달린 건과 원고에 반영된 건은 다르게 보인다(FR-36).
  */
 export function SharedTab(p: Props) {
+  const [scope, setScope] = useState<Scope>("all");
+  const [kind, setKind] = useState<Kind>("all");
   if (p.items.length === 0) return <p className={styles.empty}>아직 주고받은 의견과 수정 제안이 없어요.</p>;
+  const shown = p.items.filter((i) => (scope === "all" || isOpen(i)) && (kind === "all" || i.kind === kind));
   return (
     <>
       {p.notice && (
@@ -48,8 +63,33 @@ export function SharedTab(p: Props) {
           {p.notice}
         </p>
       )}
+      {/* 거르기(FR-36, L-63): 진행 중 / 전체, 의견 / 수정 제안 */}
+      <div className={styles.cardActions} role="group" aria-label="함께 봄 거르기">
+        {(
+          [
+            ["open", "진행 중"],
+            ["all", "전체"],
+          ] as const
+        ).map(([v, label]) => (
+          <button key={v} type="button" className={styles.button} aria-pressed={scope === v} onClick={() => setScope(v)}>
+            {label}
+          </button>
+        ))}
+        {(
+          [
+            ["all", "모두"],
+            ["comment", "의견"],
+            ["edit", "수정 제안"],
+          ] as const
+        ).map(([v, label]) => (
+          <button key={v} type="button" className={styles.button} aria-pressed={kind === v} onClick={() => setKind(v)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 && <p className={styles.empty}>거른 조건에 맞는 것이 없어요.</p>}
       <ul className={styles.cards}>
-        {p.items.map((item) =>
+        {shown.map((item) =>
           item.kind === "edit" ? (
             <EditCard key={item.edit.id} {...p} edit={item.edit} />
           ) : (
@@ -85,6 +125,11 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
       <p>
         <del className={styles.editDel}>{edit.original}</del> → <ins className={styles.editIns}>{edit.replacement}</ins>
       </p>
+      {(edit.kind || edit.reason) && (
+        <p className={styles.body} data-testid="edit-reason">
+          {edit.kind && <span className={styles.typeTag}>{KIND_LABEL[edit.kind]}</span>} {edit.reason}
+        </p>
+      )}
       {edit.ai_origin_id && <span className={styles.aiOrigin}>{AI_ORIGIN_LABEL}</span>}
       {!decided && can(role, "accept_suggested_edit") && (
         <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
@@ -102,12 +147,17 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
   );
 }
 
-function CommentCard({ comment, replies, quote, detached, participants, selected, unseen, onSelect, onReply, role }: Props & { comment: Comment; replies: Comment[]; quote: string | null; detached: boolean }) {
+function CommentCard({ comment, replies, quote, detached, participants, selected, unseen, onSelect, onReply, onResolve, role, me }: Props & { comment: Comment; replies: Comment[]; quote: string | null; detached: boolean }) {
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  const resolved = comment.status === "resolved";
+  // 해결·다시 열기는 쓴 사람과 편집자만(Q-21). 권한이 없으면 버튼을 숨긴다(D-15).
+  const canResolve = comment.author_id === me || role === "editor";
+  const resolver = comment.resolved_by ? participants.get(comment.resolved_by) : undefined;
   return (
     <li
-      className={styles.card}
+      className={`${styles.card} ${resolved ? styles.decided : ""}`}
+      data-status={comment.status}
       data-testid="comment-card"
       data-card-id={comment.id}
       aria-current={selected.includes(comment.id) ? "true" : undefined}
@@ -119,6 +169,11 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
         <span className={styles.typeTag}>의견</span>
         {replies.length > 0 && <span className={styles.replyCount}>답글 {replies.length}</span>}
         {unseen.has(comment.id) && <span className={styles.unseen}>새 의견</span>}
+        {resolved && (
+          <span className={styles.statusChip} data-testid="comment-status">
+            해결됨{resolver ? ` · ${resolver.display_name}` : ""}
+          </span>
+        )}
       </div>
       <Author id={comment.author_id} participants={participants} />
       {quote && <p className={styles.quoteLine}>“{quote}”</p>}
@@ -135,7 +190,14 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
           ))}
         </ul>
       )}
-      {can(role, "create_comment") && (
+      {canResolve && (
+        <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
+          <button type="button" className={styles.button} onClick={() => onResolve(comment, !resolved)}>
+            {resolved ? "다시 열기" : "해결"}
+          </button>
+        </div>
+      )}
+      {can(role, "create_comment") && !resolved && (
         <form
           className={styles.replyForm}
           onClick={(e) => e.stopPropagation()}

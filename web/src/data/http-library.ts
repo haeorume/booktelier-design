@@ -28,6 +28,14 @@ export function toChapterInfo(c: S["ChapterSummary"]): ChapterInfo {
   return { id: c.id, project_id: c.project_id, order: c.order, title: c.title, status: c.status, version: c.version };
 }
 
+/** 서버 오류를 화면 오류로: 409 version_conflict면 최신 장을 담은 VersionConflictError. */
+export function rethrowConflict(e: unknown): never {
+  if (e instanceof ApiError && e.status === 409 && e.code === "version_conflict" && e.body.latest) {
+    throw new VersionConflictError(toChapter(e.body.latest as S["Chapter"]));
+  }
+  throw e;
+}
+
 export function toChapter(c: S["Chapter"]): Chapter {
   return { ...toChapterInfo(c), doc: c.doc as unknown as ChapterDoc };
 }
@@ -62,6 +70,17 @@ async function orNull<T>(p: Promise<T>): Promise<T | null> {
   }
 }
 
+/** 이 책에서 지금 맡은 참여자의 토큰. 없으면 이 책의 아무 토큰(편집자 먼저). */
+export function createTokenResolver(tokens: TokenStore, session: ClientSession): (projectId: Uuid) => string | null {
+  return (projectId) => {
+    const current = session.getCurrentParticipantId(projectId);
+    const entry = current ? tokens.get(current) : null;
+    if (entry && entry.project_id === projectId) return entry.token;
+    const all = tokens.forProject(projectId);
+    return (all.find((e) => e.role === "editor") ?? all[0])?.token ?? null;
+  };
+}
+
 export interface HttpLibraryDeps {
   http: HttpClient;
   tokens: TokenStore;
@@ -74,14 +93,7 @@ export function createHttpLibrary(deps: HttpLibraryDeps): Library {
   const { http, tokens, session, identity } = deps;
   const newId = deps.newId ?? (() => crypto.randomUUID());
 
-  /** 이 책에서 지금 맡은 참여자의 토큰. 없으면 이 책의 아무 토큰(편집자 먼저). */
-  function tokenFor(projectId: Uuid): string | null {
-    const current = session.getCurrentParticipantId(projectId);
-    const entry = current ? tokens.get(current) : null;
-    if (entry && entry.project_id === projectId) return entry.token;
-    const all = tokens.forProject(projectId);
-    return (all.find((e) => e.role === "editor") ?? all[0])?.token ?? null;
-  }
+  const tokenFor = createTokenResolver(tokens, session);
 
   function need(projectId: Uuid): string {
     const t = tokenFor(projectId);
@@ -99,7 +111,14 @@ export function createHttpLibrary(deps: HttpLibraryDeps): Library {
 
     async createBook(input) {
       const res = await http.request<S["ProjectCreateOut"]>("POST", "/projects", {
-        body: { id: newId(), title: input.title, template_id: input.template_id, first_chapter_id: newId(), anon_id: identity.getAnonId() },
+        body: {
+          id: newId(),
+          title: input.title,
+          template_id: input.template_id,
+          first_chapter_id: newId(),
+          anon_id: identity.getAnonId(),
+          start_with_sample: input.startWithSample ?? false,
+        },
       });
       const editor = toParticipant(res.participant);
       remember(editor, res.editor_token);

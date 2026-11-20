@@ -542,6 +542,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/projects/{project_id}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-31 바뀐 것 받기
+         * @description 세 역할 모두. 다른 사람의 보내기 전 AI 제안은 넣지 않아요(D-29).
+         */
+        get: operations["changes_projects__project_id__changes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/projects/{project_id}/chapters": {
         parameters: {
             query?: never;
@@ -607,6 +627,26 @@ export interface paths {
          *     같은 요청에 layout도 있으면 기본값 위에 그 값을 얹어요.
          */
         patch: operations["patch_layout_projects__project_id__layout_patch"];
+        trace?: never;
+    };
+    "/projects/{project_id}/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-30 접속자와 작업 위치
+         * @description 내 위치 알리기 전용. 접속자 목록은 A-31로 받아요(D-31). 세 역할 모두.
+         */
+        post: operations["report_presence_projects__project_id__presence_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/projects/{project_id}/style-rules": {
@@ -817,6 +857,37 @@ export interface components {
              * @default 0
              */
             choice: number;
+        };
+        /**
+         * ChangesOut
+         * @description since 뒤에 바뀐 것. since가 없으면 장 전부와 조판 값.
+         *
+         *     서버는 since보다 몇 초 앞부터 보므로 같은 변경이 두 번 올 수 있어요. 화면은 version으로 걸러요.
+         */
+        ChangesOut: {
+            /**
+             * Chapters
+             * @description 원고·상태가 바뀌었거나 새로 생긴 장
+             */
+            chapters: components["schemas"]["ChapterSummary"][];
+            /**
+             * Cursor
+             * Format: date-time
+             * @description 다음 요청의 since
+             */
+            cursor: string;
+            /** @description 조판 값이 바뀌었으면 새 값, 아니면 null */
+            layout: components["schemas"]["Layout"] | null;
+            /**
+             * Presence
+             * @description 나를 뺀 지금 접속자와 각자 위치
+             */
+            presence: components["schemas"]["Presence"][];
+            /**
+             * Shared Chapter Ids
+             * @description 의견·수정 제안이 바뀐 장(A-22를 다시 읽어요)
+             */
+            shared_chapter_ids: string[];
         };
         /** Chapter */
         Chapter: {
@@ -1277,6 +1348,46 @@ export interface components {
              */
             role: "editor" | "author" | "designer";
         };
+        /**
+         * Presence
+         * @description 접속자 한 사람. 편집자는 이름 대신 '편집자'로 보여요(FR-19).
+         */
+        Presence: {
+            /** Chapter Id */
+            chapter_id: string | null;
+            /** Display Name */
+            display_name: string;
+            /** Paragraph Id */
+            paragraph_id: string | null;
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "editor" | "author" | "designer";
+            /**
+             * Seen At
+             * Format: date-time
+             */
+            seen_at: string;
+        };
+        /**
+         * PresenceIn
+         * @description 지금 보는 장과 문단(문단 단위, FR-47 ③). 이벤트로 쌓지 않아요.
+         */
+        PresenceIn: {
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /** Paragraph Id */
+            paragraph_id?: string | null;
+        };
         /** Project */
         Project: {
             /**
@@ -1450,6 +1561,8 @@ export interface components {
         SharedOut: {
             /** Comments */
             comments: components["schemas"]["Comment"][];
+            /** Seen */
+            seen: string[];
             /** Suggested Edits */
             suggested_edits: components["schemas"]["SuggestedEdit"][];
         };
@@ -3310,6 +3423,67 @@ export interface operations {
             };
         };
     };
+    changes_projects__project_id__changes_get: {
+        parameters: {
+            query?: {
+                /** @description 앞 응답의 cursor */
+                since?: string | null;
+            };
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangesOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     create_chapter_projects__project_id__chapters_post: {
         parameters: {
             query?: never;
@@ -3524,6 +3698,66 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["LayoutOut"];
                 };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    report_presence_projects__project_id__presence_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PresenceIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description 토큰이 없거나 틀려요 */
             401: {

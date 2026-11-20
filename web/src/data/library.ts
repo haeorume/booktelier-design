@@ -49,7 +49,8 @@ export interface JoinOutcome {
 export interface Library {
   readonly source: "server" | "local";
 
-  createBook(input: { title: string; template_id: TemplateId }): Promise<CreatedBook>;
+  /** startWithSample: 발표용으로 첫 장을 1차 예시 원고로 채운다(D-39). 1차 구현은 늘 예시 원고로 시작한다. */
+  createBook(input: { title: string; template_id: TemplateId; startWithSample?: boolean }): Promise<CreatedBook>;
   /** 이 브라우저가 편집자로 가진 책(FR-02, FR-07). */
   myBooks(): Promise<ProjectCard[]>;
 

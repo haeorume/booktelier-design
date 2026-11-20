@@ -135,6 +135,8 @@ class SharedOut(BaseModel):
 
     comments: list[Comment]
     suggested_edits: list[SuggestedEdit]
+    # 지금 보는 사람이 처음 본 기록(A-27)이 있는 의견·수정 제안 id. 확인할 일 표시에 써요(FR-02 ②).
+    seen: list[UUID]
 
 
 # A-23 의견

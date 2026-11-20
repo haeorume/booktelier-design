@@ -146,7 +146,9 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
   await expect(editCard).toHaveCount(1);
   await expect(editCard).toContainText("AI 제안에서 보냄");
   await expect(editCard).toContainText("며칠");
-  await expect(page.getByTestId("comment-card")).toContainText("'며칠'로 고쳐 주세요.");
+  // 수정 제안으로 보내면 이유가 담긴 카드 하나만 생기고 설명용 의견은 따로 없다(FR-29 ⑤, QA-F19)
+  await expect(editCard.getByTestId("edit-reason")).toContainText("'며칠'로 고쳐 주세요.");
+  await expect(page.getByTestId("comment-card")).toHaveCount(0);
 
   // 10. 작가: 지면에 지운 글자와 더한 글자가 보이고, 수락하면 원고가 바뀐다(QA-15)
   await switchRole(page, "작가");

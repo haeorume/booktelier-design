@@ -64,6 +64,11 @@ def list_shared(
     return SharedOut(
         comments=[_convert.comment(c) for c in comments],
         suggested_edits=[_convert.suggested_edit(e) for e in edits],
+        seen=sorted(
+            shared_db.seen_ids(db, me.participant_id, "comment")
+            | shared_db.seen_ids(db, me.participant_id, "suggested_edit"),
+            key=str,
+        ),
     )
 
 

@@ -151,6 +151,9 @@ export interface SuggestedEdit {
   author_id: Uuid;
   status: SuggestedEditStatus;
   ai_origin_id: Uuid | null;
+  /** 수정 이유(비워도 됨, Q-22)와 종류. AI 제안에서 보낸 카드에도 담긴다(FR-29 ⑤, FR-33). */
+  reason?: string | null;
+  kind?: AiSuggestionKind | null;
 }
 
 export interface Comment {
@@ -167,6 +170,9 @@ export interface Comment {
   status: CommentStatus;
   parent_id: Uuid | null;
   ai_origin_id: Uuid | null;
+  /** 해결한 사람과 시각(FR-36). */
+  resolved_by?: Uuid | null;
+  resolved_at?: IsoDateTime | null;
 }
 
 export interface StyleRule {

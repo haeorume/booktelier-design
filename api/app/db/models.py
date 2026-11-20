@@ -10,7 +10,7 @@ ON DELETE(11.21 정모 결정, F1):
 """
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import (
@@ -39,6 +39,18 @@ def _now() -> Mapped[datetime]:
 
 def _ts() -> Mapped[datetime | None]:
     return mapped_column(DateTime(timezone=True), nullable=True)
+
+
+def _changed() -> Mapped[datetime]:
+    """바뀐 시각(A-31 커서, 0004). 줄이 바뀔 때마다 서버 시각으로 다시 적어요.
+    now()는 트랜잭션 시작 시각이라 파이썬 시각을 써요."""
+    return mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
 
 
 def _pk() -> Mapped[uuid.UUID]:
@@ -85,6 +97,18 @@ class Participant(Base):
     token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     created_at: Mapped[datetime] = _now()
     last_seen_at: Mapped[datetime | None] = _ts()
+    # 작업 위치(A-30, FR-47). 지금 보는 장·문단. 이벤트로 쌓지 않아요(0004).
+    current_chapter_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "chapter.id",
+            ondelete="SET NULL",
+            use_alter=True,
+            name="participant_current_chapter_id_fkey",
+        ),
+        nullable=True,
+    )
+    current_paragraph_id: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class RoleLink(Base):
@@ -190,6 +214,7 @@ class SuggestedEdit(Base):
     created_at: Mapped[datetime] = _now()
     decided_at: Mapped[datetime | None] = _ts()
     decided_by: Mapped[uuid.UUID | None] = _fk("participant.id", "SET NULL", nullable=True)
+    updated_at: Mapped[datetime] = _changed()
 
 
 class Comment(Base):
@@ -208,6 +233,7 @@ class Comment(Base):
     created_at: Mapped[datetime] = _now()
     resolved_at: Mapped[datetime | None] = _ts()
     resolved_by: Mapped[uuid.UUID | None] = _fk("participant.id", "SET NULL", nullable=True)
+    updated_at: Mapped[datetime] = _changed()
 
 
 class StyleRule(Base):

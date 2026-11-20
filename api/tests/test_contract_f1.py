@@ -31,6 +31,8 @@ PROTECTED: list[tuple[str, str, dict[str, Any] | None]] = [
     ("GET", f"/chapters/{CHAPTER}/snapshots", None),
     ("POST", f"/chapters/{CHAPTER}/snapshots", {"label": "1차"}),
     ("GET", f"/snapshots/{CHAPTER}", None),
+    ("POST", f"/projects/{PROJECT}/presence", {"chapter_id": CHAPTER}),
+    ("GET", f"/projects/{PROJECT}/changes", None),
 ]
 
 

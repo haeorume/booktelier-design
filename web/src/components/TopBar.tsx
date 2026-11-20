@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { can } from "@/domain/permissions";
 import { ROLE_LABEL } from "@/domain/labels";
+import type { PresentPerson } from "@/data";
 import type { Participant, Role } from "@/types";
 import { Participants } from "./Participants";
 import styles from "./TopBar.module.css";
@@ -13,6 +14,10 @@ interface Props {
   chapterTitle: string;
   participants: Participant[];
   currentId: string;
+  /** 지금 이 책을 연 다른 사람(F4). null이면 서버 없는 1차 데모 */
+  present: PresentPerson[] | null;
+  chapterTitles: Map<string, string>;
+  onJump: (person: PresentPerson) => void;
   layoutOpen: boolean;
   onShare: () => void;
   onSnapshots: () => void;
@@ -23,7 +28,8 @@ interface Props {
  * 작업 공간 상단 바(WS-10). 권한이 없는 버튼은 숨긴다(D-15).
  * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 공유는 편집자만.
  */
-export function TopBar({ role, bookTitle, chapterTitle, participants, currentId, layoutOpen, onShare, onSnapshots, onToggleLayout }: Props) {
+export function TopBar(props: Props) {
+  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
   return (
     <header className={styles.bar}>
       <nav className={styles.path} aria-label="경로">
@@ -41,7 +47,7 @@ export function TopBar({ role, bookTitle, chapterTitle, participants, currentId,
         {ROLE_LABEL[role]}
       </span>
       <div className={styles.tools}>
-        <Participants participants={participants} currentId={currentId} />
+        <Participants participants={participants} currentId={currentId} present={present} chapterTitles={chapterTitles} onJump={onJump} />
         {can(role, "view_snapshots") && (
           <button type="button" className={styles.button} onClick={onSnapshots}>
             검토본
