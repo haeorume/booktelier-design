@@ -1,6 +1,6 @@
 # 시트에서 옮긴 문서
 
-`scripts/sheets_to_md.py`가 2026-11-18 17:15에 만든 목록이에요. 직접 고치지 않아요. 시트를 고쳤으면 다시 내려받아 다시 만들어요.
+`scripts/sheets_to_md.py`가 2026-11-20 16:34에 만든 목록이에요. 직접 고치지 않아요. 시트를 고쳤으면 다시 내려받아 다시 만들어요.
 어느 탭을 언제 보는지는 `docs/README.md`에 있어요.
 
 ## 개발 문서 (`dev/`)
@@ -10,10 +10,13 @@
 - [demo-flow](dev/03_demo-flow.md)
 - [boundary](dev/04_boundary.md)
 - [spec-p0](dev/05_spec-p0.md)
-- [data-contract](dev/06_data-contract.md) (JSON 3개)
-- [events](dev/07_events.md)
-- [정할 것](dev/08_to-decide.md)
-- [1차 점검](dev/09_qa-checklist.md)
+- [data-contract](dev/06_data-contract.md) (JSON 4개)
+- [db](dev/07_db.md)
+- [events](dev/08_events.md)
+- [api-needs](dev/09_api-needs.md)
+- [정할 것](dev/10_to-decide.md)
+- [1차 점검](dev/11_qa-checklist.md)
+- [최종 점검(프론트)](dev/12_qa-final-front.md)
 
 ## 요구사항 정의서 (`requirements/`)
 

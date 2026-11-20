@@ -1,0 +1,60 @@
+[project]
+name = "booktelier-api"
+version = "0.1.0"
+description = "Booktelier(북틀리에) 서버. FastAPI + PostgreSQL(pgvector)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "pgvector>=0.3.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.28",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# 줄 길이는 포매터가 맞춰요. 한글 주석·문구는 폭 계산이 달라 E501에서 뺐어요.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+known-third-party = ["alembic"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+check_untyped_defs = true
+warn_unused_ignores = true
+exclude = ["alembic/versions/"]
+
+[[tool.mypy.overrides]]
+module = "app.*"
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["pgvector.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "db: 실제 Postgres(TEST_DATABASE_URL)가 있어야 도는 테스트",
+]

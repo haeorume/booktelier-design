@@ -253,6 +253,9 @@ TABS = {
     "확인할 것": "to-check",
     "정할 것": "to-decide",
     "1차 점검": "qa-checklist",
+    "db": "db",
+    "api-needs": "api-needs",
+    "최종 점검(프론트)": "qa-final-front",
 }
 
 

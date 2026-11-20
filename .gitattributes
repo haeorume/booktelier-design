@@ -1,0 +1,6 @@
+# Windows(정모)와 macOS가 같이 써요. 저장소 안에서는 줄 끝을 LF로 맞춰요.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary

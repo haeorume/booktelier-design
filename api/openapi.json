@@ -1,0 +1,89 @@
+{
+  "components": {
+    "schemas": {
+      "DbHealthOut": {
+        "properties": {
+          "connected": {
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "pgvector": {
+            "title": "Pgvector",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "connected",
+          "pgvector"
+        ],
+        "title": "DbHealthOut",
+        "type": "object"
+      },
+      "HealthOut": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HealthOut",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Booktelier API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "description": "서버가 살아 있는지. 배포처(Railway) 헬스 체크가 불러요. DB는 보지 않아요.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "health 서버가 떠 있나",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/db": {
+      "get": {
+        "description": "배포 뒤 Neon에 붙는지, pgvector가 켜졌는지 확인해요(DEPLOY 2장). 헬스 체크 경로로는 쓰지 않아요.",
+        "operationId": "health_db_health_db_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DbHealthOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "health DB 연결과 pgvector",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}

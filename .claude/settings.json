@@ -5,6 +5,24 @@
       "Bash(npm --prefix web run *)",
       "Bash(npx playwright test *)",
       "Bash(node scripts/check-invariants.mjs)",
+      "Bash(node scripts/check-invariants.mjs *)",
+      "Bash(node scripts/check-contract.mjs)",
+      "Bash(node scripts/check-all.mjs)",
+      "Bash(node scripts/check-all.mjs *)",
+      "Bash(node scripts/progress.mjs)",
+      "Bash(node scripts/progress.mjs *)",
+      "Bash(uv sync)",
+      "Bash(uv sync *)",
+      "Bash(uv run ruff *)",
+      "Bash(uv run mypy *)",
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest *)",
+      "Bash(uv run python scripts/dump_openapi.py)",
+      "Bash(uv run python scripts/dump_openapi.py *)",
+      "Bash(uv run alembic revision *)",
+      "Bash(uv run alembic history *)",
+      "Bash(uv run alembic current *)",
+      "Bash(uv run uvicorn *)",
       "Bash(git status)",
       "Bash(git status *)",
       "Bash(git diff)",
@@ -14,19 +32,46 @@
     ],
     "ask": [
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git tag *)",
+      "Bash(uv add *)",
+      "Bash(uv remove *)",
+      "Bash(uv lock)",
+      "Bash(uv lock *)",
+      "Bash(npm install *)",
+      "Bash(npm i *)",
+      "Bash(uv run alembic upgrade *)",
+      "Bash(uv run alembic downgrade *)",
+      "Bash(uv run alembic stamp *)",
+      "Bash(railway *)",
+      "Bash(vercel *)",
+      "Bash(npx vercel *)"
     ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./web/.env)",
-      "Read(./web/.env.*)",
+      "Read(./web/.env.local)",
+      "Read(./web/.env.production)",
+      "Read(./web/.env.development)",
+      "Read(./api/.env)",
+      "Read(./api/.env.local)",
+      "Read(./api/.env.production)",
       "Edit(./.claude/**)",
       "Edit(./AGENTS.md)",
       "Edit(./CLAUDE.md)",
+      "Edit(./api/AGENTS.md)",
+      "Edit(./api/CLAUDE.md)",
       "Edit(./scripts/check-invariants.mjs)",
+      "Edit(./scripts/check-contract.mjs)",
+      "Edit(./scripts/check-all.mjs)",
       "Edit(./docs/DECISIONS.md)",
-      "Edit(./docs/sheets/**)"
+      "Edit(./docs/PLAN.md)",
+      "Edit(./scripts/progress.mjs)",
+      "Edit(./docs/sheets/**)",
+      "Edit(./.github/**)",
+      "Edit(./web/src/types/api.ts)",
+      "Edit(./api/openapi.json)"
     ]
   },
   "hooks": {
@@ -50,7 +95,7 @@
             "type": "command",
             "command": "node",
             "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-check.mjs"],
-            "timeout": 600
+            "timeout": 900
           }
         ]
       }

@@ -1,131 +1,122 @@
-# 하네스 쓰는 법 (정모님용, Windows 기준)
+# 하네스 쓰는 법 v3 (최종 MVP, Windows 기준)
 
-코드는 **Claude Code**가 쓰고, 검수는 **Codex**가 해요. 둘 다 PyCharm 아래쪽 터미널 하나에서 써요.
-Codex는 Claude Code 안에 플러그인으로 넣어 `/codex:review`로 불러요. 터미널을 따로 열 필요가 없어요.
+코드는 **Claude Code**가 쓰고, 검수는 **Codex**가 해요(Claude Code 안 플러그인 `/codex:review`). 커밋은 사람이 '커밋해'라고 할 때만, push와 PR은 사람이 직접 해요.
+1차 하네스(W0~W6)에서 틀은 그대로이고, 서버(`api/`)·계약·디자인·CI가 더해졌어요.
 
-## 이 묶음은 '지도 + 막는 장치'예요
+## 이 묶음은 '지도 + 막는 장치 + 루프'예요
 
 | 파일 | 하는 일 |
 | --- | --- |
-| `AGENTS.md` | **지도**. 두 AI가 같이 읽어요. 무엇을 어디서 찾는지만 가리켜요 |
-| `CLAUDE.md` | 지도를 불러오고(`@AGENTS.md`), Claude의 작업 루프만 적어요 |
-| `docs/README.md` | 기준 문서 안내. 질문별로 볼 탭, 읽지 않아도 되는 탭 |
-| `docs/PLAN.md` | 작업 묶음 W0~W6과 완료 기준 |
-| `docs/DECISIONS.md` | 시트끼리 어긋난 곳의 임시 교정표. 시트가 고쳐지면 줄을 지워요 |
-| `scripts/check-invariants.mjs` | **불변 규칙 R1~R10**을 기계가 검사하고 고치는 법을 알려 줘요 |
-| `.claude/settings.json`, `.claude/hooks/` | 훅 2개와 권한. 커밋·push는 매번 정모님 승인. `.env`와 하네스 파일은 Claude가 못 고쳐요 |
-| `docs/sheets/` | 시트 세 개를 탭마다 .md로 옮긴 것(11.18 17시). 예시 JSON은 `docs/sheets/dev/json/` |
-| `docs/design/` | FigJam 그림 4장(11.18 17시). 화면 흐름도는 AI가 글자를 읽게 줄별 조각으로도 넣음. 배치 참고용 |
-| `scripts/sheets_to_md.py`, `docs/source/` | 시트를 고친 뒤 .xlsx를 받아 `docs/sheets/`를 다시 만들 때 써요 |
-| `api/README.md` | 목요일부터 쓸 서버 자리. 1차에는 비워 둬요 |
+| `AGENTS.md`, `api/AGENTS.md` | **지도**. 두 AI가 같이 읽어요. 무엇을 어디서 찾는지만 가리켜요 |
+| `CLAUDE.md`, `api/CLAUDE.md` | 지도를 불러오고(`@AGENTS.md`), Claude의 작업 루프를 적어요 |
+| `docs/PLAN.md` | 작업 묶음 F0~F8, 완료 기준, 서버 점검 S-01~S-09 |
+| `docs/DECISIONS.md` | 시트끼리 어긋난 곳과 새로 정한 것(D-xx) |
+| `docs/DEPLOY.md` | Neon·Railway·Vercel, 환경 변수, Railway 체험 → Hobby 기준 |
+| `docs/README.md` | 기준 문서 안내. 질문별로 볼 탭 |
+| `docs/design/DESIGN.md`, `web/src/styles/tokens.css` | 화면이 어떻게 보이나. 견본은 `docs/design/specimen.html` |
+| `docs/HANDOFF.md` | 1차를 만들며 문서와 다르게 한 것. 시트에 옮기면 지워요 |
+| `scripts/check-invariants.mjs` | **불변 규칙 R1~R15**를 기계가 검사하고 고치는 법을 알려 줘요 |
+| `scripts/check-contract.mjs` | **R13** 계약 파일(`api/openapi.json`, `web/src/types/api.ts`)이 서버 코드와 맞는지 |
+| `scripts/check-all.mjs` | 위 둘 + web·api 검사 전부를 한 번에 |
+| `scripts/progress.mjs` | 지금 F에서 서버에 아직 없는 API, 확인할 QA·서버 점검. `docs/PLAN.md` 맨 위 '지금 할 F:' 줄은 사람이 고쳐요 |
+| `.claude/commands/` | `/next`(계획), `/report`(보고), `/review-fix`(Codex 지적 정리) |
+| `.github/pull_request_template.md` | PR 양식 |
+| `.claude/settings.json`, `.claude/hooks/` | 훅 2개와 권한 |
+| `.github/workflows/check.yml` | PR마다 같은 검사 + DB 테스트(pgvector 컨테이너) |
+| `docs/sheets/` | 시트 v0.4(11.20) 사본. 다시 만들 때 `scripts/sheets_to_md.py` |
 
-## 처음 한 번
+## 처음 한 번 (F0)
 
-PyCharm 아래쪽 터미널은 Windows에서 보통 **PowerShell**이에요. 아래 명령은 PowerShell 기준이에요.
+PyCharm 아래쪽 터미널(PowerShell)에서 저장소 맨 위 폴더(`C:\Booktlie`) 기준이에요.
 
-### 0. 준비물
+### 1. 도구
 
 ```powershell
-node -v            # v20 이상
+node -v            # v22 이상
 git --version
-py --version       # Python 3
 claude --version
+uv --version       # 없으면 아래 한 줄로 설치하고 터미널을 새로 열어요
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-- Codex 로그인에 쓸 ChatGPT 계정(무료도 돼요). 쓴 만큼 그 계정의 Codex 사용량에서 빠져요.
-- 훅은 셸 없이 `node`로 바로 돌게 해 둬서 PowerShell에서도 돌아요.
+Python 3.12는 `uv sync`가 알아서 받아요. 따로 설치하지 않아도 돼요.
 
-### 1. 새 폴더에서 시작
-
-지금까지 하던 폴더는 지우지 말고 참고용으로 두고, 새 폴더에서 시작해요.
+### 2. 받은 변경 확인과 설치
 
 ```powershell
-git clone <우리 GitHub 저장소 주소> booktelier
-cd booktelier
+git status                     # 하네스 v3 파일들이 바뀜·새 파일로 보여요
+cd web; npm install; cd ..     # openapi-typescript가 더해졌어요
+cd api; uv sync; cd ..         # 서버 패키지(.venv)
 ```
 
-저장소가 아직 없으면 GitHub에서 **비공개** 저장소를 새로 만들고 clone해요.
+### 3. Neon과 .env
 
-### 2. 이 묶음 넣기
+`docs/DEPLOY.md` 1장대로 Neon 프로젝트 둘(`booktelier-dev`, `booktelier-prod`. 싱가포르, Postgres 17)과 브랜치(`dev-jeongmo`, `test-jeongmo` …)를 만들고:
 
 ```powershell
-Expand-Archive -Path "$HOME\Downloads\booktelier-harness.zip" -DestinationPath . -Force
-Get-ChildItem -Force     # .claude, AGENTS.md, CLAUDE.md, docs, scripts, api 가 보이면 됨
+Copy-Item api\.env.example api\.env    # DATABASE_URL, TEST_DATABASE_URL 채우기 (서로 다른 브랜치!)
+cd api; uv run alembic upgrade head; cd ..
 ```
 
-점으로 시작하는 `.claude` 폴더가 꼭 들어가야 해요.
-
-### 3. 문서 확인
-
-`docs/sheets/`는 11.18 17시 시트로 이미 만들어 넣어 뒀어요. 확인만 해요.
+### 4. 검사가 도는지 확인
 
 ```powershell
-node scripts/check-invariants.mjs     # '불변 규칙: 통과'가 나오면 됨
+node scripts/check-all.mjs                 # '전체 검사: 통과'. R11 경고 43건은 F7까지 정상
+cd web; npm run test:e2e; cd ..            # 1차 e2e가 그대로 통과
 ```
 
-시트를 고친 뒤에만 `docs/source/README.md`대로 .xlsx를 내려받아 `py scripts/sheets_to_md.py`로 다시 만들어요.
-FigJam 그림도 `docs/design/`에 들어 있어요. 그림을 고치면 같은 이름으로 다시 내보내 바꿔 넣어요(화면 흐름도 조각은 혜린님께 부탁해 다시 잘라요).
+DB 테스트까지 돌았는지는 `api 테스트` 줄 아래에 'DB 테스트 n개를 돌리지 않았어요'가 **없는지**로 봐요.
 
-### 4. 첫 커밋
+### 5. 1차 보존과 첫 커밋
 
 ```powershell
+git tag mvp1 c031565
+git push origin mvp1
+git rm -r --cached .idea          # PyCharm 설정은 PC에 남고 저장소에서만 빠져요(R10)
 git add -A
-git commit -m "하네스 세팅"
+git commit -m "F0: 하네스 v3"
 git push
 ```
 
-### 5. Claude Code 켜기
+`docs/HANDOFF.md`도 같이 커밋해요(지금까지 커밋 안 된 채 있었어요). `.idea/`와 `Claude outputs/`는 `.gitignore`에 넣어 올라가지 않아요.
 
-저장소 맨 위 폴더에서 `claude`를 실행해요.
-(선택) PyCharm의 Settings → Plugins에서 Anthropic 공식 'Claude Code' 플러그인을 깔면 바뀐 내용을 IDE 화면에서 보기 편해요. 없어도 돼요.
+### 6. Claude Code에서 장치 확인
 
-### 6. Codex 플러그인 넣기
+저장소 맨 위에서 `claude`를 실행해요.
+- `/hooks`: **PostToolUse**와 **Stop**에 하나씩 보이면 돼요.
+- `/memory`: `CLAUDE.md`가 보이면 돼요.
+- Codex 플러그인은 1차 때 넣은 그대로 써요. 없으면 `/plugin marketplace add openai/codex-plugin-cc` → `/plugin install codex@openai-codex` → `/reload-plugins` → `/codex:setup`. 자동 검수(review gate)는 켜지 않아요.
+- 첫 질문: `/next` → F1 계획이 나오면 지도가 제대로 읽힌 거예요(그 전에 `docs/PLAN.md`의 '지금 할 F:'를 F1로).
 
-Claude Code 입력창에 한 줄씩 쳐요.
-
-```
-/plugin marketplace add openai/codex-plugin-cc
-/plugin install codex@openai-codex
-/reload-plugins
-/codex:setup
-```
-
-- Codex CLI가 없으면 `/codex:setup`이 설치를 제안해요. 로그인하라고 나오면 `!codex login`.
-- 자동 검수(review gate)는 켜지 않아요. `--enable-review-gate`를 붙이지 마세요.
-
-### 7. 장치가 들어갔는지 확인
-
-- `/hooks`: **PostToolUse**와 **Stop**에 하나씩 보이면 돼요. 안 보이면 `.claude` 폴더가 빠진 거예요.
-- `/memory`: 프로젝트 메모리에 `CLAUDE.md`가 보이면 돼요(지도 `AGENTS.md`는 그 안에서 불러와요).
-
-### 8. 첫 지시
+### 7. 첫 지시
 
 ```
-docs/PLAN.md의 W0을 시작해. 먼저 계획만 보여 주고 멈춰.
+docs/PLAN.md의 F1을 시작해. 먼저 계획만 보여 주고 멈춰.
 ```
 
 ---
 
-## W 하나 = 루프 한 바퀴
+## F 하나 = 루프 한 바퀴
 
-1. **계획 확인**: Claude가 계획을 보여 주고 멈춰요. 괜찮으면 `진행해`, 이상하면 고쳐 달라고 해요.
-2. **구현**: Claude가 만들고 검사를 돌려요. 훅이 알아서 린트, 불변 규칙, 타입 검사, 단위 테스트를 걸어요. 끝나면 보고하고 멈춰요.
-3. **직접 눌러 보기**: 보고의 '확인하는 방법'대로 눌러 봐요. 터미널 탭을 하나 더 열어 `cd web; npm run dev` → http://localhost:3000
-4. **Codex 검수**: `/codex:review` (커밋하지 않은 변경을 읽기만 해요)
-5. **고치기**: `Codex 지적 정리해서 고칠 것만 고쳐 줘`
-6. **커밋**: 검사 통과를 확인하고 `커밋해` → 승인 창이 뜨면 허용
-7. **push**: `git push` (직접)
-8. **다음 W**: `W1 시작해. 계획만 먼저.`
-
-문서 기준으로 세게 보고 싶을 때는 4번에서 `/codex:adversarial-review` 뒤에 초점을 적어요.
-예: `/codex:adversarial-review docs/DECISIONS.md와 data-contract 이름을 따르는지 봐 줘`
+1. **계획 확인**: `/next`. Claude가 계획과 바꿀 계약을 보여 주고 멈춰요. 괜찮으면 `진행해`.
+2. **구현**: 계약 먼저 → 구현 → 테스트. 훅이 알아서 ESLint·ruff, 끝낼 때 불변 규칙·타입·테스트·pytest·계약을 걸어요.
+3. **직접 눌러 보기**: 보고의 '확인하는 방법'대로. 서버는 `cd api; uv run uvicorn app.main:app --reload`, 화면은 `cd web; npm run dev`.
+4. **Codex 검수**: `/codex:review` (커밋하지 않은 변경을 읽기만 해요). 세게 보려면 `/codex:adversarial-review 권한 검사와 409 처리를 봐 줘`.
+5. **고치기**: Codex 결과를 붙여 `/review-fix` → 표를 보고 `진행해`
+6. **마이그레이션이 있으면**: Claude가 적어 준 `uv run alembic upgrade head`를 내 dev 브랜치에 직접 실행(승인 창).
+7. **커밋**: 검사 통과를 확인하고 `커밋해` → 승인 창에서 허용
+8. **push·PR**: 직접. CI가 초록이면 상대가 보고 merge해요.
+9. **다음 F**: `F2 시작해. 계획만 먼저.`
 
 ## 막혔을 때
 
 - **진행이 안 보이면**: `Esc` → `지금까지 한 것, 남은 것, 막힌 것 요약해 줘`
-- **멈춰 있는 것 같으면**: 터미널이 승인 질문(허용할까요?)에서 기다리고 있는지 먼저 봐요.
-- **훅이 같은 오류로 막으면**: 한 번 다시 고쳐 본 뒤에도 실패하면 Claude가 실패를 보고하고 멈춰요. 보고를 읽고 정해요.
-- **불변 규칙이 맞지 않는 상황이면**: 규칙 예외는 사람이 `scripts/check-invariants.mjs`를 고쳐서 둬요(Claude는 못 고쳐요). 혜린님과 같이 정해요.
-- **Claude가 문서와 다르게 하자고 하면**: 혜린님께 공유해 주세요. `docs/DECISIONS.md`를 고칠지 같이 정해요.
-- **시트를 고쳤으면**: .xlsx를 다시 내려받아 `py scripts/sheets_to_md.py`를 다시 돌리고 커밋해요.
+- **멈춰 있는 것 같으면**: 승인 질문(허용할까요?)에서 기다리는지 먼저 봐요.
+- **훅이 같은 오류로 막으면**: 한 번 다시 고친 뒤에도 실패하면 Claude가 보고하고 멈춰요. 보고를 읽고 정해요.
+- **R13(계약)이 실패하면**: `cd api; uv run python scripts/dump_openapi.py; cd ../web; npm run gen:api` 뒤 두 파일을 같이 커밋.
+- **DB 테스트가 'TEST_DATABASE_URL이 DATABASE_URL과 같아요'로 멈추면**: `api/.env`의 두 주소를 서로 다른 Neon 브랜치로.
+- **불변 규칙이 맞지 않는 상황이면**: 규칙 예외는 사람이 `scripts/check-invariants.mjs`를 고쳐서 둬요(Claude는 못 고쳐요). F7에서 `R11_STRICT = true`로 바꾸는 것도 사람이에요.
+- **Claude가 문서와 다르게 하자고 하면**: 팀에 공유하고 `docs/DECISIONS.md`를 고칠지 같이 정해요.
+- **시트를 고쳤으면**: 시트 셋을 .xlsx로 받아 `docs/source/`에 넣고 `py scripts/sheets_to_md.py` → 커밋.
+- **Railway가 이상하면**: `docs/DEPLOY.md` 2장의 Hobby 기준을 봐요.
 - **시간이 밀리면**: `docs/PLAN.md` 끝의 '빼는 순서'대로 빼요.

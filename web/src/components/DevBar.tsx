@@ -10,8 +10,14 @@ import { usePanelLayout, useSessionVersion } from "./hooks";
 import { JoinForm } from "./JoinForm";
 import styles from "./DevBar.module.css";
 
-/** 개발용 막대를 끄려면 NEXT_PUBLIC_DEV_BAR=off (FR-41 ④). */
-export const DEV_BAR_ENABLED = process.env.NEXT_PUBLIC_DEV_BAR !== "off";
+/**
+ * 개발용 막대(FR-41 ④, 불변 규칙 R14).
+ * 개발 서버(npm run dev, e2e)에서는 보이고, 배포 빌드에서는 NEXT_PUBLIC_DEV_BAR=1일 때만 보여요.
+ * 개발 서버에서도 숨기려면 NEXT_PUBLIC_DEV_BAR=0.
+ */
+const DEV_BAR_FLAG = process.env.NEXT_PUBLIC_DEV_BAR;
+export const DEV_BAR_ENABLED =
+  DEV_BAR_FLAG === "1" || (DEV_BAR_FLAG !== "0" && process.env.NODE_ENV === "development");
 
 const PANEL_LABEL: Record<PanelLayout, string> = { single: "하나씩", split: "나란히" };
 

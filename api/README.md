@@ -1,6 +1,21 @@
-# api/
+# api/ (Booktelier 서버)
 
-목요일부터 FastAPI 서버를 둘 자리예요. 1차 MVP(수요일)에는 비워 둬요.
+FastAPI + PostgreSQL(pgvector). 지도는 `api/AGENTS.md`, 배포와 환경 변수는 `docs/DEPLOY.md`.
 
-- 1차는 `web/`의 브라우저 저장과 예시 데이터로 돌아요(`docs/DECISIONS.md` D-06, D-07).
-- 서버를 붙일 때는 data-contract 모양을 그대로 따르고(boundary M5), 웹은 `web/src/data/` 어댑터만 HTTP 구현으로 바꿔요.
+## 처음 한 번 (Windows PowerShell)
+
+```powershell
+cd api
+uv sync                              # Python 3.12와 패키지를 설치해요(.venv)
+Copy-Item .env.example .env          # 값 채우기: DATABASE_URL, TEST_DATABASE_URL (Neon 내 브랜치)
+uv run alembic upgrade head          # 내 dev 브랜치에 테이블 올리기
+uv run uvicorn app.main:app --reload # http://localhost:8000/docs
+```
+
+## 검사
+
+```powershell
+uv run ruff check . ; uv run ruff format --check . ; uv run mypy app tests ; uv run pytest -q
+```
+
+저장소 맨 위에서 `node scripts/check-all.mjs --api`로 한 번에 돌려도 돼요(계약 검사 포함).

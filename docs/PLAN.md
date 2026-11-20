@@ -1,121 +1,80 @@
-# 1차 MVP 작업 계획 (W0 ~ W6)
+# 최종 MVP 작업 계획 (F0 ~ F8)
 
-한 번에 **W 하나**만 해요. W마다 CLAUDE.md의 '작업 루프'를 한 바퀴 돌고, 사람이 확인해야 다음 W로 넘어가요.
-데모 단계 번호는 개발 문서 demo-flow, QA 번호는 개발 문서 '1차 점검' 탭이에요.
+발표는 **11.26(목)**. 다른 컴퓨터에서 핵심 흐름 13단계가 되는 배포를 **11.25(수)까지**(NFR-16), 11.25 저녁에 기능을 동결해요.
+지금 할 F: F0
 
-## 모든 W에 공통인 완료 기준
+> 위 줄은 사람이 F가 끝날 때마다 고쳐요. `node scripts/progress.mjs`가 이 줄과 아래 'F별 번호' 표를 읽어요.
 
-- `cd web && npm run check`(lint + 타입 검사 + 단위 테스트)가 통과해요.
-- 그 W까지 만든 데모 단계를 이어서 누르는 e2e가 `web/e2e/demo-flow.spec.ts`에 있고 `npm run test:e2e`가 통과해요. 아직 만들지 않은 단계는 테스트에 넣지 않아요.
-- 그 W의 '확인할 QA'를 스스로 눌러 보고(또는 테스트로) 결과를 보고에 적어요.
-- 새로 남기는 이벤트가 있으면 events 문서의 이름과 공통 칸을 따르고, 보고에 적어요.
+1차 계획(W0~W6)은 `docs/archive/PLAN-mvp1.md`에 있어요. 결정은 `docs/DECISIONS.md`(D-xx), 확인은 개발 문서 '최종 점검(프론트)' QA-F01~30과 아래 서버 점검이에요.
 
----
+## 진행 방식
 
-## W0. 저장소와 도구
+- **한 사람이 한 번에 F 하나.** 정모님은 `api/`, 혜린 님은 `web/`을 맡아 나란히 가요. 표의 '누가' 칸을 따라요.
+- **계약 먼저(D-25).** 각 F에서 쓰는 API는 정모님이 Pydantic 모델과 가짜 응답 엔드포인트를 먼저 올리고(`openapi.json`, `web/src/types/api.ts`까지), 웹은 그 계약으로 만들어요.
+- **브랜치와 PR.** `api/…`·`web/…` 브랜치에서 일하고 PR로 합쳐요. 상대가 보고 merge해요. 계약을 바꾸는 PR을 먼저 merge해요. CI(`.github/workflows/check.yml`)가 통과해야 merge해요.
+- F마다 작업 루프는 `CLAUDE.md`: 계획 → 구현 → 검사 → 보고하고 멈춤 → Codex 검수 → 고침 → 사람 확인 → 커밋(사람이 '커밋해') → push·PR(사람).
 
-**만들 것** (11.18 17시에 1~3을 직접 돌려 확인한 명령이에요. 그대로 써요)
-1. `web/`에 Next.js 앱: TypeScript, ESLint, App Router, `src/` 폴더, Tailwind 없음(템플릿이 CSS 변수 묶음이라 CSS 변수 + CSS Modules로 해요), import 별칭 `@/*`, npm. 저장소 맨 위에서
-   `npx --yes create-next-app@latest web --ts --eslint --app --src-dir --no-tailwind --import-alias "@/*" --use-npm --yes --disable-git` (2분 안팎)
-   - Next.js가 `web/AGENTS.md`를 만들어요. Next.js 16은 학습 데이터와 다른 곳이 있으니 `node_modules/next/dist/docs/`를 먼저 보라는 안내예요. 지우지 말고 같이 커밋해요(`next dev`가 다시 만들어요).
-2. 단위 테스트 Vitest, e2e Playwright(chromium만, 창 1440×900, `webServer`로 개발 서버를 띄움). `web/`에서
-   `npm i -D @types/node@^22 vitest @playwright/test` 그다음 `npx playwright install chromium`
-   - `@types/node@^22`를 같이 올려야 해요. create-next-app이 `^20`을 넣는데 Vitest 5는 22 이상을 요구해서, 빼면 설치가 ERESOLVE로 실패해요.
-3. `web/package.json` scripts를 이 이름으로 맞춰요. 훅이 이 이름을 불러요.
-   - `dev`, `build`, `start`
-   - `lint`: `eslint . --max-warnings 0`
-   - `typecheck`: `tsc --noEmit`
-   - `test`: `vitest run --passWithNoTests`
-   - `test:e2e`: `playwright test`
-   - `check`: `npm run lint && npm run typecheck && npm run test && node ../scripts/check-invariants.mjs`
-4. `web/e2e/smoke.spec.ts`: 첫 화면(/)이 열리고 'Booktelier'가 보이며 로그인·회원가입 화면이 나오지 않아요.
-5. `docs/sheets/INDEX.md`가 있는지 확인해요. 없으면 멈추고 사람에게 `python scripts/sheets_to_md.py`를 돌려 달라고 해요.
-6. 예시 데이터: `docs/sheets/dev/json/` 아래 data-contract에서 꺼낸 JSON 세 개를 `web/src/fixtures/`에 복사해요. 이름은 `live_check.json`, `chapter_review.json`, `manuscript.json`. **내용은 바꾸지 않아요**(D-19).
-7. 검사 장치가 도는지 확인해요: 저장소 맨 위에서 `node scripts/check-invariants.mjs`가 통과하고, `.claude/hooks/stop-check.mjs`에 빈 입력 `{}`을 넣어 실행하면 종료 코드 0이 나와요.
+## 모든 F에 공통인 완료 기준
 
-**확인할 QA**: QA-01, QA-03, QA-05
+- `node scripts/check-all.mjs`가 통과해요(불변 규칙, web lint·타입·단위 테스트, api ruff·mypy·pytest, 계약).
+- 서버를 바꿨으면 DB 테스트까지 돌려요(`api/.env`에 `TEST_DATABASE_URL`). CI는 늘 DB 테스트를 돌려요.
+- 화면을 바꿨으면 `cd web && npm run test:e2e`가 통과해요. 핵심 흐름 e2e는 그 F까지 서버로 옮긴 단계만 서버로 돌려요.
+- 그 F의 '확인할 QA'를 스스로 눌러 보거나 테스트로 확인하고 결과를 보고에 적어요.
+- 새로 남기는 이벤트는 events 탭의 이름과 공통 칸을 따르고, 원고 글자는 이벤트·로그에 넣지 않아요(db 1번).
 
----
+## 서버 점검 (정모님, F마다 pytest로)
 
-## W1. 데이터 층 (화면 없이)
+| 번호 | 확인할 것 | F |
+| --- | --- | --- |
+| S-01 | 토큰이 없으면 401, 틀린 토큰도 401 | F1 |
+| S-02 | 다른 책의 자원을 부르면 403 | F1 |
+| S-03 | 초대 링크를 새로 바꾸거나 취소하면 옛 링크로 참여할 수 없음 | F1 |
+| S-04 | 토큰은 해시만 저장되고, 어떤 응답에도 `token_hash`가 없음 | F1 |
+| S-05 | 역할 × 엔드포인트 권한 표(D-14, D-15)를 표 하나로 도는 테스트가 통과 | F1~F5 |
+| S-06 | `base_version`이 다르면 409와 최신 버전 | F3 |
+| S-07 | 다른 사람의 보내기 전 AI 제안은 목록에 오지 않음(D-29) | F5 |
+| S-08 | 적용·수락을 서버가 원고에 반영하고 버전을 올림(D-30) | F5 |
+| S-09 | 이벤트에 원고 글자가 없음, KPI 계산 함수의 단위 테스트(db 5번) | F8 |
 
-**만들 것**
-- `web/src/types/`: data-contract 엔터티와 확정 상태 값의 타입. kind는 D-04의 넷만.
-- `web/src/data/`: 저장소 인터페이스 + localStorage 구현. 화면은 이것만 써요(나중에 HTTP 구현으로 바꿀 자리).
-- `web/src/domain/`: 화면과 상관없는 순수 함수
-  - 상태 전이: AI 제안(pending → applied · dismissed · sent · stale, applied → pending은 실행 취소 1회, sent → merged), 장(editing → review_requested → reviewed), 수정 제안(pending → accepted · rejected)
-  - 권한: `can(role, action)` 한 곳에서. D-14, D-15를 따라요
-  - 위치: anchor로 글자를 찾고, 어긋나면 original로 다시 찾기(NFR-05)
-- `web/src/ai/`: AI 제공자 인터페이스 + 데모 제공자(fixtures를 돌려주고 짧게 기다리는 흉내). 실제 LLM 호출 없음(D-06).
-- `web/src/events/`: `track(name, props)`. 공통 칸(event_id, name, ts(ms), anon_id, session_id(30분), participant_id, project_id, chapter_id, role, path, props)을 채우고 props에 `panel_layout`을 늘 넣어요(D-10).
-- 단위 테스트: 상태 전이, 권한표, **fixtures의 제안 7개 위치가 예시 원고 글자와 맞는지**, 이벤트 공통 칸.
+## F 목록
 
-**확인할 QA**: QA-46, QA-47, QA-48
+| F | 언제 | 누가 | 만들 것 | 끝났다는 기준 |
+| --- | --- | --- | --- | --- |
+| **F0 하네스 v3** | 11.20(금) | 혜린·정모 | 이 하네스. `mvp1` 태그, `api/` 뼈대(`/health`), 시트 v0.4 다시 내보내기, Neon 프로젝트와 브랜치, Railway·Vercel 계정 | `node scripts/check-all.mjs` 통과, 1차 e2e 그대로 통과, Claude에게 "지금 할 일이 뭐야?"라고 물으면 F1을 가리킴 |
+| **F1 서버 뼈대·신원** | 11.21(토) | 정모 | 설정, DB 연결, 테이블 12개 마이그레이션(`rag_chunk`는 F6), 토큰(편집자·참여자) 발급과 해시 저장, A-01~09(A-03 내 책 목록 포함). **오전에 A-01~A-15의 Pydantic 모델과 가짜 응답을 먼저** 올려 웹이 기다리지 않게 해요. Railway에 첫 배포(`docs/DEPLOY.md` 체험 확인) | S-01~S-04, Railway `/health`와 Neon 연결 확인 |
+| **F2 웹을 서버로** | 11.21~22 | 혜린 | `data/` HTTP 어댑터(api-needs의 '1차 data/ 함수'와 짝), 토큰 저장과 주소에서 지우기, `/e/[token]`, 편집자 링크 안내(ST-02), 참여 화면 재방문, 리뷰 R-3(`ChapterWorkspace.tsx` 나누기)·B-4(엔터티 통째 덮어쓰기) | QA-F01·03~08. 1차 단위 테스트 통과(localStorage 구현은 테스트용, D-20) |
+| **F3 원고·장·조판** | 11.22(일) | 정모 API, 혜린 화면 | A-10~15, A-29(검토본: 핵심 흐름 11단계). 버전 충돌 409, 저장 상태와 다시 시도(리뷰 B-1, NFR-06), 장 추가(FR-15), 조판 설정 확장(여백 4개·제본 여백·글꼴·크기·쪽 공통 설정, FR-44·45), 템플릿 잠정값(DESIGN.md 4장, 저장된 1차 책의 값 옮기기) | QA-F11·15~17, S-06. 다른 브라우저에서 새로고침해도 같음 |
+| **F4 함께 작업** | 11.22~23 | 둘 | A-30·31 몇 초 간격(D-31), 접속자·작업 위치(FR-19·47), 받은 변경으로 다시 그리기(입력 중 문단은 지킴) | QA-F09·10. **두 브라우저 e2e**(NFR-17 ②) 통과 |
+| **F5 AI 제안 흐름·의견·수정 제안** | 11.23(월) | 둘 | `api/app/ai/` 제공자 인터페이스와 **데모 제공자**(1차 예시 JSON)로 A-16~20(실시간 교정, 장 검토, 적용·무시·유지를 서버가 반영). 이어서 A-21~28: 보내기(수정 제안이면 카드 하나), 수정 제안 이유·종류, 의견 해결·다시 열기, 거르기, 처음 본 기록, 확인할 일, 표기 원칙(A-28) | QA-F19~24, S-05·07·08. 데모 제공자로 핵심 흐름 13단계 e2e 통과 |
+| **F6 실제 AI** | 11.22~24 | 정모 | LLM 제공자를 F5 인터페이스 뒤에 붙임(LangChain), 책 원칙 넣기, RAG 최소판(어문 규범 일부 + 다른 장, D-26), `rag_chunk` 마이그레이션, 근거(evidence) 칸. 화면은 근거 표시만 더함 | QA-F18. 예시 원고 정답 7개 비교표. 실패해도 입력이 막히지 않음(NFR-03). `AI_PROVIDER=demo`로 바로 돌아감 |
+| **F7 지면·미리보기·디자인** | 11.23~24 | 혜린 | `tokens.css` 적용 후 **R11_STRICT 켜기**(사람), DESIGN.md 6장대로 화면 정리, 한 쪽 보기 쪽 경계·쪽 번호, Paged.js 미리보기 PV-01~05, 글자 로고 | QA-F02·12~14·29. 1440·1280 화면 캡처를 시안과 나란히 |
+| **F8 기록·배포·점검** | 11.24~25 | 둘 | 이벤트 서버 저장 A-33, /dev 지표 A-34, 배포(Vercel·Railway·Neon `booktelier-prod`), 최종 점검 QA-F01~30과 서버 점검, 발표 연습 | NFR-16: **11.25(수)까지 다른 컴퓨터에서 핵심 흐름 13단계**, S-09. 11.25 저녁 기능 동결 |
+| Could | 남는 날만 | — | 장 탭 FR-48, AI 대화 FR-50, 굵게·기울임 FR-51, 보기 켜고 끄기 FR-52, 밑줄 팝오버 FR-53 | 하나씩 넣고 그때마다 e2e 통과 |
 
----
+## F별 번호
 
-## W2. 책 만들기 · 공유 · 링크로 들어오기 (데모 1~5)
+`node scripts/progress.mjs`가 이 표를 읽어 지금 F에서 서버에 아직 없는 API와 확인할 QA를 보여 줘요. 위 표의 A·QA 번호를 바꾸면 여기도 같이 바꿔요.
 
-**만들 것**
-- ST-01 새 책 만들기(제목, 템플릿 3종), HM-01 편집자 홈(책 카드, 확인할 일), WS-02 공유 창(작가 링크·디자이너 링크 복사), JN-01 링크로 들어오기(책 제목, 역할, 이름), 작업 공간의 빈 틀(상단 바, 역할 배지)
-- DV-02 개발용 막대: 역할 전환(편집자·작가·디자이너), 패널 배치 전환(하나씩·나란히), 설정으로 끌 수 있음. 주소는 바꾸지 않아요(정할 것 4)
-- 이벤트: project_created, template_selected, role_link_copied, role_link_opened, participant_joined
+| F | API | 확인할 QA | 서버 점검 |
+| --- | --- | --- | --- |
+| F0 | - | - | - |
+| F1 | A-01~09 | - | S-01~05 |
+| F2 | A-01~09 | QA-F01·03~08 | - |
+| F3 | A-10~15·29 | QA-F11·15~17 | S-05·06 |
+| F4 | A-30~31 | QA-F09·10 | - |
+| F5 | A-16~28 | QA-F19~24 | S-05·07·08 |
+| F6 | A-16~17 | QA-F18 | - |
+| F7 | A-35 | QA-F02·12~14·29 | - |
+| F8 | A-33~34 | QA-F01~30 | S-09 |
+| Could | A-32 | QA-F25~27 | - |
 
-**확인할 QA**: QA-05~QA-10, QA-24
-
----
-
-## W3. 지면과 실시간 교정 (데모 6)
-
-**만들 것**
-- WS-01 작업 공간: 장 목록과 장 상태 배지, 책 모양 지면(편집기는 Tiptap, 문단마다 `attrs.id`, 템플릿 CSS 변수 적용), 오른쪽 검토 패널(탭)
-- 작가가 문단을 고치고 1.5초 멈추면 데모 제공자의 실시간 교정 결과로 밑줄과 카드(원문, 수정안 1개, 대안 최대 2개, 종류, 이유)를 보여 줘요. 보내기 전 AI 제안은 본인만 봐요
-- 카드 동작: 적용(작가만, 실행 취소 1회), 무시, 이 표현 유지(Should). 겹친 밑줄은 D-12
-- 이벤트: first_edit, AI 제안 노출·적용·무시·유지(이름은 events 탭 '확정 이름')
-
-**확인할 QA**: QA-11, QA-19~QA-23, QA-27~QA-36, QA-38
-
----
-
-## W4. 검토 요청 · 장 검토 · 보내기 · 수락 (데모 7~10)
-
-**만들 것**
-- 검토 요청(작가)과 검토 완료(편집자), 편집자 홈 책 카드의 확인할 일 늘고 줄기
-- 장 검토(편집자): 진행 표시 동안 버튼 막힘 → 결과 카드 목록. 종류별 개수 한 줄은 Could
-- 보내기 창: 의견 / 수정 제안 고르기, 수정안이나 대안 고르기, 문구 다듬기. 받은 카드에 'AI 제안에서 보냄'
-- 수정 제안: 지면에 지운 글자와 더한 글자, 수락 · 거절. 의견은 세 역할 모두. 답글과 반영 구분은 Should
-- 이벤트: review_requested, chapter_review_run, ai_suggestion_sent, suggested_edit_accepted, AI 제안 반영
-
-**확인할 QA**: QA-12~QA-15, QA-39~QA-42
-
----
-
-## W5. 검토본 · 디자이너 · 조판 설정 · 패널 두 배치 (데모 11~13)
-
-**만들 것**
-- 검토본 저장(편집자)과 목록 보기(모두, 읽기 전용)
-- 디자이너 화면: 원고 수정·수정 제안·AI 탭 없음, 의견은 가능, 역할 배지 '디자이너'
-- 조판 설정 패널(편집자·디자이너): 템플릿, 판형, 여백, 행간. 템플릿을 바꾸면 확인 뒤 그 템플릿 기본값으로. 마지막에 바꾼 사람과 시각이 보임. 작가는 값만 글자로(D-15)
-- 오른쪽 패널 A안·B안(D-10)
-- 이벤트: snapshot_saved, participant_joined(designer), layout_changed(손을 뗄 때 한 번)
-
-**확인할 QA**: QA-16~QA-18, QA-25, QA-43, QA-44. QA-26(1440px에서 나란히 열었을 때 지면이 읽을 만한지)은 사람이 판단하도록 화면을 캡처해 보고에 붙여요
-
----
-
-## W6. 마무리
-
-**만들 것**
-- `web/e2e/demo-flow.spec.ts`가 1~13단계를 한 번에 통과(QA-04)
-- /dev/events 퍼널 화면: 13단계 도달 수와 이탈 수(QA-45)
-- 1280px·1440px에서 겹치거나 잘리지 않음(QA-49), 콘솔 빨간 오류 없음(QA-51), 키보드로 1~5단계(QA-50, Should)
-- `README.md`에 실행 방법
-- 배포(Vercel)는 사람이 해요. Claude는 `npm run build` 통과와 필요한 환경 변수가 없다는 것까지 확인해요
-
----
+**막히는 길(critical path)**: F1 → F2 → F3 → F4·F5 → F8. F6은 F5의 데모 제공자 자리에 끼우는 것이라 늦어져도 흐름은 끝나요. 웹이 서버를 기다리지 않게, **F1 첫날 오전에 가짜 응답 엔드포인트를 먼저 올리는 것**이 가장 중요해요.
 
 ## 시간이 밀리면 빼는 순서
 
-1. Could: FR-04 책 거르기, FR-22 장 검토 요약 한 줄, FR-31 표기 원칙 목록
-2. Should 중 데모 13단계에 없는 것: FR-26 정렬·거르기, FR-36 답글과 반영 구분, FR-19 접속자 표시, QA-50 키보드
-3. 그래도 밀리면 사람과 상의해요. 데모 13단계에 들어가는 기능은 빼지 않아요.
+1. Could 전부
+2. F6의 RAG(책 원칙만 넣은 LLM 호출로)
+3. F4의 작업 위치(접속자 표시만)
+4. F6 전체를 데모 제공자로. 발표 때 '실제 AI는 붙이는 중'이라고 밝혀요.
+
+서버 저장, 다른 브라우저 사이 반영, 의견·수정 제안, 미리보기는 빼지 않아요(최종 MVP 한 줄 정의).

@@ -27,3 +27,15 @@ docs/source/*.txt
 # 운영체제
 .DS_Store
 Thumbs.db
+
+# Python(api/)
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# IDE·개인 설정과 개인 산출물(불변 규칙 R10)
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Claude outputs/

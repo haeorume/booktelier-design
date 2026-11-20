@@ -1,0 +1,95 @@
+# PR마다, main(master)에 올라올 때마다 저장소 검사를 돌려요(하네스 v3 3장 10번).
+# 비밀값을 쓰지 않아요: DB는 이 작업 안에서 잠깐 띄우는 pgvector 컨테이너예요(D-23). 공개 저장소라서.
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - name: 불변 규칙
+        run: node ../scripts/check-invariants.mjs
+
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # Neon 프로젝트와 같은 Postgres 메이저 버전을 써요(docs/DEPLOY.md)
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: booktelier_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/booktelier_test
+      REQUIRE_DB_TESTS: "1"
+      AI_PROVIDER: demo
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy app tests
+      - name: 마이그레이션을 끝까지 올리고, 모델과 마이그레이션이 같은지 확인
+        run: |
+          uv run alembic -x url="$TEST_DATABASE_URL" upgrade head
+          uv run alembic -x url="$TEST_DATABASE_URL" check
+      - run: uv run pytest -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: 계약(R13)
+        working-directory: .
+        run: |
+          npm ci --prefix web
+          node scripts/check-contract.mjs
+
+  e2e:
+    # F2에서 저장을 서버로 옮기는 동안 1차 e2e가 안전망이에요. 화면이 서버를 부르기 시작하면
+    # 이 job에 pgvector 서비스와 api 띄우기를 더해요(PLAN F2, 사람이).
+    needs: web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
