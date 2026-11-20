@@ -21,7 +21,7 @@ export const PERMISSIONS = {
   create_suggested_edit: EDITOR, // FR-33
   complete_review: EDITOR,
   save_snapshot: EDITOR,
-  share_role_links: EDITOR, // 공유 창(FR-05, routes WS-02)
+  share_role_links: EDITOR, // 초대 창(FR-05, routes WS-02, L-07)
   open_editor_home: EDITOR, // 경로 표시의 '편집자 홈'(WS-11), FR-07
   // AI 제안 카드(디자이너는 AI 탭이 없음)
   view_ai_suggestions: AUTHOR_EDITOR,

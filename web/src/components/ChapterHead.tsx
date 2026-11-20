@@ -1,9 +1,9 @@
 "use client";
 
 import { can } from "@/domain/permissions";
-import { CHAPTER_STATUS_LABEL } from "@/domain/labels";
 import type { Chapter, Role } from "@/types";
 import styles from "./ChapterHead.module.css";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   chapter: Chapter;
@@ -21,9 +21,7 @@ interface Props {
 export function ChapterHead({ chapter, role, busy, onRequestReview, onCompleteReview }: Props) {
   return (
     <div className={styles.head}>
-      <span className={styles.badge} data-testid="chapter-head-status">
-        {CHAPTER_STATUS_LABEL[chapter.status]}
-      </span>
+      <StatusBadge status={chapter.status} testId="chapter-head-status" />
       {can(role, "request_review") && (
         <button type="button" className={styles.button} disabled={busy || chapter.status === "review_requested"} onClick={onRequestReview}>
           검토 요청

@@ -107,6 +107,7 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
     <li
       className={`${styles.card} ${decided ? styles.decided : ""}`}
       data-testid="edit-card"
+      data-card="edit"
       data-card-id={edit.id}
       data-status={edit.status}
       aria-current={selected.includes(edit.id) ? "true" : undefined}
@@ -159,6 +160,7 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
       className={`${styles.card} ${resolved ? styles.decided : ""}`}
       data-status={comment.status}
       data-testid="comment-card"
+      data-card="comment"
       data-card-id={comment.id}
       aria-current={selected.includes(comment.id) ? "true" : undefined}
       tabIndex={0}

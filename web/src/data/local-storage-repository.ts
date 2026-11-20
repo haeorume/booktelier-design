@@ -49,7 +49,7 @@ const defaultNewId = () => crypto.randomUUID();
 
 /**
  * 1차에 저장된 초대 링크는 { token, project_id, role, revoked_at }뿐이다. 읽을 때 새 모양으로 채운다
- * (id는 token, 주소는 /j/token). 그래야 옛 책의 공유 창이 깨지지 않는다(Codex 검수 11.21).
+ * (id는 token, 주소는 /j/token). 그래야 옛 책의 초대 창이 깨지지 않는다(Codex 검수 11.21).
  */
 export function upgradeRoleLink(row: Partial<LocalRoleLink> & { token: Uuid; project_id: Uuid; role: RoleLink["role"] }): LocalRoleLink {
   return {

@@ -9,6 +9,7 @@ import { TEMPLATE_ORDER, TEMPLATES } from "@/domain/templates";
 import { setTrackContext, track } from "@/events";
 import type { TemplateId } from "@/types";
 import styles from "./page.module.css";
+import { Logo } from "@/components/Logo";
 
 /**
  * 새 책 만들기(ST-01). 제목과 템플릿을 받아 만든다(FR-01, FR-10).
@@ -61,7 +62,9 @@ export function NewBook() {
 
   return (
     <main className={styles.main}>
-      <p className={styles.brand}>Booktelier(북틀리에)</p>
+      <p className={styles.brand}>
+        <Logo size="lg" withName />
+      </p>
       <form
         className={styles.form}
         onSubmit={(e) => {

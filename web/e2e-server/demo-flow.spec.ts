@@ -34,9 +34,9 @@ test("데모 1~13단계를 서버로: 세 브라우저가 같은 책을 만든�
   const workspaceUrl = editor.url();
   await expect(paragraph(editor, "para_02")).toContainText("오르세 미술관");
 
-  // 3. 공유: 작가 링크와 디자이너 링크를 만든다
-  await editor.getByRole("button", { name: "공유" }).click();
-  const share = editor.getByRole("dialog", { name: "공유" });
+  // 3. 초대: 작가 링크와 디자이너 링크를 만든다
+  await editor.getByRole("button", { name: "초대", exact: true }).click();
+  const share = editor.getByRole("dialog", { name: "참여자 초대" });
   const links: Record<string, string> = {};
   for (const role of ["author", "designer"]) {
     const row = share.getByTestId(`share-${role}`);

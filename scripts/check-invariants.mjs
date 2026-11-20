@@ -25,7 +25,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // F7(디자인 적용)에서 true로 바꾼다. 그 전에는 아래 1차 파일의 R11 위반만 경고로 보여 주고 통과시킨다.
-const R11_STRICT = false;
+const R11_STRICT = true;
 // 1차 MVP에서 색 값을 직접 쓴 파일. 여기 없는 파일(새 파일)은 R11_STRICT와 상관없이 바로 막는다.
 const R11_BASELINE = new Set([
   "web/src/components/DevBar.module.css",

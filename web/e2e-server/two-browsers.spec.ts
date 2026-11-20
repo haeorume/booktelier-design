@@ -26,8 +26,8 @@ async function createBook(page: Page, title: string) {
 }
 
 async function inviteUrl(page: Page, role: "author" | "designer") {
-  await page.getByRole("button", { name: "공유" }).click();
-  const dialog = page.getByRole("dialog", { name: "공유" });
+  await page.getByRole("button", { name: "초대", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "참여자 초대" });
   const row = dialog.getByTestId(`share-${role}`);
   await row.getByRole("button", { name: "링크 만들기" }).click();
   const box = row.getByRole("textbox");

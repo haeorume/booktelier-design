@@ -35,10 +35,10 @@
   font: inherit;
   font-weight: 400;
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
 }
 
 .templates {
@@ -57,13 +57,13 @@
   flex-direction: column;
   gap: 0.3rem;
   padding: 0.9rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 8px;
   cursor: pointer;
 }
 
 .template[data-selected="true"] {
-  border: 2px solid var(--accent);
+  border: 2px solid var(--bt-brand);
   padding: calc(0.9rem - 1px);
 }
 
@@ -74,8 +74,7 @@
 }
 
 .template:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  box-shadow: var(--bt-focus);
 }
 
 .templateName {
@@ -84,7 +83,7 @@
 
 .templateSpec {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .actions {
@@ -102,9 +101,9 @@
 }
 
 .primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
 }
 
 .primary:disabled {
@@ -113,5 +112,5 @@
 }
 
 .secondary {
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
 }

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { bookDeps } from "@/data";
-import { CHAPTER_STATUS_LABEL } from "@/domain/labels";
+import { StatusBadge } from "@/components/StatusBadge";
 import type { ProjectCard } from "@/types";
 import styles from "./page.module.css";
+import { Logo } from "@/components/Logo";
 
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString("ko-KR", { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -30,7 +31,9 @@ export default function EditorHome() {
   return (
     <main className={styles.main}>
       <header className={styles.header}>
-        <p className={styles.brand}>Booktelier(북틀리에)</p>
+        <p className={styles.brand}>
+          <Logo size="lg" withName />
+        </p>
         <h1 className={styles.title}>편집자 홈</h1>
         <Link className={styles.newBook} href="/?new=1">
           새 책 만들기
@@ -48,13 +51,19 @@ export default function EditorHome() {
           {cards.map((c) => (
             <li key={c.id}>
               <Link className={styles.card} href={c.first_chapter_id ? `/p/${c.id}/c/${c.first_chapter_id}` : "#"} data-testid="book-card">
-                <span className={styles.cardTitle}>{c.title}</span>
-                <span className={styles.stage}>{CHAPTER_STATUS_LABEL[c.stage]}</span>
-                <span className={styles.meta}>
-                  확인할 일 <strong data-testid="pending-count">{c.todo_count}</strong>
+                {/* 표지: 제목 글자를 명조로 얹은 색 면(DESIGN.md 6장, 사진 없음) */}
+                <span className={styles.cover} aria-hidden="true">
+                  {c.title}
                 </span>
-                <span className={styles.meta}>참여자 {c.participants.length}명</span>
-                <span className={styles.meta}>최근 변경 {formatTs(c.updated_at)}</span>
+                <span className={styles.info}>
+                  <span className={styles.cardTitle}>{c.title}</span>
+                  <StatusBadge status={c.stage} />
+                  <span className={styles.meta}>
+                    확인할 일 <strong data-testid="pending-count">{c.todo_count}</strong>
+                  </span>
+                  <span className={styles.meta}>참여자 {c.participants.length}명</span>
+                  <span className={styles.meta}>최근 변경 {formatTs(c.updated_at)}</span>
+                </span>
               </Link>
             </li>
           ))}

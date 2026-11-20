@@ -1,0 +1,37 @@
+.badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bt-space-1);
+  height: 22px;
+  padding: 0 var(--bt-space-2);
+  border-radius: var(--bt-radius-sm);
+  border: 1px solid var(--bt-line-strong);
+  background: var(--bt-soft);
+  color: var(--bt-text-2);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--bt-radius-full);
+  background: currentColor;
+}
+
+.badge[data-status="review_requested"] {
+  background: var(--bt-accent-soft);
+  border-color: var(--bt-accent-line);
+  color: var(--bt-accent-text);
+}
+
+.badge[data-status="reviewed"] {
+  background: var(--bt-success-soft);
+  border-color: var(--bt-success);
+  color: var(--bt-success);
+}

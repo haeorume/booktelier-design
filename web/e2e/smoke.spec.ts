@@ -4,7 +4,8 @@ test("첫 화면이 열리고 Booktelier가 보이며 로그인·회원가입 �
   const response = await page.goto("/");
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByText("Booktelier(북틀리에)")).toBeVisible();
+  await expect(page.getByTestId("logo")).toContainText("BOOKTELIER");
+  await expect(page.getByTestId("logo")).toContainText("북틀리에");
   await expect(page.getByRole("heading", { name: "새 책 만들기" })).toBeVisible();
 
   await expect(page.getByText(/로그인|회원가입|log ?in|sign ?(in|up)/i)).toHaveCount(0);

@@ -14,14 +14,14 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .badge {
-  border: 1px solid var(--foreground);
+  border: 1px solid var(--bt-text);
   border-radius: 999px;
   padding: 0.1rem 0.6rem;
-  color: var(--foreground);
+  color: var(--bt-text);
   font-weight: 600;
 }
 
@@ -35,10 +35,10 @@
 .input {
   font: inherit;
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
 }
 
 .actions {
@@ -56,9 +56,9 @@
 }
 
 .primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
 }
 
 .primary:disabled {
@@ -67,7 +67,7 @@
 }
 
 .secondary {
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
 }

@@ -70,3 +70,11 @@ for (const width of [1280, 1440]) {
     }
   });
 }
+
+test("1280px에서도 원고 구조의 장 제목이 말줄임만 남지 않는다(DESIGN.md 3장)", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await createBookAndCopyLinks(page, "좁은 화면 제목 확인");
+  const title = page.getByRole("navigation", { name: "원고 구조" }).getByRole("link").first().locator("span").first();
+  const width = await title.evaluate((el) => el.getBoundingClientRect().width);
+  expect(width).toBeGreaterThan(100);
+});

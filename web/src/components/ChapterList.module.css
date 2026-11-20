@@ -1,49 +1,119 @@
+/* 원고 구조(WS-20, DESIGN.md 5장 '장 항목'). */
 .panel {
-  width: 14rem;
+  width: var(--bt-nav-w);
   flex-shrink: 0;
-  border-right: 1px solid var(--border);
-  background: var(--background);
-  padding: 0.9rem;
+  border-right: 1px solid var(--bt-line);
+  background: var(--bt-panel);
+  padding: var(--bt-space-4) var(--bt-space-3);
   overflow: auto;
 }
 
 .heading {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-text-2);
+  padding: 0 var(--bt-space-2);
+  margin-bottom: var(--bt-space-2);
 }
 
 .list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--bt-space-1);
 }
 
+/* 장 항목: 높이 36px, 제목은 한 줄 말줄임, 오른쪽에 상태 배지 */
 .item {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.55rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  align-items: center;
+  gap: var(--bt-space-2);
+  width: 100%;
+  min-height: 36px;
+  padding: 0 var(--bt-space-2);
+  border-radius: var(--bt-radius-md);
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--bt-text);
+  font-size: var(--bt-size-sm);
+  text-align: left;
+}
+
+a.item:hover {
+  background: var(--bt-soft);
 }
 
 .item[aria-current="page"] {
-  border-color: var(--accent);
-  background: var(--surface);
+  border-left-color: var(--bt-brand);
+  background: var(--bt-accent-soft);
+  color: var(--bt-ink);
+  font-weight: var(--bt-weight-medium);
 }
 
 .title {
-  font-size: 0.9rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.badge {
-  align-self: flex-start;
-  font-size: 0.75rem;
-  border: 1px solid var(--foreground);
-  border-radius: 999px;
-  padding: 0 0.5rem;
+.add {
+  margin-top: var(--bt-space-2);
+  color: var(--bt-accent-text);
+  cursor: pointer;
+}
+
+.add:hover {
+  background: var(--bt-accent-wash);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-2);
+  margin-top: var(--bt-space-2);
+  padding: var(--bt-space-2);
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-lg);
+  background: var(--bt-surface);
+}
+
+.input {
+  height: 32px;
+  padding: 0 var(--bt-space-2);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-sm);
+}
+
+.formButtons {
+  display: flex;
+  gap: var(--bt-space-2);
+  justify-content: flex-end;
+}
+
+.formButtons button {
+  height: 28px;
+  padding: 0 var(--bt-space-3);
+  border-radius: var(--bt-radius-md);
+  border: 1px solid var(--bt-line-control);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-xs);
+  cursor: pointer;
+}
+
+.formButtons button[type="submit"] {
+  border-color: var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
+}
+
+.formButtons button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* 좁은 창에서는 패널을 줄여 지면 폭을 지킨다(QA-49). 1280px '나란히'에서도 실용서(152mm) 지면이 들어간다. */
@@ -56,6 +126,26 @@
 @media (max-width: 1360px) {
   .panel {
     width: 9rem;
-    padding: 0.7rem;
+    padding: var(--bt-space-3) var(--bt-space-2);
+  }
+}
+
+/*
+ * 패널이 좁아지면 제목과 상태 배지를 두 줄로 놓아 제목 자리를 패널 폭만큼 지켜요.
+ * 한 줄에 두면 배지가 줄지 않아 제목이 '…'만 남아요(DESIGN.md 3장 1280px, Codex 검수 11.21).
+ */
+@media (max-width: 1500px) {
+  a.item {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--bt-space-1);
+    padding-top: var(--bt-space-2);
+    padding-bottom: var(--bt-space-2);
+  }
+
+  a.item .title {
+    flex: none;
+    width: 100%;
   }
 }

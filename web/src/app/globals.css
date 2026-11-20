@@ -1,31 +1,10 @@
+/*
+ * 화면·본문 글꼴(DESIGN.md 2장, OFL). next/font는 글꼴 이름을 바꿔 붙여서, tokens.css·조판 값·미리보기(Paged.js)가
+ * 같은 이름("Noto Sans KR", "Noto Serif KR")으로 부를 수 있게 Google Fonts 스타일시트로 불러요.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap");
 /* 디자인 토큰(DESIGN.md 2장). 컴포넌트 CSS는 var(--bt-…)만 써요(불변 규칙 R11). */
 @import "../styles/tokens.css";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #555555;
-  --border: #c8c8c8;
-  --surface: #f5f5f4;
-  --accent: #1f3a5f;
-  --accent-contrast: #ffffff;
-  --paper: #fffdf8;
-  --ink: #1b1b1b;
-  --desk: #ecebe7;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #121212;
-    --foreground: #ededed;
-    --muted: #b0b0b0;
-    --border: #444444;
-    --surface: #1e1e1e;
-    --accent: #8fb3e0;
-    --accent-contrast: #0b1520;
-    --desk: #1a1a1a;
-  }
-}
 
 html {
   height: 100%;
@@ -41,9 +20,11 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", Arial, sans-serif;
+  color: var(--bt-text);
+  background: var(--bt-bg);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-md);
+  line-height: var(--bt-leading-ui);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -59,13 +40,16 @@ a {
   text-decoration: none;
 }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* 포커스는 주황 두 겹 띠(DESIGN.md 5장, --bt-focus). 비텍스트 대비 3:1을 넘어요. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--bt-focus);
 }
