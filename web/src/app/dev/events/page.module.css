@@ -12,7 +12,7 @@
 }
 
 .note {
-  color: var(--muted);
+  color: var(--bt-text-2);
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -30,13 +30,13 @@
 .table th,
 .table td {
   padding: 0.55rem 0.7rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--bt-line-strong);
   text-align: left;
 }
 
 .table th {
   font-weight: 600;
-  background: var(--surface);
+  background: var(--bt-panel);
 }
 
 .num {
@@ -45,6 +45,6 @@
 }
 
 .role {
-  color: var(--muted);
+  color: var(--bt-text-2);
   font-size: 0.85rem;
 }

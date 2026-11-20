@@ -31,7 +31,7 @@ test("막대로 역할을 바꾸면 주소는 그대로이고 지금 참여자�
 test("패널 배치를 바꾸면 이후 이벤트의 panel_layout이 바뀐다(D-10)", async ({ page }) => {
   await createBookAndCopyLinks(page);
   await page.getByTestId("dev-bar").getByRole("button", { name: "나란히" }).click();
-  await page.getByRole("button", { name: "공유" }).click();
+  await page.getByRole("button", { name: "초대", exact: true }).click();
   await page.getByTestId("share-author").getByRole("button", { name: "링크 복사" }).click();
   const layouts = async () => (await events(page)).filter((e) => e.name === "role_link_copied").map((e) => e.props.panel_layout);
   await expect.poll(layouts).toEqual(["single", "single", "split"]);
@@ -85,7 +85,7 @@ test("클립보드에 넣지 못하면 '복사됨' 대신 직접 복사하라고
   await page.evaluate(() => {
     navigator.clipboard.writeText = () => Promise.reject(new Error("거부됨"));
   });
-  await page.getByRole("button", { name: "공유" }).click();
+  await page.getByRole("button", { name: "초대", exact: true }).click();
   const row = page.getByTestId("share-author");
   await row.getByRole("button", { name: "링크 복사" }).click();
   await expect(row.getByRole("alert")).toContainText("직접 복사해 주세요");

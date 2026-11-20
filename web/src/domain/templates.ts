@@ -56,7 +56,7 @@ export function parseTrim(trim: string): { width: number; height: number } | nul
 
 const FONT_STACK: Record<FontFamily, string> = {
   serif: '"Noto Serif KR", "Nanum Myeongjo", "Batang", "AppleMyungjo", serif',
-  sans: '"Noto Sans KR", "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif',
+  sans: '"Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif',
 };
 
 /** 지면에 입히는 CSS 변수 묶음(P3). 원고와 따로 저장한 조판 값에서 만든다.

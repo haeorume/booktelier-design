@@ -1,56 +1,107 @@
+/* 상단 바(WS-10, DESIGN.md 3장). 높이 56px, 흰 면 + 아래 구분선. */
 .bar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--background);
+  gap: var(--bt-space-4);
+  min-height: var(--bt-topbar-h);
+  padding: var(--bt-space-2) var(--bt-space-5);
+  border-bottom: 1px solid var(--bt-line);
+  background: var(--bt-surface);
+}
+
+/* 글자 로고(PR-26, D-01). 오름님 SVG가 오기 전에는 Noto Sans KR 600(DESIGN.md 9장). */
+.logo {
+  flex: none;
+  padding-right: var(--bt-space-4);
+  border-right: 1px solid var(--bt-line);
 }
 
 .path {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--bt-space-2);
   min-width: 0;
-  color: var(--muted);
+  font-size: var(--bt-size-sm);
+  color: var(--bt-text-2);
+}
+
+.path > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .path a {
+  color: var(--bt-accent-text);
+}
+
+.path a:hover {
   text-decoration: underline;
 }
 
 .book {
-  color: var(--foreground);
-  font-weight: 600;
+  color: var(--bt-ink);
+  font-weight: var(--bt-weight-bold);
 }
 
+/* 역할 배지(WS-12): 역할 색 세 벌 + 글자. 색만으로 구분하지 않아요. */
 .badge {
-  border: 1px solid var(--foreground);
-  border-radius: 999px;
-  padding: 0.1rem 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--bt-space-2);
+  border: 1px solid;
+  border-radius: var(--bt-radius-sm);
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-bold);
+}
+
+.badge[data-role="editor"] {
+  background: var(--bt-role-editor-bg);
+  border-color: var(--bt-role-editor-line);
+  color: var(--bt-role-editor-text);
+}
+
+.badge[data-role="author"] {
+  background: var(--bt-role-author-bg);
+  border-color: var(--bt-role-author-line);
+  color: var(--bt-role-author-text);
+}
+
+.badge[data-role="designer"] {
+  background: var(--bt-role-designer-bg);
+  border-color: var(--bt-role-designer-line);
+  color: var(--bt-role-designer-text);
 }
 
 .tools {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--bt-space-2);
+}
+
+/* 보조 버튼(DESIGN.md 5장): 흰 바탕, 테두리, 높이 32px */
+.button {
+  height: 32px;
+  padding: 0 var(--bt-space-3);
+  border-radius: var(--bt-radius-md);
+  border: 1px solid var(--bt-line-control);
+  background: var(--bt-surface);
+  color: var(--bt-text);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
+  cursor: pointer;
+  transition: background var(--bt-duration) var(--bt-ease);
+}
+
+.button:hover {
+  background: var(--bt-soft);
 }
 
 .button[aria-pressed="true"] {
-  border-color: var(--accent);
-  background: var(--surface);
-  font-weight: 600;
-}
-
-.button {
-  font: inherit;
-  padding: 0.4rem 0.9rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--foreground);
-  cursor: pointer;
+  border-color: var(--bt-brand);
+  background: var(--bt-accent-soft);
+  color: var(--bt-accent-text);
 }

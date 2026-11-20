@@ -26,7 +26,13 @@ export function roleLinkUrl(link: Pick<RoleLink, "url">): string {
   return `${origin}${link.url}`;
 }
 
-/** 공유 창(WS-02). 역할마다 다른 링크를 복사한다(FR-05). 편집자만 연다. */
+/** 역할 카드 설명은 할 수 있는 일로(DESIGN.md 6장 초대 창). */
+const CAN_DO: Partial<Record<Role, string>> = {
+  author: "원고 쓰기 · AI 제안 · 수정 제안 받기",
+  designer: "조판 설정 · 미리보기 · 의견",
+};
+
+/** 초대 창(WS-02, L-07). 역할마다 다른 링크를 복사한다(FR-05). 편집자만 연다. */
 export function ShareDialog({ links, onCreate, onRotate, onRevoke, onClose }: Props) {
   const [busy, setBusy] = useState<Role | null>(null);
   const [copied, setCopied] = useState<Role | null>(null);
@@ -84,7 +90,7 @@ export function ShareDialog({ links, onCreate, onRotate, onRevoke, onClose }: Pr
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="share-title" onClick={(e) => e.stopPropagation()}>
         <h2 id="share-title" className={styles.title}>
-          공유
+          참여자 초대
         </h2>
         <p className={styles.hint}>링크마다 역할이 정해져 있어요. 받은 사람은 그 역할로만 들어와요. 링크가 새었으면 새로 바꾸거나 취소해요.</p>
         <ul className={styles.list}>
@@ -92,7 +98,10 @@ export function ShareDialog({ links, onCreate, onRotate, onRevoke, onClose }: Pr
             const link = active(role);
             return (
               <li key={role} className={styles.row} data-testid={`share-${role}`}>
-                <span className={styles.label}>{roleLinkLabel(role)}</span>
+                <span className={styles.label}>
+                  {roleLinkLabel(role)}
+                  <span className={styles.can}>{CAN_DO[role]}</span>
+                </span>
                 {link ? (
                   <>
                     <input

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CHAPTER_STATUS_LABEL } from "@/domain/labels";
 import type { Chapter } from "@/types";
 import styles from "./ChapterList.module.css";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   projectId: string;
@@ -37,11 +37,9 @@ export function ChapterList({ projectId, chapters, currentId, onAdd }: Props) {
       <ul className={styles.list}>
         {chapters.map((c) => (
           <li key={c.id}>
-            <Link href={`/p/${projectId}/c/${c.id}`} className={styles.item} aria-current={c.id === currentId ? "page" : undefined}>
+            <Link href={`/p/${projectId}/c/${c.id}`} className={styles.item} aria-current={c.id === currentId ? "page" : undefined} title={c.title}>
               <span className={styles.title}>{c.title}</span>
-              <span className={styles.badge} data-testid="chapter-status">
-                {CHAPTER_STATUS_LABEL[c.status]}
-              </span>
+              <StatusBadge status={c.status} testId="chapter-status" />
             </Link>
           </li>
         ))}
@@ -49,25 +47,25 @@ export function ChapterList({ projectId, chapters, currentId, onAdd }: Props) {
       {onAdd &&
         (adding ? (
           <form
-            className={styles.item}
+            className={styles.form}
             onSubmit={(e) => {
               e.preventDefault();
               void submit();
             }}
           >
-            <input className={styles.title} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="장 제목" aria-label="새 장 제목" maxLength={100} autoFocus />
-            <span className={styles.badge}>
-              <button type="submit" disabled={!title.trim() || busy}>
-                추가
-              </button>{" "}
+            <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="장 제목" aria-label="새 장 제목" maxLength={100} autoFocus />
+            <span className={styles.formButtons}>
               <button type="button" onClick={() => setAdding(false)}>
                 닫기
+              </button>
+              <button type="submit" disabled={!title.trim() || busy}>
+                추가
               </button>
             </span>
           </form>
         ) : (
-          <button type="button" className={styles.item} onClick={() => setAdding(true)}>
-            장 추가
+          <button type="button" className={`${styles.item} ${styles.add}`} onClick={() => setAdding(true)}>
+            <span aria-hidden="true">+ </span>장 추가
           </button>
         ))}
     </nav>

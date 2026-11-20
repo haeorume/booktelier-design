@@ -2,41 +2,59 @@
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--bt-space-2);
 }
 
 .person {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.8rem;
-  color: var(--muted);
-  padding: 0.1rem 0.45rem 0.1rem 0.1rem;
-  border-radius: 999px;
+  gap: var(--bt-space-2);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-2);
+  padding: 2px var(--bt-space-2) 2px 2px;
+  border-radius: var(--bt-radius-full);
   border: 1px solid transparent;
 }
 
 .person[aria-current="true"] {
-  color: var(--foreground);
-  font-weight: 600;
-  border-color: var(--accent);
+  color: var(--bt-text);
+  font-weight: var(--bt-weight-medium);
 }
 
+/* 아바타(DESIGN.md 5장): 지름 28px, 머리글자 + 역할 색. 역할은 옆 글자로도 보여요. */
 .avatar {
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--bt-radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  font-weight: 600;
+  border: 1px solid;
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-bold);
+}
+
+.avatar[data-role="editor"] {
+  background: var(--bt-role-editor-bg);
+  border-color: var(--bt-role-editor-line);
+  color: var(--bt-role-editor-text);
+}
+
+.avatar[data-role="author"] {
+  background: var(--bt-role-author-bg);
+  border-color: var(--bt-role-author-line);
+  color: var(--bt-role-author-text);
+}
+
+.avatar[data-role="designer"] {
+  background: var(--bt-role-designer-bg);
+  border-color: var(--bt-role-designer-line);
+  color: var(--bt-role-designer-text);
 }
 
 .person[aria-current="true"] .avatar {
-  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 2px var(--bt-surface), 0 0 0 3px var(--bt-brand);
 }
 
 .role {
@@ -56,12 +74,11 @@ button.person {
 }
 
 button.person:hover:not(:disabled) {
-  border-color: var(--border);
+  border-color: var(--bt-line-strong);
 }
 
 button.person:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  box-shadow: var(--bt-focus);
 }
 
 button.person:disabled {
@@ -77,5 +94,5 @@ button.person .label {
 /* 지금 보는 장. 이름 아래 작게(DESIGN.md 아바타) */
 .where {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }

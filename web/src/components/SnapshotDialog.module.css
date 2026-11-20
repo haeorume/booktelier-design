@@ -25,15 +25,15 @@
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.55rem 0.7rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
   cursor: pointer;
 }
 
 .item:hover {
-  border-color: var(--accent);
+  border-color: var(--bt-brand);
 }
 
 .name {
@@ -42,11 +42,11 @@
 
 .meta {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .empty {
-  color: var(--muted);
+  color: var(--bt-text-2);
   font-size: 0.9rem;
 }
 
@@ -54,9 +54,9 @@
   max-height: 50vh;
   overflow: auto;
   padding: 1rem;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--border);
+  background: var(--bt-paper);
+  color: var(--bt-ink);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
   line-height: 1.7;
 }

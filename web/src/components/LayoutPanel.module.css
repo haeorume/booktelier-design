@@ -1,8 +1,8 @@
 .panel {
   width: 18rem;
   flex-shrink: 0;
-  border-left: 1px solid var(--border);
-  background: var(--background);
+  border-left: 1px solid var(--bt-line-strong);
+  background: var(--bt-surface);
   padding: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -24,16 +24,16 @@
   font: inherit;
   font-size: 0.85rem;
   padding: 0.2rem 0.6rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
   cursor: pointer;
 }
 
 .lastChange {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .values {
@@ -43,7 +43,7 @@
 }
 
 .values dt {
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .values dd {
@@ -67,7 +67,7 @@
 .hint {
   font-weight: 400;
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 .templates {
@@ -85,14 +85,14 @@
   font-size: 0.85rem;
   text-align: center;
   padding: 0.45rem 0.3rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
   cursor: pointer;
 }
 
 /* 고른 템플릿은 테두리와 체크 표시를 함께 쓴다(CS-05, 색만으로 구분하지 않음). */
 .template[data-selected="true"] {
-  border: 2px solid var(--accent);
+  border: 2px solid var(--bt-brand);
   font-weight: 600;
 }
 
@@ -103,8 +103,7 @@
 }
 
 .template:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  box-shadow: var(--bt-focus);
 }
 
 .select,
@@ -112,10 +111,10 @@
   font: inherit;
   font-weight: 400;
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
 }
 
 .slider {
@@ -141,7 +140,7 @@
 
 .unit {
   font-size: 0.85rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
 }
 
 /* 좁은 창에서는 패널을 줄여 지면 폭을 지킨다(QA-49). */

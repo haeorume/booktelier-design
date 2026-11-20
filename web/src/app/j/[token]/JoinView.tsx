@@ -8,6 +8,7 @@ import { bookDeps, stashInviteToken, tabStorage } from "@/data";
 import { setTrackContext, track } from "@/events";
 import type { Role } from "@/types";
 import styles from "./page.module.css";
+import { Logo } from "@/components/Logo";
 
 type View = { kind: "loading" } | { kind: "unusable" } | { kind: "ready"; role: Role; title: string };
 
@@ -47,7 +48,9 @@ export function JoinView({ token }: { token: string }) {
   const { role, title } = view;
   return (
     <main className={styles.main}>
-      <p className={styles.brand}>Booktelier(북틀리에)</p>
+      <p className={styles.brand}>
+        <Logo size="lg" withName />
+      </p>
       <JoinForm
         bookTitle={title}
         role={role}

@@ -33,7 +33,7 @@ export const NAVIGATE_MS = 30_000;
 const WORKSPACE = /\/p\/[0-9a-f-]{36}\/c\/[0-9a-f-]{36}$/;
 export const LINK = /\/j\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
-/** 데모 1~3단계: 책을 만들고 공유 창에서 두 링크를 복사한다. */
+/** 데모 1~3단계: 책을 만들고 초대 창에서 두 링크를 복사한다. */
 export async function createBookAndCopyLinks(page: Page, title = "파리에서 보낸 한 달") {
   await page.goto("/");
   const create = page.getByRole("button", { name: "만들기" });
@@ -45,8 +45,8 @@ export async function createBookAndCopyLinks(page: Page, title = "파리에서 �
   await create.click();
   await expect(page).toHaveURL(WORKSPACE, { timeout: NAVIGATE_MS });
 
-  await page.getByRole("button", { name: "공유" }).click();
-  const dialog = page.getByRole("dialog", { name: "공유" });
+  await page.getByRole("button", { name: "초대", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "참여자 초대" });
   await dialog.getByTestId("share-author").getByRole("button", { name: "링크 복사" }).click();
   const authorLink = await page.evaluate(() => navigator.clipboard.readText());
   await dialog.getByTestId("share-designer").getByRole("button", { name: "링크 복사" }).click();

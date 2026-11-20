@@ -6,7 +6,7 @@
 
 .quote {
   padding: 0.5rem 0.7rem;
-  background: var(--surface);
+  background: var(--bt-panel);
   border-radius: 6px;
   font-size: 0.95rem;
 }
@@ -41,8 +41,8 @@
 
 .tag {
   font-size: 0.7rem;
-  color: var(--muted);
-  border: 1px solid var(--border);
+  color: var(--bt-text-2);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 4px;
   padding: 0 0.3rem;
 }
@@ -59,10 +59,10 @@
   font: inherit;
   font-weight: 400;
   padding: 0.5rem 0.65rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
   resize: vertical;
 }
 
@@ -81,9 +81,9 @@
 }
 
 .primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
 }
 
 .primary:disabled {
@@ -92,7 +92,7 @@
 }
 
 .secondary {
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
 }

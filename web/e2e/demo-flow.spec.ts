@@ -2,7 +2,7 @@
 import { expect, test } from "@playwright/test";
 import { aiCards, card, events, expectEvent, LINK, NAVIGATE_MS, paragraph, switchRole, typeAtEnd, WORKSPACE } from "./helpers";
 
-test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락 → 검토본 → 디자이너 → 조판 설정", async ({ page }) => {
+test("데모 1~13단계: 책 만들기 → 초대 → 링크로 들어오기 → AI 제안 적용 → 검토 요청 → 장 검토 → 보내기 → 수락 → 검토본 → 디자이너 → 조판 설정", async ({ page }) => {
   const title = "파리에서 보낸 한 달";
   // 콘솔의 빨간 오류와 페이지 오류를 모은다(QA-51)
   const errors: string[] = [];
@@ -36,9 +36,9 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
   await expectEvent(page, "project_created", { role: "editor" });
   await expectEvent(page, "template_selected", { props: { template_id: "essay", panel_layout: "single" } });
 
-  // 3. 공유 창에서 작가 링크와 디자이너 링크를 각각 복사한다(QA-08)
-  await page.getByRole("button", { name: "공유" }).click();
-  const dialog = page.getByRole("dialog", { name: "공유" });
+  // 3. 초대 창에서 작가 링크와 디자이너 링크를 각각 복사한다(QA-08)
+  await page.getByRole("button", { name: "초대", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "참여자 초대" });
   const authorRow = dialog.getByTestId("share-author");
   await expect(authorRow).toContainText("작가 링크");
   await authorRow.getByRole("button", { name: "링크 복사" }).click();
@@ -61,14 +61,14 @@ test("데모 1~13단계: 책 만들기 → 공유 → 링크로 들어오기 →
   await expect(page.getByTestId("join-role")).toHaveText("작가");
   await expectEvent(page, "role_link_opened", { role: "author", props: { role: "author" } });
 
-  // 5. 이름을 넣고 들어간다. 작가로 열리고 공유가 없다(QA-10)
+  // 5. 이름을 넣고 들어간다. 작가로 열리고 초대가 없다(QA-10)
   const enter = page.getByRole("button", { name: "들어가기" });
   await expect(enter).toBeDisabled();
   await page.getByLabel("이름").fill("작가 A");
   await enter.click();
   await expect(page).toHaveURL(WORKSPACE);
   await expect(page.getByTestId("role-badge")).toHaveText("작가");
-  await expect(page.getByRole("button", { name: "공유" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "초대", exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "편집자 홈" })).toHaveCount(0);
   await expectEvent(page, "participant_joined", { role: "author", props: { role: "author" } });
 

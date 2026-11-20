@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--bt-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,14 +10,14 @@
 
 .dialog {
   width: min(92vw, 32rem);
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
   border-radius: 10px;
   padding: 1.4rem;
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--bt-shadow-lg);
 }
 
 .title {

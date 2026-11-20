@@ -5,6 +5,7 @@ import { can } from "@/domain/permissions";
 import { ROLE_LABEL } from "@/domain/labels";
 import type { PresentPerson } from "@/data";
 import type { Participant, Role } from "@/types";
+import { Logo } from "./Logo";
 import { Participants } from "./Participants";
 import styles from "./TopBar.module.css";
 
@@ -26,12 +27,15 @@ interface Props {
 
 /**
  * 작업 공간 상단 바(WS-10). 권한이 없는 버튼은 숨긴다(D-15).
- * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 공유는 편집자만.
+ * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 초대(L-07)는 편집자만.
  */
 export function TopBar(props: Props) {
   const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
   return (
     <header className={styles.bar}>
+      <span className={styles.logo}>
+        <Logo />
+      </span>
       <nav className={styles.path} aria-label="경로">
         {can(role, "open_editor_home") && (
           <>
@@ -43,7 +47,7 @@ export function TopBar(props: Props) {
         <span aria-hidden="true">›</span>
         <span>{chapterTitle}</span>
       </nav>
-      <span className={styles.badge} data-testid="role-badge">
+      <span className={styles.badge} data-role={role} data-testid="role-badge">
         {ROLE_LABEL[role]}
       </span>
       <div className={styles.tools}>
@@ -58,7 +62,7 @@ export function TopBar(props: Props) {
         </button>
         {can(role, "share_role_links") && (
           <button type="button" className={styles.button} onClick={onShare}>
-            공유
+            초대
           </button>
         )}
       </div>

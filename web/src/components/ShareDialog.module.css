@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--bt-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,14 +10,14 @@
 
 .dialog {
   width: min(92vw, 36rem);
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
   border-radius: 10px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--bt-shadow-lg);
 }
 
 .title {
@@ -25,7 +25,7 @@
 }
 
 .hint {
-  color: var(--muted);
+  color: var(--bt-text-2);
   font-size: 0.9rem;
 }
 
@@ -51,10 +51,10 @@
   font: inherit;
   font-size: 0.85rem;
   padding: 0.45rem 0.6rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 6px;
-  background: var(--surface);
-  color: var(--foreground);
+  background: var(--bt-panel);
+  color: var(--bt-text);
   min-width: 0;
 }
 
@@ -64,9 +64,9 @@
   padding: 0.45rem 0.9rem;
   border-radius: 6px;
   cursor: pointer;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
   white-space: nowrap;
 }
 
@@ -77,12 +77,19 @@
 .error {
   grid-column: 2 / -1;
   font-size: 0.85rem;
-  color: var(--foreground);
-  border-left: 3px solid #b3261e;
+  color: var(--bt-text);
+  border-left: 3px solid var(--bt-danger);
   padding-left: 0.5rem;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.can {
+  display: block;
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-regular);
+  color: var(--bt-text-2);
 }

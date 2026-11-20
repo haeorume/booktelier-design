@@ -6,9 +6,9 @@
   font-family: var(--page-font);
   font-size: var(--page-font-size, 1rem);
   line-height: var(--page-line-height);
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08);
+  background: var(--bt-paper);
+  color: var(--bt-ink);
+  box-shadow: var(--bt-shadow-paper);
   margin: 2rem auto;
 }
 
@@ -19,6 +19,7 @@
 
 .prose {
   outline: none;
+  box-shadow: none;
   word-break: keep-all;
 }
 
@@ -28,8 +29,13 @@
   min-height: 1em;
 }
 
+/* 지면 전체에는 포커스 띠 대신 엷은 파선만(종이 둘레에 주황 띠가 생기지 않게) */
+.prose:focus-visible {
+  box-shadow: none;
+}
+
 .page[data-editable="true"] .prose:focus-visible {
-  outline: 1px dashed var(--border);
+  outline: 1px dashed var(--bt-line-control);
   outline-offset: 6px;
 }
 
@@ -46,60 +52,60 @@
 }
 
 .page :global(.ai-underline:hover) {
-  background-color: rgba(31, 58, 95, 0.08);
+  background-color: var(--bt-accent-wash);
 }
 
 .page :global(.ai-underline:focus-visible) {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--bt-brand);
   outline-offset: 1px;
 }
 
 .page :global(.ai-underline--spelling) {
   text-decoration-line: underline;
   text-decoration-style: wavy;
-  text-decoration-color: #c62828;
+  text-decoration-color: var(--bt-kind-spelling);
 }
 
 .page :global(.ai-underline--spacing) {
   text-decoration-line: underline;
   text-decoration-style: double;
-  text-decoration-color: #b45309;
+  text-decoration-color: var(--bt-kind-spacing);
 }
 
 .page :global(.ai-underline--notation) {
   text-decoration-line: underline;
   text-decoration-style: dotted;
-  text-decoration-color: #1565c0;
+  text-decoration-color: var(--bt-kind-notation);
   text-decoration-thickness: 3px;
 }
 
 .page :global(.ai-underline--polish) {
-  background-color: rgba(0, 121, 107, 0.14);
-  box-shadow: inset 0 -3px 0 #00796b;
+  background-color: var(--bt-kind-polish-wash);
+  box-shadow: inset 0 -3px 0 var(--bt-kind-polish);
 }
 
 .page :global(.ai-underline.is-selected) {
-  background-color: rgba(31, 58, 95, 0.16);
-  outline: 2px solid var(--accent);
+  background-color: var(--bt-accent-soft);
+  outline: 2px solid var(--bt-brand);
   outline-offset: 1px;
 }
 
 /* 수정 제안(CS-11 보라 파선). 지운 글자는 취소선, 더한 글자는 파선 밑줄. 색과 모양을 함께 쓴다. */
 .page :global(.edit-delete) {
   text-decoration-line: line-through;
-  text-decoration-color: #6a1b9a;
+  text-decoration-color: var(--bt-edit);
   text-decoration-thickness: 2px;
-  color: #5b5b5b;
+  color: var(--bt-text-3);
   cursor: pointer;
 }
 
 .page :global(.edit-insert) {
   text-decoration-line: underline;
   text-decoration-style: dashed;
-  text-decoration-color: #6a1b9a;
+  text-decoration-color: var(--bt-edit);
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
-  color: #4a148c;
+  color: var(--bt-edit);
   cursor: pointer;
   margin-left: 0.1em;
 }
@@ -107,14 +113,14 @@
 .page :global(.edit-delete.is-selected),
 .page :global(.edit-insert.is-selected),
 .page :global(.comment-mark.is-selected) {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--bt-brand);
   outline-offset: 1px;
 }
 
 /* 의견이 달린 자리. 엷은 칠과 점선 테두리 아래선. */
 .page :global(.comment-mark) {
-  background-color: rgba(255, 193, 7, 0.18);
-  border-bottom: 1px dotted #8d6e00;
+  background-color: var(--bt-comment-wash);
+  border-bottom: 1px dotted var(--bt-comment);
   cursor: pointer;
 }
 
@@ -124,11 +130,11 @@
   display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--bt-line-strong);
   border-radius: 8px;
-  background: var(--background);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-lg);
+  font-family: var(--bt-font-ui);
   line-height: 1.2;
   text-indent: 0;
 }
@@ -140,10 +146,10 @@
   border: none;
   border-radius: 5px;
   background: transparent;
-  color: var(--foreground);
+  color: var(--bt-text);
   cursor: pointer;
 }
 
 .selectionMenu button:hover {
-  background: var(--surface);
+  background: var(--bt-panel);
 }

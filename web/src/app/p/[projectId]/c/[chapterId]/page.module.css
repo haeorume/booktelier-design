@@ -15,9 +15,9 @@
 .desk {
   flex: 1;
   min-width: 0;
-  background: var(--desk);
+  background: var(--bt-bg);
   overflow: auto;
-  padding: 0 1rem;
+  padding: 0 var(--bt-desk-gutter);
 }
 
 .reviewSlot {
@@ -36,12 +36,12 @@
   gap: 0.5rem;
   align-items: center;
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--bt-text-2);
   margin: -0.75rem 0 1rem;
 }
 
 .saveState[data-state="failed"],
 .saveState[data-state="offline"] {
-  color: var(--foreground);
+  color: var(--bt-text);
   font-weight: 600;
 }

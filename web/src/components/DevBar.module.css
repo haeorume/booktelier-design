@@ -9,14 +9,14 @@
   gap: 1rem;
   padding: 0.35rem 1rem;
   font-size: 0.85rem;
-  color: #1a1a1a;
-  background: repeating-linear-gradient(135deg, #ffe58a, #ffe58a 12px, #ffd84d 12px, #ffd84d 24px);
-  border-bottom: 1px solid #c9a800;
+  color: var(--bt-ink);
+  background: repeating-linear-gradient(135deg, var(--bt-warning-soft), var(--bt-warning-soft) 12px, var(--bt-accent-line) 12px, var(--bt-accent-line) 24px);
+  border-bottom: 1px solid var(--bt-warning);
 }
 
 .tag {
   font-weight: 700;
-  border: 1px dashed #1a1a1a;
+  border: 1px dashed var(--bt-ink);
   border-radius: 4px;
   padding: 0 0.4rem;
 }
@@ -35,16 +35,16 @@
 .option {
   font: inherit;
   padding: 0.15rem 0.6rem;
-  border: 1px solid #1a1a1a;
+  border: 1px solid var(--bt-ink);
   border-radius: 4px;
-  background: #fffbe8;
-  color: #1a1a1a;
+  background: var(--bt-warning-soft);
+  color: var(--bt-ink);
   cursor: pointer;
 }
 
 .option[aria-pressed="true"] {
-  background: #1a1a1a;
-  color: #fffbe8;
+  background: var(--bt-ink);
+  color: var(--bt-warning-soft);
 }
 
 .option:disabled {
@@ -55,7 +55,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--bt-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,9 +63,9 @@
 }
 
 .dialog {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bt-surface);
+  color: var(--bt-text);
   border-radius: 10px;
   padding: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--bt-shadow-lg);
 }

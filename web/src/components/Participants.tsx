@@ -49,7 +49,7 @@ export function Participants({ participants, currentId, present, chapterTitles, 
               aria-label={`${name} ${ROLE_LABEL[p.role]}${chapter ? `, ${chapter}을 보고 있어요. 누르면 그 자리로 가요` : ""}`}
               onClick={() => onJump(p)}
             >
-              <span className={styles.avatar} aria-hidden="true">
+              <span className={styles.avatar} data-role={p.role} aria-hidden="true">
                 {name.slice(0, 1)}
               </span>
               <span className={styles.label}>
@@ -75,7 +75,7 @@ function Person({ person, me }: { person: Participant; me: boolean }) {
   const name = nameOf(person);
   return (
     <li className={styles.person} aria-current={me ? "true" : undefined} title={`${name} · ${ROLE_LABEL[person.role]}`}>
-      <span className={styles.avatar} aria-hidden="true">
+      <span className={styles.avatar} data-role={person.role} aria-hidden="true">
         {name.slice(0, 1)}
       </span>
       <span className={styles.label}>
