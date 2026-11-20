@@ -19,6 +19,9 @@ export function NewBook() {
   const forceNew = useSearchParams().get("new") === "1";
   const [title, setTitle] = useState("");
   const [template, setTemplate] = useState<TemplateId>("novel");
+  // 발표용 예시 원고로 시작(D-39). 서버에 저장할 때만 고른다(1차 브라우저 저장은 늘 예시 원고).
+  const [sample, setSample] = useState(false);
+  const serverBacked = bookDeps().library.source === "server";
   const [busy, setBusy] = useState(false);
   const [hasBooks, setHasBooks] = useState(false);
   // 만든 뒤 편집자 링크 안내(ST-02, FR-46 ①). 확인하면 작업 공간으로 간다.
@@ -41,7 +44,7 @@ export function NewBook() {
     if (empty || busy) return;
     setBusy(true);
     try {
-      const { project, chapter, editor, editorUrl } = await bookDeps().library.createBook({ title, template_id: template });
+      const { project, chapter, editor, editorUrl } = await bookDeps().library.createBook({ title, template_id: template, startWithSample: sample });
       setTrackContext({ participant_id: editor.id, project_id: project.id, chapter_id: null, role: "editor" });
       // 1·2단계는 만들기 한 번으로 함께 끝난다. 이 순서로 둘을 남긴다(정할 것 6).
       track("project_created");
@@ -83,6 +86,13 @@ export function NewBook() {
             </label>
           ))}
         </fieldset>
+        {serverBacked && (
+          <label className={styles.label}>
+            <span>
+              <input type="checkbox" checked={sample} onChange={(e) => setSample(e.target.checked)} /> 예시 원고로 시작
+            </span>
+          </label>
+        )}
         <div className={styles.actions}>
           {hasBooks && (
             <Link className={styles.secondary} href="/home">

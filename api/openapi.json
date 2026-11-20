@@ -1801,6 +1801,14 @@
             "title": "Comments",
             "type": "array"
           },
+          "seen": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Seen",
+            "type": "array"
+          },
           "suggested_edits": {
             "items": {
               "$ref": "#/components/schemas/SuggestedEdit"
@@ -1811,7 +1819,8 @@
         },
         "required": [
           "comments",
-          "suggested_edits"
+          "suggested_edits",
+          "seen"
         ],
         "title": "SharedOut",
         "type": "object"

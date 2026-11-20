@@ -1450,6 +1450,8 @@ export interface components {
         SharedOut: {
             /** Comments */
             comments: components["schemas"]["Comment"][];
+            /** Seen */
+            seen: string[];
             /** Suggested Edits */
             suggested_edits: components["schemas"]["SuggestedEdit"][];
         };

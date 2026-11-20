@@ -3,6 +3,7 @@
 // 모두 Promise를 돌려주는 것은 HTTP 구현으로 바꿀 때 화면을 고치지 않으려는 것.
 import type {
   AiSuggestion,
+  AiSuggestionKind,
   Chapter,
   ChapterDoc,
   Comment,
@@ -83,6 +84,8 @@ export interface Repository {
     replacement: string;
     author_id: Uuid;
     ai_origin_id: Uuid | null;
+    reason?: string | null;
+    kind?: AiSuggestionKind | null;
   }): Promise<SuggestedEdit>;
   listSuggestedEdits(chapterId: Uuid): Promise<SuggestedEdit[]>;
   updateSuggestedEdit(edit: SuggestedEdit): Promise<SuggestedEdit>;

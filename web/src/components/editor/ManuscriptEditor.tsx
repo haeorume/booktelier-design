@@ -95,7 +95,8 @@ export function ManuscriptEditor(props: Props) {
   });
 
   useEffect(() => {
-    editor?.setEditable(editable);
+    // 잠그고 푸는 것은 원고 변경이 아니다. 바뀜 이벤트를 내지 않아 저장이 따로 나가지 않게 한다.
+    editor?.setEditable(editable, false);
   }, [editor, editable]);
 
   useEffect(() => {

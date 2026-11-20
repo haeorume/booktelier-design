@@ -28,6 +28,10 @@ export const EVENT_NAMES = [
   "invite_link_revoked",
   "editor_link_opened",
   "save_failed",
+  // F5(events 탭 v0.4 혜린 초안 11.20)
+  "review_completed",
+  "comment_resolved",
+  "comment_reopened",
   // 체류
   "screen_entered",
   "screen_left",
