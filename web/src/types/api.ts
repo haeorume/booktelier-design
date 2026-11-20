@@ -4,6 +4,103 @@
  */
 
 export interface paths {
+    "/ai-suggestions/{suggestion_id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-20 AI 제안 적용
+         * @description 작가만(D-14). 서버가 원고에 반영하고 새 버전을 돌려줘요(D-30, S-08). 그사이 원고가 바뀌었으면 409.
+         */
+        post: operations["apply_ai_suggestions__suggestion_id__apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai-suggestions/{suggestion_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A-20 AI 제안 무시 */
+        post: operations["dismiss_ai_suggestions__suggestion_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai-suggestions/{suggestion_id}/keep": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-20 AI 제안 이 표현 유지
+         * @description 표기 원칙에 유지 표현을 남기고 제안은 무효(FR-30).
+         */
+        post: operations["keep_ai_suggestions__suggestion_id__keep_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai-suggestions/{suggestion_id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-21 AI 제안 보내기
+         * @description 편집자만(FR-29 ④). 수정 제안이면 이유·종류가 담긴 카드 하나(⑤).
+         */
+        post: operations["send_ai_suggestions__suggestion_id__send_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai-suggestions/{suggestion_id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-20 AI 제안 실행 취소
+         * @description 작가만. 바로 앞 동작일 때만 서버가 되돌려요(FR-27 ③, X-04).
+         */
+        post: operations["undo_ai_suggestions__suggestion_id__undo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/chapters/{chapter_id}": {
         parameters: {
             query?: never;
@@ -15,6 +112,46 @@ export interface paths {
         get: operations["get_chapter_chapters__chapter_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/ai-suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-19 내 AI 제안 목록
+         * @description 내 제안만(다른 사람 것은 오지 않음, D-29). 지금 원고에 맞춰 자리를 다시 찾고, 원문이 사라진 대기 제안은 무효로 해요.
+         */
+        get: operations["list_mine_chapters__chapter_id__ai_suggestions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-23 의견 남기기·답글
+         * @description 세 역할 모두(FR-32, D-14). 의견은 원고를 바꾸지 않아요.
+         */
+        post: operations["create_comment_chapters__chapter_id__comments_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -34,6 +171,67 @@ export interface paths {
          * @description 작가만(D-14). base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).
          */
         put: operations["save_doc_chapters__chapter_id__doc_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/live-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-16 실시간 교정
+         * @description 작가가 입력을 멈추면 바뀐 문단만(D-18). 이번에 대기로 뜬 내 제안을 돌려줘요. 실패해도 입력은 막지 않아요(NFR-03).
+         */
+        post: operations["live_check_chapters__chapter_id__live_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-17 장 검토 실행
+         * @description 편집자가 눌러야만 돌고, 결과는 실행한 사람에게만 보여요(D-18, FR-21 ③). 바로 답해요(A-18 없음, F5 결정).
+         */
+        post: operations["chapter_review_chapters__chapter_id__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/shared": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-22 함께 봄 목록
+         * @description 참여자 모두. 의견(답글 포함)과 수정 제안. '진행 중'(open)은 열린 의견과 대기 수정 제안만(L-63, FR-36).
+         *     자리는 지금 원고에서 다시 찾아 돌려줘요(NFR-05).
+         */
+        get: operations["list_shared_chapters__chapter_id__shared_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -79,6 +277,60 @@ export interface paths {
          * @description 검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14). 표에 없는 전이는 409.
          */
         post: operations["change_status_chapters__chapter_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/suggested-edits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-25 수정 제안 남기기
+         * @description 편집자만(FR-33, D-14). 이유는 비워도 돼요(Q-22).
+         */
+        post: operations["create_edit_chapters__chapter_id__suggested_edits_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comments/{comment_id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A-24 의견 다시 열기 */
+        post: operations["reopen_comments__comment_id__reopen_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/comments/{comment_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** A-24 의견 해결 */
+        post: operations["resolve_comments__comment_id__resolve_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -357,6 +609,27 @@ export interface paths {
         patch: operations["patch_layout_projects__project_id__layout_patch"];
         trace?: never;
     };
+    "/projects/{project_id}/style-rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A-28 표기 원칙 목록 */
+        get: operations["list_style_rules_projects__project_id__style_rules_get"];
+        put?: never;
+        /**
+         * A-28 표기 원칙 더하기
+         * @description 추가는 누구나(api-needs A-28). 수정·삭제는 편집자(FR-31, Could, 이번에는 없음).
+         */
+        post: operations["create_style_rule_projects__project_id__style_rules_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/snapshots/{snapshot_id}": {
         parameters: {
             query?: never;
@@ -374,10 +647,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/suggested-edits/{edit_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-26 수정 제안 수락
+         * @description 받은 사람(작가)만(FR-34). 서버가 원고에 반영하고 버전을 올려요(D-30, S-08).
+         */
+        post: operations["accept_suggested_edits__edit_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/suggested-edits/{edit_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-26 수정 제안 거절
+         * @description 받은 사람(작가)만(FR-35). 원고는 그대로예요.
+         */
+        post: operations["reject_suggested_edits__edit_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-27 처음 본 기록
+         * @description 카드를 화면에 연 때. 처음 한 번만 남아요(first_view). 내 책의 의견·수정 제안만.
+         */
+        post: operations["add_view_views_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptIn */
+        AcceptIn: {
+            /** Base Version */
+            base_version: number;
+        };
+        /** AcceptOut */
+        AcceptOut: {
+            /** Chapter Version */
+            chapter_version: number;
+            /** Merged Ai Suggestion Id */
+            merged_ai_suggestion_id: string | null;
+            suggested_edit: components["schemas"]["SuggestedEdit"];
+        };
+        /** AiActionOut */
+        AiActionOut: {
+            /** Chapter Version */
+            chapter_version: number | null;
+            suggestion: components["schemas"]["AiSuggestion"];
+        };
+        /**
+         * AiSuggestion
+         * @description 보내기 전까지 주인만 봐요(D-29).
+         */
+        AiSuggestion: {
+            /** Alternatives */
+            alternatives: string[];
+            anchor: components["schemas"]["Anchor"];
+            /** Base Version */
+            base_version: number;
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Evidence */
+            evidence: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "spelling" | "spacing" | "notation" | "polish";
+            /** Original */
+            original: string;
+            /**
+             * Owner Participant Id
+             * Format: uuid
+             */
+            owner_participant_id: string;
+            /** Reason */
+            reason: string;
+            /** Replacement */
+            replacement: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "live_check" | "chapter_review";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "applied" | "dismissed" | "sent" | "merged" | "stale";
+            /**
+             * Target Role
+             * @enum {string}
+             */
+            target_role: "editor" | "author" | "designer";
+        };
+        /**
+         * Anchor
+         * @description 문단 id + 서식 제외 텍스트 기준 글자 위치. start 포함, end 제외, UTF-16 단위(D-19).
+         */
+        Anchor: {
+            /** End */
+            end: number;
+            /** Paragraph Id */
+            paragraph_id: string;
+            /** Start */
+            start: number;
+        };
+        /**
+         * ApplyIn
+         * @description choice 0은 수정안, 1·2는 대안(FR-27 ①).
+         */
+        ApplyIn: {
+            /** Base Version */
+            base_version: number;
+            /**
+             * Choice
+             * @default 0
+             */
+            choice: number;
+        };
         /** Chapter */
         Chapter: {
             doc: components["schemas"]["ChapterDoc"];
@@ -474,6 +914,81 @@ export interface components {
             updated_at: string;
             /** Version */
             version: number;
+        };
+        /** Comment */
+        Comment: {
+            /** Ai Origin Id */
+            ai_origin_id: string | null;
+            anchor: components["schemas"]["Anchor"] | null;
+            /**
+             * Author Id
+             * Format: uuid
+             */
+            author_id: string;
+            /** Body */
+            body: string;
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Original */
+            original: string | null;
+            /** Parent Id */
+            parent_id: string | null;
+            /** Resolved At */
+            resolved_at: string | null;
+            /** Resolved By */
+            resolved_by: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "resolved";
+        };
+        /** CommentIn */
+        CommentIn: {
+            anchor?: components["schemas"]["Anchor"] | null;
+            /** Body */
+            body: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Original */
+            original?: string | null;
+            /** Parent Id */
+            parent_id?: string | null;
+        };
+        /**
+         * ConflictOut
+         * @description 409 여러 종류(AI 제안·수정 제안 처리). code로 화면이 안내를 골라요(C-3).
+         *
+         *     - version_conflict: base_version이 최신이 아님. 이때만 latest(최신 장)가 와요(C-4).
+         *     - source_changed: 원문이 먼저 바뀌었거나 지워짐
+         *     - invalid_transition: 이미 처리된 제안
+         *     - undo_unavailable: 바로 앞 동작이 아니라 실행 취소할 수 없음
+         */
+        ConflictOut: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "version_conflict" | "source_changed" | "invalid_transition" | "undo_unavailable";
+            latest?: components["schemas"]["Chapter"] | null;
+            /** Message */
+            message: string;
         };
         /** DbHealthOut */
         DbHealthOut: {
@@ -641,6 +1156,16 @@ export interface components {
             layout?: components["schemas"]["Layout"] | null;
             /** Template Id */
             template_id?: ("novel" | "essay" | "practical") | null;
+        };
+        /**
+         * LiveCheckIn
+         * @description 원문은 보내지 않아요. 서버가 저장본을 읽어요(C-9).
+         */
+        LiveCheckIn: {
+            /** Base Version */
+            base_version: number;
+            /** Paragraph Ids */
+            paragraph_ids: string[];
         };
         /**
          * Margins
@@ -831,6 +1356,11 @@ export interface components {
              */
             id: string;
             /**
+             * Start With Sample
+             * @default false
+             */
+            start_with_sample: boolean;
+            /**
              * Template Id
              * @enum {string}
              */
@@ -864,6 +1394,23 @@ export interface components {
             /** Editor Tokens */
             editor_tokens: string[];
         };
+        /** ReviewIn */
+        ReviewIn: {
+            /** Base Version */
+            base_version: number;
+        };
+        /**
+         * ReviewOut
+         * @description 종류별 개수는 지금 원고에서 자리를 찾은 제안으로 세요(FR-21 ②, FR-22).
+         */
+        ReviewOut: {
+            /** Suggestions */
+            suggestions: components["schemas"]["AiSuggestion"][];
+            /** Summary */
+            summary: {
+                [key: string]: number;
+            };
+        };
         /**
          * Running
          * @description 쪽 공통 설정: 쪽 번호와 머리말(FR-44).
@@ -871,6 +1418,40 @@ export interface components {
         Running: {
             left?: components["schemas"]["PageSide"] | null;
             right?: components["schemas"]["PageSide"] | null;
+        };
+        /** SendIn */
+        SendIn: {
+            /**
+             * As
+             * @enum {string}
+             */
+            as: "comment" | "suggested_edit";
+            /**
+             * Choice
+             * @default 0
+             */
+            choice: number;
+            /** Text */
+            text: string;
+        };
+        /**
+         * SendOut
+         * @description 수정 제안이면 카드 하나(설명용 의견 없음, FR-29 ⑤).
+         */
+        SendOut: {
+            comment: components["schemas"]["Comment"] | null;
+            suggested_edit: components["schemas"]["SuggestedEdit"] | null;
+            suggestion: components["schemas"]["AiSuggestion"];
+        };
+        /**
+         * SharedOut
+         * @description 자리는 지금 원고에서 다시 찾은 값이에요(NFR-05). 원문이 지워진 수정 제안은 source_deleted.
+         */
+        SharedOut: {
+            /** Comments */
+            comments: components["schemas"]["Comment"][];
+            /** Suggested Edits */
+            suggested_edits: components["schemas"]["SuggestedEdit"][];
         };
         /** Snapshot */
         Snapshot: {
@@ -932,6 +1513,108 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** StyleRule */
+        StyleRule: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Created By
+             * Format: uuid
+             */
+            created_by: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Text */
+            text: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "rule" | "keep";
+        };
+        /** StyleRuleIn */
+        StyleRuleIn: {
+            /** Text */
+            text: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "rule" | "keep";
+        };
+        /** SuggestedEdit */
+        SuggestedEdit: {
+            /** Ai Origin Id */
+            ai_origin_id: string | null;
+            anchor: components["schemas"]["Anchor"];
+            /**
+             * Author Id
+             * Format: uuid
+             */
+            author_id: string;
+            /** Base Version */
+            base_version: number;
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decided By */
+            decided_by: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: ("spelling" | "spacing" | "notation" | "polish") | null;
+            /** Original */
+            original: string;
+            /** Reason */
+            reason: string | null;
+            /** Replacement */
+            replacement: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "accepted" | "rejected" | "source_deleted";
+        };
+        /** SuggestedEditIn */
+        SuggestedEditIn: {
+            anchor: components["schemas"]["Anchor"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind?: ("spelling" | "spacing" | "notation" | "polish") | null;
+            /** Original */
+            original: string;
+            /** Reason */
+            reason?: string | null;
+            /** Replacement */
+            replacement: string;
+        };
         /** TextMark */
         TextMark: {
             /** Attrs */
@@ -953,6 +1636,11 @@ export interface components {
              */
             type: "text";
         };
+        /** UndoIn */
+        UndoIn: {
+            /** Base Version */
+            base_version: number;
+        };
         /**
          * VersionConflictOut
          * @description 409. 최신 원고를 같이 줘요(C-4, D-30).
@@ -967,6 +1655,19 @@ export interface components {
             /** Message */
             message: string;
         };
+        /** ViewIn */
+        ViewIn: {
+            /**
+             * Target Id
+             * Format: uuid
+             */
+            target_id: string;
+            /**
+             * Target Type
+             * @enum {string}
+             */
+            target_type: "comment" | "suggested_edit";
+        };
     };
     responses: never;
     parameters: never;
@@ -976,6 +1677,353 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    apply_ai_suggestions__suggestion_id__apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 원고나 제안이 바뀌었어요(code로 구분) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    dismiss_ai_suggestions__suggestion_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    keep_ai_suggestions__suggestion_id__keep_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    send_ai_suggestions__suggestion_id__send_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SendOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    undo_ai_suggestions__suggestion_id__undo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                suggestion_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UndoIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiActionOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 원고나 제안이 바뀌었어요(code로 구분) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     get_chapter_chapters__chapter_id__get: {
         parameters: {
             query?: never;
@@ -1016,6 +2064,135 @@ export interface operations {
             };
             /** @description 찾을 수 없어요 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    list_mine_chapters__chapter_id__ai_suggestions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSuggestion"][];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_comment_chapters__chapter_id__comments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1092,6 +2269,209 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    live_check_chapters__chapter_id__live_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiveCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSuggestion"][];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 원고나 제안이 바뀌었어요(code로 구분) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    chapter_review_chapters__chapter_id__review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 원고나 제안이 바뀌었어요(code로 구분) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    list_shared_chapters__chapter_id__shared_get: {
+        parameters: {
+            query?: {
+                type?: "all" | "comment" | "suggested_edit";
+                status?: "all" | "open";
+            };
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SharedOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
                 };
             };
             /** @description 요청 모양이 맞지 않아요 */
@@ -1247,6 +2627,211 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChapterSummary"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_edit_chapters__chapter_id__suggested_edits_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestedEditIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestedEdit"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    reopen_comments__comment_id__reopen_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                comment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    resolve_comments__comment_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                comment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"];
                 };
             };
             /** @description 토큰이 없거나 틀려요 */
@@ -1978,6 +3563,126 @@ export interface operations {
             };
         };
     };
+    list_style_rules_projects__project_id__style_rules_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StyleRule"][];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_style_rule_projects__project_id__style_rules_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StyleRuleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StyleRule"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     get_snapshot_snapshots__snapshot_id__get: {
         parameters: {
             query?: never;
@@ -1997,6 +3702,202 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Snapshot"];
                 };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    accept_suggested_edits__edit_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                edit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 원고나 수정 제안이 바뀌었어요(code로 구분) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    reject_suggested_edits__edit_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                edit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestedEdit"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    add_view_views_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description 토큰이 없거나 틀려요 */
             401: {

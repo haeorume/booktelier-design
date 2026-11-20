@@ -167,6 +167,9 @@ class AiSuggestion(Base):
     model: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = _now()
     decided_at: Mapped[datetime | None] = _ts()
+    # 실행 취소(A-20 undo)용. 적용으로 만든 원고 버전과 넣은 글자. 장 버전이 이 값과 같을 때만 되돌려요(0003).
+    applied_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    applied_text: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class SuggestedEdit(Base):

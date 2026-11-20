@@ -25,7 +25,7 @@ def token_in(url: str) -> str:
     return url.rsplit("/", 1)[-1]
 
 
-def make_book(c: TestClient, title: str = "테스트 책") -> Book:
+def make_book(c: TestClient, title: str = "테스트 책", *, sample: bool = False) -> Book:
     pid, cid = str(uuid.uuid4()), str(uuid.uuid4())
     res = c.post(
         "/projects",
@@ -35,6 +35,7 @@ def make_book(c: TestClient, title: str = "테스트 책") -> Book:
             "template_id": "essay",
             "first_chapter_id": cid,
             "anon_id": str(uuid.uuid4()),
+            "start_with_sample": sample,
         },
     )
     assert res.status_code == 201, res.text

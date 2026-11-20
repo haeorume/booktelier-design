@@ -270,6 +270,8 @@ def test_s04_no_hash_in_any_response(db_client: TestClient, book: Book) -> None:
 # ---- S-05 역할 × 엔드포인트 권한 표(D-14, D-15) ----
 # 줄을 더할 때: (A 번호, 메서드, 경로 틀, 본문, 할 수 있는 역할). F3~F5에서 계속 더해요.
 
+ANCHOR = {"paragraph_id": "para_02", "start": 85, "end": 89}  # 예시 원고의 "한참동안"
+
 PERMISSION_TABLE: list[tuple[str, str, str, dict[str, Any] | None, set[str]]] = [
     ("A-01", "GET", "/me", None, {"editor", "author", "designer"}),
     ("A-10", "GET", "/projects/{p}", None, {"editor", "author", "designer"}),
@@ -303,6 +305,39 @@ PERMISSION_TABLE: list[tuple[str, str, str, dict[str, Any] | None, set[str]]] = 
     ("A-14", "POST", "/chapters/{c}/status", {"to": "review_requested"}, {"author"}),
     ("A-29", "GET", "/chapters/{c}/snapshots", None, {"editor", "author", "designer"}),
     ("A-29", "POST", "/chapters/{c}/snapshots", {"label": "1차 검토"}, {"editor"}),
+    # F5: AI 제안·함께 봄(예시 원고로 시작한 책, D-39)
+    (
+        "A-16",
+        "POST",
+        "/chapters/{c}/live-check",
+        {"paragraph_ids": ["para_02"], "base_version": 1},
+        {"author"},
+    ),
+    ("A-17", "POST", "/chapters/{c}/review", {"base_version": 1}, {"editor"}),
+    ("A-19", "GET", "/chapters/{c}/ai-suggestions", None, {"author", "editor"}),
+    ("A-22", "GET", "/chapters/{c}/shared", None, {"editor", "author", "designer"}),
+    (
+        "A-23",
+        "POST",
+        "/chapters/{c}/comments",
+        {"id": "{new}", "body": "의견", "anchor": ANCHOR, "original": "한참동안"},
+        {"editor", "author", "designer"},
+    ),
+    (
+        "A-25",
+        "POST",
+        "/chapters/{c}/suggested-edits",
+        {"id": "{new}", "anchor": ANCHOR, "original": "한참동안", "replacement": "한참 동안"},
+        {"editor"},
+    ),
+    ("A-28", "GET", "/projects/{p}/style-rules", None, {"editor", "author", "designer"}),
+    (
+        "A-28",
+        "POST",
+        "/projects/{p}/style-rules",
+        {"type": "rule", "text": "루브르"},
+        {"editor", "author", "designer"},
+    ),
 ]
 
 
@@ -321,7 +356,7 @@ def test_s05_permission_table(
     allowed: set[str],
     role: str,
 ) -> None:
-    b = _make_book(db_client)
+    b = _make_book(db_client, sample=True)
     token = {"editor": b.editor, "author": b.author, "designer": b.designer}[role]
     url = path.format(p=b.project_id, i=b.author_invite["id"], c=b.chapter_id)
     if body is not None:

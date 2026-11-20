@@ -72,9 +72,13 @@ def test_no_hash_field_in_any_schema() -> None:
 
 
 def test_every_error_response_uses_error_shape() -> None:
-    # C-3·D-35: 오류는 늘 { code, message }. A-12의 409만 latest를 더 실어요.
+    # C-3·D-35: 오류는 늘 { code, message }. 409는 버전 충돌일 때 latest를 더 실어요.
     spec = create_app().openapi()
-    allowed = {"#/components/schemas/ErrorOut", "#/components/schemas/VersionConflictOut"}
+    allowed = {
+        "#/components/schemas/ErrorOut",
+        "#/components/schemas/VersionConflictOut",
+        "#/components/schemas/ConflictOut",
+    }
     assert "HTTPValidationError" not in spec["components"]["schemas"]
     for path, ops in spec["paths"].items():
         for method, op in ops.items():
@@ -113,3 +117,25 @@ def test_chapter_doc_round_trips_without_nulls() -> None:
         ],
     }
     assert ChapterDoc.model_validate(doc).model_dump(mode="json") == doc
+
+
+def test_demo_fixtures_are_the_web_fixtures_d19() -> None:
+    # 서버 데모 제공자는 1차 예시 JSON을 글자 하나 바꾸지 않고 써요(D-19). 사본이 웹 원본과 같은지.
+    from pathlib import Path
+
+    api = Path(__file__).resolve().parents[1] / "app" / "ai" / "fixtures"
+    web = Path(__file__).resolve().parents[2] / "web" / "src" / "fixtures"
+    for name in ("live_check.json", "chapter_review.json", "manuscript.json"):
+        assert (api / name).read_bytes() == (web / name).read_bytes(), name
+
+
+def test_ai_and_edit_conflicts_declare_conflict_out() -> None:
+    # 409가 여러 종류(source_changed 등)인 곳은 latest가 선택인 ConflictOut(Codex 검수 11.21)
+    spec = create_app().openapi()
+    for path in ("/ai-suggestions/{suggestion_id}/apply", "/suggested-edits/{edit_id}/accept"):
+        ref = spec["paths"][path]["post"]["responses"]["409"]["content"]["application/json"][
+            "schema"
+        ]["$ref"]
+        assert ref.endswith("/ConflictOut"), path
+    schema = spec["components"]["schemas"]["ConflictOut"]
+    assert "latest" not in schema.get("required", [])

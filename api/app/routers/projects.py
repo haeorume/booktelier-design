@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
+from app.ai.demo import sample_manuscript
 from app.auth.permissions import Role
 from app.auth.token import Me, require, require_project
 from app.auth.tokens import hash_token, new_invite_token, new_secret_token
@@ -54,6 +55,9 @@ def create_project(body: ProjectCreateIn, db: DbSession) -> ProjectCreateOut:
     if not title:  # 빈칸만 있어도 만들 수 없어요(FR-01 ③)
         raise AppError(422, "invalid_request", "title: 책 제목이 비어 있어요")
     token = new_secret_token()
+    chapter_title, chapter_doc = (
+        sample_manuscript() if body.start_with_sample else (FIRST_CHAPTER_TITLE, None)
+    )
     project, chapter, editor = project_db.create(
         db,
         project_id=body.id,
@@ -61,7 +65,8 @@ def create_project(body: ProjectCreateIn, db: DbSession) -> ProjectCreateOut:
         template_id=body.template_id,
         layout=default_layout(body.template_id).model_dump(exclude_none=True),
         chapter_id=body.first_chapter_id,
-        chapter_title=FIRST_CHAPTER_TITLE,
+        chapter_title=chapter_title,
+        chapter_doc=chapter_doc,
         editor_name=EDITOR_NAME,
         editor_anon_id=body.anon_id,
         editor_token_hash=hash_token(token),

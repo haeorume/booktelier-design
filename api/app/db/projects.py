@@ -33,6 +33,7 @@ def create(
     chapter_id: uuid.UUID,
     chapter_title: str,
     editor_name: str,
+    chapter_doc: dict[str, Any] | None = None,
     editor_anon_id: uuid.UUID,
     editor_token_hash: str,
 ) -> tuple[Project, Chapter, Participant]:
@@ -58,7 +59,7 @@ def create(
         project_id=project_id,
         sort_order=1,
         title=chapter_title,
-        doc=EMPTY_DOC,
+        doc=chapter_doc if chapter_doc is not None else EMPTY_DOC,
     )
     try:
         db.add(project)
