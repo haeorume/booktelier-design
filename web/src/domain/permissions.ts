@@ -32,6 +32,8 @@ export const PERMISSIONS = {
   // 세 역할 모두
   create_comment: ALL, // FR-32
   view_snapshots: ALL,
+  // 장 추가는 편집자·작가(Q-20, api-needs A-13)
+  add_chapter: AUTHOR_EDITOR,
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Action = keyof typeof PERMISSIONS;

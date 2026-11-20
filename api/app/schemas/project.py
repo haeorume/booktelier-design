@@ -149,3 +149,21 @@ class LayoutOut(BaseModel):
     layout: Layout
     layout_updated_by: UUID
     layout_updated_at: datetime
+
+
+# A-29 검토본
+class SnapshotCreateIn(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+
+
+class SnapshotSummary(BaseModel):
+    id: UUID
+    chapter_id: UUID
+    version: int
+    label: str
+    created_by: UUID
+    created_at: datetime
+
+
+class Snapshot(SnapshotSummary):
+    doc: ChapterDoc

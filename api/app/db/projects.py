@@ -29,6 +29,7 @@ def create(
     project_id: uuid.UUID,
     title: str,
     template_id: str,
+    layout: dict[str, Any],
     chapter_id: uuid.UUID,
     chapter_title: str,
     editor_name: str,
@@ -42,7 +43,7 @@ def create(
     if ids_taken(db, project_id, chapter_id):
         raise AppError(409, "duplicate_id", "같은 id가 이미 있어요")
     now = datetime.now(UTC)
-    project = Project(id=project_id, title=title, template_id=template_id, layout={})
+    project = Project(id=project_id, title=title, template_id=template_id, layout=layout)
     editor = Participant(
         id=uuid.uuid4(),
         project_id=project_id,
@@ -71,6 +72,39 @@ def create(
     for row in (project, editor, chapter):
         db.refresh(row)
     return project, chapter, editor
+
+
+def lock(db: Session, project_id: uuid.UUID) -> Project | None:
+    """책 행을 잠그고 최신 값으로 다시 읽어요(SELECT … FOR UPDATE). 조판 값을 합치기 전에 불러요.
+
+    겹친 요청은 앞 요청이 커밋할 때까지 기다렸다가 그 결과 위에 합쳐요(A-15, FR-16 ⑤).
+    """
+    return db.scalars(
+        select(Project)
+        .where(Project.id == project_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).first()
+
+
+def update_layout(
+    db: Session,
+    project: Project,
+    *,
+    template_id: str,
+    layout: dict[str, Any],
+    by: uuid.UUID,
+) -> Project:
+    """조판 값 저장(A-15). 마지막에 바꾼 사람과 시각을 남겨요(FR-16 ⑤)."""
+    now = datetime.now(UTC)
+    project.template_id = template_id
+    project.layout = layout
+    project.layout_updated_by = by
+    project.layout_updated_at = now
+    project.updated_at = now
+    db.commit()
+    db.refresh(project)
+    return project
 
 
 @dataclass(frozen=True)

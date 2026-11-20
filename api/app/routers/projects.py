@@ -1,5 +1,6 @@
-"""책 API. A-02·A-03·A-07·A-08은 실제, A-10·A-13·A-15는 F3까지 가짜 응답(신원·책 범위 확인은 실제)."""
+"""책 API(A-02, A-03, A-07, A-08, A-10, A-13, A-15)."""
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, status
@@ -7,14 +8,17 @@ from fastapi import APIRouter, status
 from app.auth.permissions import Role
 from app.auth.token import Me, require, require_project
 from app.auth.tokens import hash_token, new_invite_token, new_secret_token
+from app.db import chapters as chapter_db
 from app.db import invites as invite_db
 from app.db import participants as participant_db
 from app.db import projects as project_db
+from app.db.models import Project as ProjectRow
 from app.db.session import DbSession
 from app.errors import AppError
-from app.routers import _convert, _fake
+from app.routers import _convert
 from app.schemas.common import ChapterStatus, error_responses
 from app.schemas.invite import Invite, InviteCreateIn
+from app.schemas.layout import Layout
 from app.schemas.project import (
     Chapter,
     ChapterCreateIn,
@@ -27,6 +31,7 @@ from app.schemas.project import (
     ProjectDetail,
     ProjectListIn,
 )
+from app.templates import default_layout
 
 router = APIRouter(tags=["projects"])
 
@@ -54,6 +59,7 @@ def create_project(body: ProjectCreateIn, db: DbSession) -> ProjectCreateOut:
         project_id=body.id,
         title=title,
         template_id=body.template_id,
+        layout=default_layout(body.template_id).model_dump(exclude_none=True),
         chapter_id=body.first_chapter_id,
         chapter_title=FIRST_CHAPTER_TITLE,
         editor_name=EDITOR_NAME,
@@ -111,19 +117,29 @@ def list_projects(body: ProjectListIn, db: DbSession) -> list[ProjectCard]:
     ]
 
 
+def _project_of(db: DbSession, me: Me, project_id: UUID) -> ProjectRow:
+    require_project(me, project_id)
+    row = project_db.get(db, project_id)
+    if row is None:
+        raise AppError(404, "not_found", "책을 찾을 수 없어요")
+    return row
+
+
 @router.get(
     "/projects/{project_id}",
     summary="A-10 책 열기",
     response_model=ProjectDetail,
     responses=error_responses(401, 403, 404),
 )
-def get_project(project_id: UUID, me: Me) -> ProjectDetail:
-    """F3까지 가짜 응답. 신원과 책 범위는 실제로 확인해요."""
-    require_project(me, project_id)
+def get_project(project_id: UUID, me: Me, db: DbSession) -> ProjectDetail:
+    """참여자 모두. 책, 장 목록(원고 없이), 참여자. 미리보기(PV-01)도 이것과 A-11을 써요(D-34)."""
+    row = _project_of(db, me, project_id)
     return ProjectDetail(
-        project=_fake.project(project_id),
-        chapters=[_fake.chapter_summary()],
-        participants=_fake.participants(),
+        project=_convert.project(row),
+        chapters=[_convert.chapter_summary(c) for c in chapter_db.list_by_project(db, project_id)],
+        participants=[
+            _convert.participant(p) for p in participant_db.list_by_project(db, project_id)
+        ],
     )
 
 
@@ -134,18 +150,26 @@ def get_project(project_id: UUID, me: Me) -> ProjectDetail:
     status_code=status.HTTP_201_CREATED,
     responses=error_responses(401, 403, 404, 409),
 )
-def create_chapter(project_id: UUID, body: ChapterCreateIn, me: Me) -> Chapter:
-    """편집자·작가(Q-20). F3까지 가짜 응답. 새 장은 원고가 비어 있고 version 1이에요."""
-    require_project(me, project_id)
-    ch = _fake.chapter(body.id, body.title)
-    return ch.model_copy(
-        update={
-            "project_id": project_id,
-            "order": 2,
-            "version": 1,
-            "doc": ch.doc.model_copy(update={"content": []}),
-        }
-    )
+def create_chapter(project_id: UUID, body: ChapterCreateIn, me: Me, db: DbSession) -> Chapter:
+    """편집자·작가(Q-20, FR-15). 새 장은 원고가 비어 있고 version 1, 순서는 마지막 다음이에요."""
+    _project_of(db, me, project_id)
+    require(me, "add_chapter")
+    title = body.title.strip()
+    if not title:
+        raise AppError(422, "invalid_request", "title: 장 제목이 비어 있어요")
+    row = chapter_db.create(db, project_id=project_id, chapter_id=body.id, title=title)
+    return _convert.chapter(row)
+
+
+def _merge(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, Any]:
+    """조판 값은 바꾼 칸만 와요. 여백·쪽 공통 설정처럼 안에 든 값도 칸 단위로 합쳐요."""
+    out = dict(base)
+    for k, v in patch.items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _merge(out[k], v)
+        else:
+            out[k] = v
+    return out
 
 
 @router.patch(
@@ -154,26 +178,46 @@ def create_chapter(project_id: UUID, body: ChapterCreateIn, me: Me) -> Chapter:
     response_model=LayoutOut,
     responses=error_responses(401, 403, 404),
 )
-def patch_layout(project_id: UUID, body: LayoutPatchIn, me: Me) -> LayoutOut:
-    """편집자·디자이너(FR-16 ③). F3까지 가짜 응답. 바꾼 사람과 시각은 서버가 정해요(C-6)."""
-    require_project(me, project_id)
+def patch_layout(project_id: UUID, body: LayoutPatchIn, me: Me, db: DbSession) -> LayoutOut:
+    """편집자·디자이너(FR-16 ③). 바꾼 값만 보내요. 바꾼 사람과 시각은 서버가 정해요(C-6).
+
+    템플릿을 바꾸면 조판 값(쪽 공통 설정 포함)이 그 템플릿 기본값으로 돌아가요(FR-16 ④).
+    같은 요청에 layout도 있으면 기본값 위에 그 값을 얹어요.
+    """
+    _project_of(db, me, project_id)
     require(me, "change_layout")
-    layout = _fake.LAYOUT
+    # 잠그고 최신 값으로 다시 읽은 뒤 합쳐요. 겹친 PATCH가 서로의 변경을 지우지 않게(Codex 검수 11.21).
+    row = project_db.lock(db, project_id)
+    if row is None:
+        raise AppError(404, "not_found", "책을 찾을 수 없어요")
+    template_id = body.template_id or row.template_id
+    base: dict[str, Any]
+    if body.template_id is not None and body.template_id != row.template_id:
+        base = default_layout(body.template_id).model_dump(exclude_none=True)
+    else:
+        base = dict(row.layout or {})
     if body.layout is not None:
-        layout = layout.model_copy(update=body.layout.model_dump(exclude_unset=True))
+        base = _merge(base, body.layout.model_dump(exclude_unset=True))
+    layout = Layout.model_validate(base)  # 모양 확인
+    saved = project_db.update_layout(
+        db,
+        row,
+        template_id=template_id,
+        layout=layout.model_dump(exclude_none=True),
+        by=me.participant_id,
+    )
+    assert saved.layout_updated_by is not None and saved.layout_updated_at is not None
     return LayoutOut(
-        template_id=body.template_id or "essay",
-        layout=layout,
-        layout_updated_by=me.participant_id,
-        layout_updated_at=_fake.T1,
+        template_id=_convert.project(saved).template_id,
+        layout=Layout.model_validate(saved.layout),
+        layout_updated_by=saved.layout_updated_by,
+        layout_updated_at=saved.layout_updated_at,
     )
 
 
 def _editor_of(me: Me, project_id: UUID, db: DbSession) -> None:
-    require_project(me, project_id)
+    _project_of(db, me, project_id)
     require(me, "share_role_links")
-    if project_db.get(db, project_id) is None:
-        raise AppError(404, "not_found", "책을 찾을 수 없어요")
 
 
 @router.get(

@@ -5,7 +5,14 @@ from typing import Any
 from app.config import get_settings
 from app.schemas.invite import Invite
 from app.schemas.layout import Layout
-from app.schemas.project import Chapter, ChapterSummary, Participant, Project
+from app.schemas.project import (
+    Chapter,
+    ChapterSummary,
+    Participant,
+    Project,
+    Snapshot,
+    SnapshotSummary,
+)
 
 
 def web_url(path: str) -> str:
@@ -63,3 +70,18 @@ def invite(row: Any) -> Invite:
         created_at=row.created_at,
         revoked_at=row.revoked_at,
     )
+
+
+def snapshot_summary(row: Any) -> SnapshotSummary:
+    return SnapshotSummary(
+        id=row.id,
+        chapter_id=row.chapter_id,
+        version=row.version,
+        label=row.label,
+        created_by=row.created_by,
+        created_at=row.created_at,
+    )
+
+
+def snapshot(row: Any) -> Snapshot:
+    return Snapshot(**snapshot_summary(row).model_dump(), doc=row.doc)

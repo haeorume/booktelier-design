@@ -1161,6 +1161,109 @@
         "title": "Running",
         "type": "object"
       },
+      "Snapshot": {
+        "properties": {
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "format": "uuid",
+            "title": "Created By",
+            "type": "string"
+          },
+          "doc": {
+            "$ref": "#/components/schemas/ChapterDoc"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "chapter_id",
+          "version",
+          "label",
+          "created_by",
+          "created_at",
+          "doc"
+        ],
+        "title": "Snapshot",
+        "type": "object"
+      },
+      "SnapshotCreateIn": {
+        "properties": {
+          "label": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label"
+        ],
+        "title": "SnapshotCreateIn",
+        "type": "object"
+      },
+      "SnapshotSummary": {
+        "properties": {
+          "chapter_id": {
+            "format": "uuid",
+            "title": "Chapter Id",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by": {
+            "format": "uuid",
+            "title": "Created By",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "chapter_id",
+          "version",
+          "label",
+          "created_by",
+          "created_at"
+        ],
+        "title": "SnapshotSummary",
+        "type": "object"
+      },
       "TextMark": {
         "properties": {
           "attrs": {
@@ -1338,7 +1441,7 @@
     },
     "/chapters/{chapter_id}/doc": {
       "put": {
-        "description": "작가만. base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).\n\n가짜 응답: 예시 장의 version은 3이에요. 3을 보내면 4로 저장되고, 다른 값이면 409예요.",
+        "description": "작가만(D-14). base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).",
         "operationId": "save_doc_chapters__chapter_id__doc_put",
         "parameters": [
           {
@@ -1435,9 +1538,179 @@
         ]
       }
     },
+    "/chapters/{chapter_id}/snapshots": {
+      "get": {
+        "description": "보기는 모두(FR-38). 최근 것이 먼저, 원고는 빼요.",
+        "operationId": "list_snapshots_chapters__chapter_id__snapshots_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SnapshotSummary"
+                  },
+                  "title": "Response List Snapshots Chapters  Chapter Id  Snapshots Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-29 검토본 목록",
+        "tags": [
+          "chapters"
+        ]
+      },
+      "post": {
+        "description": "저장은 편집자(FR-38, routes WS-03). 지금 원고와 버전을 그대로 복사해요.",
+        "operationId": "create_snapshot_chapters__chapter_id__snapshots_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnapshotCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-29 검토본 저장",
+        "tags": [
+          "chapters"
+        ]
+      }
+    },
     "/chapters/{chapter_id}/status": {
       "post": {
-        "description": "검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14).",
+        "description": "검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14). 표에 없는 전이는 409.",
         "operationId": "change_status_chapters__chapter_id__status_post",
         "parameters": [
           {
@@ -1501,6 +1774,16 @@
               }
             },
             "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
           },
           "422": {
             "content": {
@@ -2009,7 +2292,7 @@
     },
     "/projects/{project_id}": {
       "get": {
-        "description": "F3까지 가짜 응답. 신원과 책 범위는 실제로 확인해요.",
+        "description": "참여자 모두. 책, 장 목록(원고 없이), 참여자. 미리보기(PV-01)도 이것과 A-11을 써요(D-34).",
         "operationId": "get_project_projects__project_id__get",
         "parameters": [
           {
@@ -2088,7 +2371,7 @@
     },
     "/projects/{project_id}/chapters": {
       "post": {
-        "description": "편집자·작가(Q-20). F3까지 가짜 응답. 새 장은 원고가 비어 있고 version 1이에요.",
+        "description": "편집자·작가(Q-20, FR-15). 새 장은 원고가 비어 있고 version 1, 순서는 마지막 다음이에요.",
         "operationId": "create_chapter_projects__project_id__chapters_post",
         "parameters": [
           {
@@ -2357,7 +2640,7 @@
     },
     "/projects/{project_id}/layout": {
       "patch": {
-        "description": "편집자·디자이너(FR-16 ③). F3까지 가짜 응답. 바꾼 사람과 시각은 서버가 정해요(C-6).",
+        "description": "편집자·디자이너(FR-16 ③). 바꾼 값만 보내요. 바꾼 사람과 시각은 서버가 정해요(C-6).\n\n템플릿을 바꾸면 조판 값(쪽 공통 설정 포함)이 그 템플릿 기본값으로 돌아가요(FR-16 ④).\n같은 요청에 layout도 있으면 기본값 위에 그 값을 얹어요.",
         "operationId": "patch_layout_projects__project_id__layout_patch",
         "parameters": [
           {
@@ -2441,6 +2724,84 @@
         "summary": "A-15 조판 값 바꾸기",
         "tags": [
           "projects"
+        ]
+      }
+    },
+    "/snapshots/{snapshot_id}": {
+      "get": {
+        "operationId": "get_snapshot_snapshots__snapshot_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "snapshot_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Snapshot Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-29 검토본 하나",
+        "tags": [
+          "chapters"
         ]
       }
     }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PERMISSIONS, can, type Action } from "./permissions";
 import type { Role } from "@/types";
 
-// 기대 권한표(D-14, D-15, FR-09 ④, FR-16 ③, FR-27, FR-29 ④, FR-32, FR-33). 이 표가 바뀌면 문서 근거도 같이 바뀌어야 한다.
+// 기대 권한표(D-14, D-15, FR-09 ④, FR-16 ③, FR-27, FR-29 ④, FR-32, FR-33, Q-20). 이 표가 바뀌면 문서 근거도 같이 바뀌어야 한다.
 const EXPECTED: Record<Action, Role[]> = {
   edit_manuscript: ["author"],
   apply_ai_suggestion: ["author"],
@@ -23,6 +23,7 @@ const EXPECTED: Record<Action, Role[]> = {
   change_layout: ["editor", "designer"],
   create_comment: ["editor", "author", "designer"],
   view_snapshots: ["editor", "author", "designer"],
+  add_chapter: ["author", "editor"], // Q-20, A-13
 };
 
 const ROLES: Role[] = ["editor", "author", "designer"];

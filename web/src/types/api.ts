@@ -31,12 +31,34 @@ export interface paths {
         get?: never;
         /**
          * A-12 원고 저장
-         * @description 작가만. base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).
-         *
-         *     가짜 응답: 예시 장의 version은 3이에요. 3을 보내면 4로 저장되고, 다른 값이면 409예요.
+         * @description 작가만(D-14). base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).
          */
         put: operations["save_doc_chapters__chapter_id__doc_put"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters/{chapter_id}/snapshots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-29 검토본 목록
+         * @description 보기는 모두(FR-38). 최근 것이 먼저, 원고는 빼요.
+         */
+        get: operations["list_snapshots_chapters__chapter_id__snapshots_get"];
+        put?: never;
+        /**
+         * A-29 검토본 저장
+         * @description 저장은 편집자(FR-38, routes WS-03). 지금 원고와 버전을 그대로 복사해요.
+         */
+        post: operations["create_snapshot_chapters__chapter_id__snapshots_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -54,7 +76,7 @@ export interface paths {
         put?: never;
         /**
          * A-14 장 상태 바꾸기
-         * @description 검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14).
+         * @description 검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14). 표에 없는 전이는 409.
          */
         post: operations["change_status_chapters__chapter_id__status_post"];
         delete?: never;
@@ -257,7 +279,7 @@ export interface paths {
         };
         /**
          * A-10 책 열기
-         * @description F3까지 가짜 응답. 신원과 책 범위는 실제로 확인해요.
+         * @description 참여자 모두. 책, 장 목록(원고 없이), 참여자. 미리보기(PV-01)도 이것과 A-11을 써요(D-34).
          */
         get: operations["get_project_projects__project_id__get"];
         put?: never;
@@ -279,7 +301,7 @@ export interface paths {
         put?: never;
         /**
          * A-13 장 추가
-         * @description 편집자·작가(Q-20). F3까지 가짜 응답. 새 장은 원고가 비어 있고 version 1이에요.
+         * @description 편집자·작가(Q-20, FR-15). 새 장은 원고가 비어 있고 version 1, 순서는 마지막 다음이에요.
          */
         post: operations["create_chapter_projects__project_id__chapters_post"];
         delete?: never;
@@ -327,9 +349,29 @@ export interface paths {
         head?: never;
         /**
          * A-15 조판 값 바꾸기
-         * @description 편집자·디자이너(FR-16 ③). F3까지 가짜 응답. 바꾼 사람과 시각은 서버가 정해요(C-6).
+         * @description 편집자·디자이너(FR-16 ③). 바꾼 값만 보내요. 바꾼 사람과 시각은 서버가 정해요(C-6).
+         *
+         *     템플릿을 바꾸면 조판 값(쪽 공통 설정 포함)이 그 템플릿 기본값으로 돌아가요(FR-16 ④).
+         *     같은 요청에 layout도 있으면 기본값 위에 그 값을 얹어요.
          */
         patch: operations["patch_layout_projects__project_id__layout_patch"];
+        trace?: never;
+    };
+    "/snapshots/{snapshot_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A-29 검토본 하나 */
+        get: operations["get_snapshot_snapshots__snapshot_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -826,6 +868,66 @@ export interface components {
             left?: components["schemas"]["PageSide"] | null;
             right?: components["schemas"]["PageSide"] | null;
         };
+        /** Snapshot */
+        Snapshot: {
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Created By
+             * Format: uuid
+             */
+            created_by: string;
+            doc: components["schemas"]["ChapterDoc"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Version */
+            version: number;
+        };
+        /** SnapshotCreateIn */
+        SnapshotCreateIn: {
+            /** Label */
+            label: string;
+        };
+        /** SnapshotSummary */
+        SnapshotSummary: {
+            /**
+             * Chapter Id
+             * Format: uuid
+             */
+            chapter_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Created By
+             * Format: uuid
+             */
+            created_by: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Label */
+            label: string;
+            /** Version */
+            version: number;
+        };
         /** TextMark */
         TextMark: {
             /** Attrs */
@@ -999,6 +1101,126 @@ export interface operations {
             };
         };
     };
+    list_snapshots_chapters__chapter_id__snapshots_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SnapshotSummary"][];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    create_snapshot_chapters__chapter_id__snapshots_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SnapshotCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Snapshot"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
     change_status_chapters__chapter_id__status_post: {
         parameters: {
             query?: never;
@@ -1043,6 +1265,15 @@ export interface operations {
             };
             /** @description 찾을 수 없어요 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 그사이 바뀌었어요 */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1703,6 +1934,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LayoutOut"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    get_snapshot_snapshots__snapshot_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                snapshot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Snapshot"];
                 };
             };
             /** @description 토큰이 없거나 틀려요 */

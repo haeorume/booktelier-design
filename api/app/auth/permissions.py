@@ -26,6 +26,7 @@ Action = Literal[
     "change_layout",
     "create_comment",
     "view_snapshots",
+    "add_chapter",
 ]
 
 _AUTHOR: Final = ("author",)
@@ -54,6 +55,7 @@ PERMISSIONS: Final[dict[Action, tuple[Role, ...]]] = {
     "change_layout": _EDITOR_DESIGNER,
     "create_comment": _ALL,
     "view_snapshots": _ALL,
+    "add_chapter": _AUTHOR_EDITOR,  # Q-20, A-13
 }
 
 ALL_ACTIONS: Final[tuple[Action, ...]] = get_args(Action)
