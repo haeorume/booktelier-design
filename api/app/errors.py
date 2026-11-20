@@ -4,6 +4,8 @@
 FastAPI가 내는 404·405·422도 여기서 같은 모양으로 바꿔 보내요.
 """
 
+from typing import Any
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -19,11 +21,15 @@ class ErrorOut(BaseModel):
 class AppError(Exception):
     """서버가 일부러 내는 오류. 예: 401 unauthorized, 403 forbidden, 409 version_conflict."""
 
-    def __init__(self, status_code: int, code: str, message: str) -> None:
+    def __init__(
+        self, status_code: int, code: str, message: str, extra: dict[str, Any] | None = None
+    ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.code = code
         self.message = message
+        # code·message 옆에 같이 실을 값. 예: 409 version_conflict의 latest(C-4, D-30)
+        self.extra = extra or {}
 
 
 _DEFAULT_CODES = {
@@ -41,7 +47,8 @@ def _body(code: str, message: str) -> dict[str, str]:
 
 async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)
-    return JSONResponse(status_code=exc.status_code, content=_body(exc.code, exc.message))
+    content: dict[str, Any] = {**exc.extra, **_body(exc.code, exc.message)}
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 
 async def _http_error(_: Request, exc: Exception) -> JSONResponse:

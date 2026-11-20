@@ -1,6 +1,200 @@
 {
   "components": {
     "schemas": {
+      "Chapter": {
+        "properties": {
+          "doc": {
+            "$ref": "#/components/schemas/ChapterDoc"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "order": {
+            "title": "Order",
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "editing",
+              "review_requested",
+              "reviewed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_changed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Changed At"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "order",
+          "title",
+          "status",
+          "version",
+          "status_changed_at",
+          "updated_at",
+          "doc"
+        ],
+        "title": "Chapter",
+        "type": "object"
+      },
+      "ChapterCreateIn": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "ChapterCreateIn",
+        "type": "object"
+      },
+      "ChapterDoc": {
+        "description": "편집기 문서. 문단마다 id가 있어요(data-contract chapter.doc, P1).",
+        "properties": {
+          "content": {
+            "items": {
+              "$ref": "#/components/schemas/ParagraphNode"
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "type": {
+            "const": "doc",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "ChapterDoc",
+        "type": "object"
+      },
+      "ChapterStatusIn": {
+        "properties": {
+          "to": {
+            "enum": [
+              "editing",
+              "review_requested",
+              "reviewed"
+            ],
+            "title": "To",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to"
+        ],
+        "title": "ChapterStatusIn",
+        "type": "object"
+      },
+      "ChapterSummary": {
+        "description": "장 목록의 한 줄. 원고(doc)는 빼요.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "order": {
+            "title": "Order",
+            "type": "integer"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "editing",
+              "review_requested",
+              "reviewed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_changed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Changed At"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "order",
+          "title",
+          "status",
+          "version",
+          "status_changed_at",
+          "updated_at"
+        ],
+        "title": "ChapterSummary",
+        "type": "object"
+      },
       "DbHealthOut": {
         "properties": {
           "connected": {
@@ -19,6 +213,61 @@
         "title": "DbHealthOut",
         "type": "object"
       },
+      "DocSaveIn": {
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "doc": {
+            "$ref": "#/components/schemas/ChapterDoc"
+          }
+        },
+        "required": [
+          "doc",
+          "base_version"
+        ],
+        "title": "DocSaveIn",
+        "type": "object"
+      },
+      "DocSaveOut": {
+        "properties": {
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "updated_at"
+        ],
+        "title": "DocSaveOut",
+        "type": "object"
+      },
+      "ErrorOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorOut",
+        "type": "object"
+      },
       "HealthOut": {
         "properties": {
           "status": {
@@ -32,6 +281,968 @@
         ],
         "title": "HealthOut",
         "type": "object"
+      },
+      "Invite": {
+        "description": "편집자에게만 보여요. 다시 복사할 수 있게 주소를 늘 같이 줘요(D-37).",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "role": {
+            "enum": [
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "revoked"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "role",
+          "url",
+          "state",
+          "created_at",
+          "revoked_at"
+        ],
+        "title": "Invite",
+        "type": "object"
+      },
+      "InviteCheckOut": {
+        "description": "A-05. 링크를 연 사람에게 보여 줄 것. 쓸 수 없으면 JN-02.",
+        "properties": {
+          "can": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Can",
+            "type": "array"
+          },
+          "project_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Title"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "editor",
+                  "author",
+                  "designer"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "state": {
+            "enum": [
+              "valid",
+              "unusable"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "project_title",
+          "role",
+          "can"
+        ],
+        "title": "InviteCheckOut",
+        "type": "object"
+      },
+      "InviteCreateIn": {
+        "properties": {
+          "role": {
+            "enum": [
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "InviteCreateIn",
+        "type": "object"
+      },
+      "InviteRotateOut": {
+        "description": "새로 바꾸기: 옛 링크는 취소되고 새 링크가 생겨요(FR-08 ①).",
+        "properties": {
+          "created": {
+            "$ref": "#/components/schemas/Invite"
+          },
+          "revoked": {
+            "$ref": "#/components/schemas/Invite"
+          }
+        },
+        "required": [
+          "revoked",
+          "created"
+        ],
+        "title": "InviteRotateOut",
+        "type": "object"
+      },
+      "JoinIn": {
+        "properties": {
+          "anon_id": {
+            "format": "uuid",
+            "title": "Anon Id",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name",
+          "anon_id"
+        ],
+        "title": "JoinIn",
+        "type": "object"
+      },
+      "JoinOut": {
+        "properties": {
+          "participant": {
+            "$ref": "#/components/schemas/Participant"
+          },
+          "participant_token": {
+            "title": "Participant Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant",
+          "participant_token"
+        ],
+        "title": "JoinOut",
+        "type": "object"
+      },
+      "Layout": {
+        "properties": {
+          "binding": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Binding"
+          },
+          "font_family": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Font Family"
+          },
+          "font_size": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Font Size"
+          },
+          "line_height": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line Height"
+          },
+          "margin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Margins"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "running": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Running"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "trim": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trim"
+          }
+        },
+        "title": "Layout",
+        "type": "object"
+      },
+      "LayoutOut": {
+        "properties": {
+          "layout": {
+            "$ref": "#/components/schemas/Layout"
+          },
+          "layout_updated_at": {
+            "format": "date-time",
+            "title": "Layout Updated At",
+            "type": "string"
+          },
+          "layout_updated_by": {
+            "format": "uuid",
+            "title": "Layout Updated By",
+            "type": "string"
+          },
+          "template_id": {
+            "enum": [
+              "novel",
+              "essay",
+              "practical"
+            ],
+            "title": "Template Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_id",
+          "layout",
+          "layout_updated_by",
+          "layout_updated_at"
+        ],
+        "title": "LayoutOut",
+        "type": "object"
+      },
+      "LayoutPatchIn": {
+        "description": "바꾼 값만 보내요. 템플릿을 바꾸면 조판 값이 그 템플릿 기본값으로 돌아가요(FR-16 ④).",
+        "properties": {
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Layout"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "template_id": {
+            "anyOf": [
+              {
+                "enum": [
+                  "novel",
+                  "essay",
+                  "practical"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Id"
+          }
+        },
+        "title": "LayoutPatchIn",
+        "type": "object"
+      },
+      "Margins": {
+        "description": "여백 4개(mm). 안쪽·바깥쪽은 펼침면 기준.",
+        "properties": {
+          "bottom": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bottom"
+          },
+          "inner": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inner"
+          },
+          "outer": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outer"
+          },
+          "top": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top"
+          }
+        },
+        "title": "Margins",
+        "type": "object"
+      },
+      "MeOut": {
+        "description": "A-01·A-04. 토큰을 가진 사람.",
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "editor",
+              "participant"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "editor",
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "participant_id",
+          "role",
+          "display_name",
+          "project_id"
+        ],
+        "title": "MeOut",
+        "type": "object"
+      },
+      "PageSide": {
+        "description": "한쪽 면(왼쪽 또는 오른쪽)의 쪽 공통 설정(FR-44 ②).",
+        "properties": {
+          "header": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "book_title",
+                  "chapter_title"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Header"
+          },
+          "page_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Number"
+          }
+        },
+        "title": "PageSide",
+        "type": "object"
+      },
+      "ParagraphAttrs": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ParagraphAttrs",
+        "type": "object"
+      },
+      "ParagraphNode": {
+        "properties": {
+          "attrs": {
+            "$ref": "#/components/schemas/ParagraphAttrs"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TextNode"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "type": {
+            "const": "paragraph",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "attrs"
+        ],
+        "title": "ParagraphNode",
+        "type": "object"
+      },
+      "Participant": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen At"
+          },
+          "project_id": {
+            "format": "uuid",
+            "title": "Project Id",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "editor",
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "role",
+          "display_name",
+          "created_at",
+          "last_seen_at"
+        ],
+        "title": "Participant",
+        "type": "object"
+      },
+      "ParticipantBrief": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "editor",
+              "author",
+              "designer"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "display_name"
+        ],
+        "title": "ParticipantBrief",
+        "type": "object"
+      },
+      "Project": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/Layout"
+          },
+          "layout_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Updated At"
+          },
+          "layout_updated_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout Updated By"
+          },
+          "template_id": {
+            "enum": [
+              "novel",
+              "essay",
+              "practical"
+            ],
+            "title": "Template Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "template_id",
+          "layout",
+          "layout_updated_by",
+          "layout_updated_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Project",
+        "type": "object"
+      },
+      "ProjectCard": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantBrief"
+            },
+            "title": "Participants",
+            "type": "array"
+          },
+          "stage": {
+            "enum": [
+              "editing",
+              "review_requested",
+              "reviewed"
+            ],
+            "title": "Stage",
+            "type": "string"
+          },
+          "template_id": {
+            "enum": [
+              "novel",
+              "essay",
+              "practical"
+            ],
+            "title": "Template Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "todo_count": {
+            "title": "Todo Count",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "template_id",
+          "stage",
+          "participants",
+          "todo_count",
+          "updated_at"
+        ],
+        "title": "ProjectCard",
+        "type": "object"
+      },
+      "ProjectCreateIn": {
+        "properties": {
+          "first_chapter_id": {
+            "format": "uuid",
+            "title": "First Chapter Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "template_id": {
+            "enum": [
+              "novel",
+              "essay",
+              "practical"
+            ],
+            "title": "Template Id",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "template_id",
+          "first_chapter_id"
+        ],
+        "title": "ProjectCreateIn",
+        "type": "object"
+      },
+      "ProjectCreateOut": {
+        "properties": {
+          "chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "editor_token": {
+            "title": "Editor Token",
+            "type": "string"
+          },
+          "editor_url": {
+            "title": "Editor Url",
+            "type": "string"
+          },
+          "participant": {
+            "$ref": "#/components/schemas/Participant"
+          },
+          "project": {
+            "$ref": "#/components/schemas/Project"
+          }
+        },
+        "required": [
+          "project",
+          "chapter",
+          "participant",
+          "editor_token",
+          "editor_url"
+        ],
+        "title": "ProjectCreateOut",
+        "type": "object"
+      },
+      "ProjectDetail": {
+        "properties": {
+          "chapters": {
+            "items": {
+              "$ref": "#/components/schemas/ChapterSummary"
+            },
+            "title": "Chapters",
+            "type": "array"
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/Participant"
+            },
+            "title": "Participants",
+            "type": "array"
+          },
+          "project": {
+            "$ref": "#/components/schemas/Project"
+          }
+        },
+        "required": [
+          "project",
+          "chapters",
+          "participants"
+        ],
+        "title": "ProjectDetail",
+        "type": "object"
+      },
+      "ProjectListIn": {
+        "description": "브라우저가 가진 편집자 토큰들. 맞지 않는 토큰은 응답에서 빠져요(D-38).",
+        "properties": {
+          "editor_tokens": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Editor Tokens",
+            "type": "array"
+          }
+        },
+        "required": [
+          "editor_tokens"
+        ],
+        "title": "ProjectListIn",
+        "type": "object"
+      },
+      "Running": {
+        "description": "쪽 공통 설정: 쪽 번호와 머리말(FR-44).",
+        "properties": {
+          "left": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageSide"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "right": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageSide"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "Running",
+        "type": "object"
+      },
+      "TextMark": {
+        "properties": {
+          "attrs": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attrs"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "TextMark",
+        "type": "object"
+      },
+      "TextNode": {
+        "properties": {
+          "marks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TextMark"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marks"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "TextNode",
+        "type": "object"
+      },
+      "VersionConflictOut": {
+        "description": "409. 최신 원고를 같이 줘요(C-4, D-30).",
+        "properties": {
+          "code": {
+            "const": "version_conflict",
+            "title": "Code",
+            "type": "string"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "latest"
+        ],
+        "title": "VersionConflictOut",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "description": "편집자 토큰이나 참여자 토큰",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -41,6 +1252,272 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/chapters/{chapter_id}": {
+      "get": {
+        "operationId": "get_chapter_chapters__chapter_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chapter"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-11 장 읽기",
+        "tags": [
+          "chapters"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/doc": {
+      "put": {
+        "description": "작가만. base_version이 지금 버전과 다르면 409와 최신 장(C-4, D-30).\n\n가짜 응답: 예시 장의 version은 3이에요. 3을 보내면 4로 저장되고, 다른 값이면 409예요.",
+        "operationId": "save_doc_chapters__chapter_id__doc_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocSaveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocSaveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionConflictOut"
+                }
+              }
+            },
+            "description": "base_version이 최신이 아니에요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-12 원고 저장",
+        "tags": [
+          "chapters"
+        ]
+      }
+    },
+    "/chapters/{chapter_id}/status": {
+      "post": {
+        "description": "검토 요청은 작가, 검토 완료·다시 열기는 편집자(FR-12~14).",
+        "operationId": "change_status_chapters__chapter_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chapter_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Chapter Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChapterStatusIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChapterSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-14 장 상태 바꾸기",
+        "tags": [
+          "chapters"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "description": "서버가 살아 있는지. 배포처(Railway) 헬스 체크가 불러요. DB는 보지 않아요.",
@@ -55,6 +1532,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
           }
         },
         "summary": "health 서버가 떠 있나",
@@ -77,11 +1564,866 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
           }
         },
         "summary": "health DB 연결과 pgvector",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/invites/{invite_id}/revoke": {
+      "post": {
+        "description": "편집자만. 취소한 링크로는 들어올 수 없어요(FR-08 ②③).",
+        "operationId": "revoke_invite_invites__invite_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invite_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invite Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invite"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-09 초대 링크 취소",
+        "tags": [
+          "invites"
+        ]
+      }
+    },
+    "/invites/{invite_id}/rotate": {
+      "post": {
+        "description": "편집자만. 옛 링크는 취소되고 같은 역할의 새 링크가 생겨요(FR-08 ①, S-03).",
+        "operationId": "rotate_invite_invites__invite_id__rotate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "invite_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Invite Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteRotateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-09 초대 링크 새로 바꾸기",
+        "tags": [
+          "invites"
+        ]
+      }
+    },
+    "/invites/{token}": {
+      "get": {
+        "description": "누구나. 없거나 바꾸었거나 취소한 링크는 state=unusable(JN-02). 무엇 때문인지는 알려 주지 않아요.",
+        "operationId": "check_invite_invites__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteCheckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "summary": "A-05 초대 링크 확인",
+        "tags": [
+          "invites"
+        ]
+      }
+    },
+    "/invites/{token}/join": {
+      "post": {
+        "description": "링크를 가진 사람. 역할은 링크의 역할로 정해져요(NFR-01). 참여자 토큰은 이 응답에서만 줘요(D-27).\n\n없거나 바꾸었거나 취소한 링크면 404 invite_unusable(FR-08 ③, S-03).",
+        "operationId": "join_invites__token__join_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "summary": "A-06 참여하기",
+        "tags": [
+          "invites"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "화면이 처음 열릴 때 불러요. 편집자 링크(/e/[token])로 들어오면 그 토큰을 헤더에 실어 불러요(A-04).",
+        "operationId": "get_me_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-01 나 확인 (A-04 편집자 링크로 들어오기도 이것)",
+        "tags": [
+          "me"
+        ]
+      }
+    },
+    "/projects": {
+      "post": {
+        "description": "누구나 불러요. 편집자 참여자와 편집자 토큰을 같이 만들고, 토큰은 이 응답에서만 줘요(D-27).",
+        "operationId": "create_project_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCreateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "summary": "A-02 책 만들기",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/projects/list": {
+      "post": {
+        "description": "브라우저가 가진 편집자 토큰들을 보내면 그 책 카드를 줘요(D-38). 맞지 않는 토큰은 빠져요.",
+        "operationId": "list_projects_projects_list_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectListIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectCard"
+                  },
+                  "title": "Response List Projects Projects List Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "summary": "A-03 내 책 목록",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/projects/{project_id}": {
+      "get": {
+        "operationId": "get_project_projects__project_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-10 책 열기",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/projects/{project_id}/chapters": {
+      "post": {
+        "description": "편집자·작가(Q-20). 새 장은 원고가 비어 있고 version 1이에요.",
+        "operationId": "create_chapter_projects__project_id__chapters_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChapterCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chapter"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "그사이 바뀌었어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-13 장 추가",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/projects/{project_id}/invites": {
+      "get": {
+        "description": "편집자만. 다시 복사할 수 있게 주소를 같이 줘요(D-37).",
+        "operationId": "list_invites_projects__project_id__invites_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Invite"
+                  },
+                  "title": "Response List Invites Projects  Project Id  Invites Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-07 초대 링크 목록",
+        "tags": [
+          "projects"
+        ]
+      },
+      "post": {
+        "description": "편집자만.",
+        "operationId": "create_invite_projects__project_id__invites_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invite"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-08 초대 링크 만들기",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/projects/{project_id}/layout": {
+      "patch": {
+        "description": "편집자·디자이너. 바꾼 값만 보내요. 바꾼 사람과 시각은 서버가 정해요(C-6).",
+        "operationId": "patch_layout_projects__project_id__layout_patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayoutPatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-15 조판 값 바꾸기",
+        "tags": [
+          "projects"
         ]
       }
     }
