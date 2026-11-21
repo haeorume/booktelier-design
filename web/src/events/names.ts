@@ -1,4 +1,4 @@
-// events 탭 '2. 이벤트'의 이름. 확정 19개 + 잠정 1개(suggested_edit_rejected) + v0.4 초안 중 F2~F5에서 쓰는 것. 이 밖의 이름은 남기지 않는다.
+// events 탭 '2. 이벤트'의 이름. 확정 19개 + 잠정 1개(suggested_edit_rejected) + v0.4 초안 중 F2~F7에서 쓰는 것. 이 밖의 이름은 남기지 않는다.
 export const EVENT_NAMES = [
   // 퍼널 1~13단계
   "project_created",
@@ -32,6 +32,8 @@ export const EVENT_NAMES = [
   "review_completed",
   "comment_resolved",
   "comment_reopened",
+  // F7(events 탭 v0.4 혜린 초안 11.20)
+  "preview_opened",
   // F4(events 탭 v0.4 혜린 초안 11.20)
   "presence_jumped",
   // 체류

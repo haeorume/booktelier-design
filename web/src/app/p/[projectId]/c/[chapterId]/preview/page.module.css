@@ -1,0 +1,236 @@
+/* 미리보기(PV-01~05, DESIGN.md 4장): 위 막대 · 책상 위 펼침면 · 아래 쪽 넘기기 */
+.preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bt-soft);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-4);
+  min-height: var(--bt-topbar-h);
+  padding: var(--bt-space-2) var(--bt-space-5);
+  border-bottom: 1px solid var(--bt-line);
+  background: var(--bt-surface);
+}
+
+/* 돌아가기(PV-05): 위 왼쪽 */
+.back {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--bt-space-3);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
+}
+
+.back:hover {
+  background: var(--bt-soft);
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--bt-space-2);
+  min-width: 0;
+  font-size: var(--bt-size-md);
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-ink);
+}
+
+.chapter {
+  font-weight: var(--bt-weight-regular);
+  color: var(--bt-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.range {
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-regular);
+  color: var(--bt-text-3);
+  white-space: nowrap;
+}
+
+/* 보기 켜고 끄기(PV-04): 칩. 켜짐은 체크 + 엷은 주황(색만으로 구분하지 않음) */
+.layers {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-1);
+}
+
+.layersLabel {
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-2);
+  margin-right: var(--bt-space-1);
+}
+
+.chip {
+  height: 28px;
+  padding: 0 var(--bt-space-2);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-sm);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--bt-accent-line);
+  background: var(--bt-accent-soft);
+  color: var(--bt-accent-text);
+  font-weight: var(--bt-weight-medium);
+}
+
+.chip[aria-pressed="true"]::before {
+  content: "✓ ";
+}
+
+.desk {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  padding: var(--bt-space-8) var(--bt-space-4);
+}
+
+.reflowing {
+  position: absolute;
+  top: var(--bt-space-3);
+  right: var(--bt-space-4);
+  padding: 2px var(--bt-space-2);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-warning-soft);
+  color: var(--bt-warning);
+  font-size: var(--bt-size-xs);
+}
+
+/* ── Paged.js가 그린 쪽(펼침면) ── */
+.stage :global(.pagedjs_pages) {
+  display: flex;
+  justify-content: center;
+}
+
+/* 다른 펼침면은 감추기만 해요. display: none이면 CSS 쪽 번호 셈(counter(page))에서 빠져 번호가 틀려져요. */
+.stage :global(.pagedjs_page[hidden]) {
+  display: block;
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* 장의 첫 쪽은 오른쪽 쪽이라 왼쪽에 빈 자리를 둬요 */
+.stage[data-first-spread="true"] :global(.pagedjs_first_page) {
+  margin-left: var(--pagedjs-width);
+}
+
+.stage :global(.pagedjs_sheet) {
+  background: var(--bt-paper);
+  box-shadow: var(--bt-shadow-paper);
+}
+
+/* 가운데 접히는 자리의 안쪽 그림자(양쪽 12px) */
+.stage :global(.pagedjs_left_page .pagedjs_sheet) {
+  background-image: linear-gradient(to left, var(--bt-line), var(--bt-paper) 12px);
+}
+
+.stage :global(.pagedjs_right_page .pagedjs_sheet) {
+  background-image: linear-gradient(to right, var(--bt-line), var(--bt-paper) 12px);
+}
+
+/* 여백 안내선: 본문이 들어가는 칸 */
+.stage[data-show-guides="true"] :global(.pagedjs_area) {
+  outline: 1px dashed var(--bt-line-control);
+}
+
+/* 검토 표시는 처음에는 보통 글자처럼(FR-43 ④). 켜면 작업 지면과 같은 색과 선 모양(UX CS-11) */
+.stage[data-show-comment="true"] :global(.bt-comment) {
+  background-color: var(--bt-comment-wash);
+  border-bottom: 1px dotted var(--bt-comment);
+}
+
+.stage[data-show-edit="true"] :global(.bt-edit-del) {
+  text-decoration: line-through 2px var(--bt-edit);
+  color: var(--bt-text-3);
+}
+
+/* 더한 글자는 수정 제안 표시를 켰을 때만 원고에 들어와요(쪽을 다시 나눠요) */
+.stage[data-show-edit="true"] :global(.bt-edit-ins) {
+  text-decoration: underline dashed 2px var(--bt-edit);
+  text-underline-offset: 4px;
+  color: var(--bt-edit);
+}
+
+.stage[data-show-ai="true"] :global(.bt-ai-spelling) {
+  text-decoration: underline wavy var(--bt-kind-spelling);
+  text-underline-offset: 4px;
+}
+
+.stage[data-show-ai="true"] :global(.bt-ai-spacing) {
+  text-decoration: underline double var(--bt-kind-spacing);
+  text-underline-offset: 4px;
+}
+
+.stage[data-show-ai="true"] :global(.bt-ai-notation) {
+  text-decoration: underline dotted 3px var(--bt-kind-notation);
+  text-underline-offset: 4px;
+}
+
+.stage[data-show-ai="true"] :global(.bt-ai-polish) {
+  background-color: var(--bt-kind-polish-wash);
+  box-shadow: inset 0 -3px 0 var(--bt-kind-polish);
+}
+
+/* 쪽 넘기기(PV-03): 아래 가운데 */
+.pager {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--bt-space-3);
+  padding: var(--bt-space-3);
+  border-top: 1px solid var(--bt-line);
+  background: var(--bt-surface);
+}
+
+.pageButton {
+  height: 32px;
+  padding: 0 var(--bt-space-3);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-sm);
+  cursor: pointer;
+}
+
+.pageButton:disabled {
+  color: var(--bt-text-3);
+  cursor: not-allowed;
+}
+
+.jump {
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-2);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-2);
+}
+
+.jumpInput {
+  width: 64px;
+  height: 32px;
+  padding: 0 var(--bt-space-2);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+}

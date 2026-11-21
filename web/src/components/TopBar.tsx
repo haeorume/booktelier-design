@@ -22,6 +22,8 @@ interface Props {
   /** 작업 공간이 장 상태·검토 요청 버튼(WS-31)과 저장 상태(WS-14)를 그려 넣을 자리 */
   chapterSlotRef: (el: HTMLElement | null) => void;
   saveSlotRef: (el: HTMLElement | null) => void;
+  /** 미리보기 주소(WS-15, PV-01). 새 탭으로도 열 수 있게 링크로 둬요. */
+  previewHref: string;
   layoutOpen: boolean;
   onShare: () => void;
   onSnapshots: () => void;
@@ -33,7 +35,7 @@ interface Props {
  * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 초대(L-07)는 편집자만.
  */
 export function TopBar(props: Props) {
-  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
+  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, previewHref, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
   return (
     <header className={styles.bar}>
       <span className={styles.logo}>
@@ -57,6 +59,9 @@ export function TopBar(props: Props) {
       <div className={styles.tools}>
         <Participants participants={participants} currentId={currentId} present={present} chapterTitles={chapterTitles} onJump={onJump} />
         <div className={styles.saveSlot} ref={saveSlotRef} />
+        <Link className={styles.button} href={previewHref} data-testid="preview-link">
+          미리보기
+        </Link>
         {can(role, "view_snapshots") && (
           <button type="button" className={styles.button} onClick={onSnapshots}>
             검토본

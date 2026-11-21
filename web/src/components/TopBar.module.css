@@ -84,6 +84,8 @@
 
 /* 보조 버튼(DESIGN.md 5장): 흰 바탕, 테두리, 높이 32px */
 .button {
+  display: inline-flex;
+  align-items: center;
   height: 32px;
   padding: 0 var(--bt-space-3);
   border-radius: var(--bt-radius-md);

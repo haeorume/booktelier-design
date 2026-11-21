@@ -197,6 +197,7 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         onJump={onJump}
         chapterSlotRef={setChapterSlot}
         saveSlotRef={setSaveSlot}
+        previewHref={`/p/${project.id}/c/${chapter.id}/preview?from=top_bar`}
         layoutOpen={layoutOpen}
         onShare={() => setSharing(true)}
         onSnapshots={() => setSnapshotsOpen(true)}
