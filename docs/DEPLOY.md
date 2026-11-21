@@ -51,7 +51,7 @@ Hobby로 올리면 Usage에서 **지출 한도**를 꼭 걸어요.
 | Root Directory | `api` |
 | Region | Southeast Asia (Singapore) |
 | Start Command | `uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
-| Pre-deploy Command | `uv run --no-sync alembic upgrade head` (사람이 리뷰해 merge한 커밋만 배포되므로, 배포 DB 변경은 여기서만 일어나요) |
+| Pre-deploy Command | `uv run --no-sync alembic upgrade head && uv run --no-sync python scripts/seed_norms.py --if-empty` (사람이 리뷰해 merge한 커밋만 배포되므로, 배포 DB 변경은 여기서만 일어나요. 어문 규범은 비어 있을 때만 넣고, 넣지 못해도 배포는 막지 않아요, F8) |
 | Healthcheck Path | `/health` |
 | PR 미리보기 환경 | **끔**. 켜면 미리보기가 배포 DB 주소를 물려받아 마이그레이션을 돌릴 수 있어요. 쓰려면 Neon 브랜치를 따로 연결한 뒤에 |
 
@@ -72,8 +72,13 @@ Vercel 주소가 정해지면 Railway의 `CORS_ORIGINS`에 넣어요.
 | `TEST_DATABASE_URL` | api(로컬만) | `booktelier-dev`의 `test-이름` 주소 | pytest DB 테스트. `DATABASE_URL`과 같으면 테스트가 시작하지 않아요. CI는 컨테이너 주소를 스스로 넣어요 |
 | `CORS_ORIGINS` | api | `http://localhost:3000,https://<vercel 주소>` | 웹 주소만, 쉼표로 |
 | `WEB_URL` | api | `http://localhost:3000` (배포는 `https://<vercel 주소>`) | 웹 주소 하나. 편집자 링크(`/e/…`)·초대 링크(`/j/…`)를 이 주소로 만들어요 |
-| `AI_PROVIDER` | api | `demo` / `llm` | F6 전에는 `demo`. e2e·CI는 늘 `demo` |
-| LLM 키 (이름은 F6에서) | api(배포처·로컬 `.env`만) | 엘리스 플랫폼 발급 키 | 브라우저로 절대 보내지 않아요(D-21) |
+| `AI_PROVIDER` | api | `demo` / `llm` | 배포는 `llm`(실제 AI). e2e·CI·pytest는 늘 `demo` |
+| `LLM_BASE_URL` | api | 엘리스 플랫폼 LLM 주소 + `/v1` | OpenAI 호환 API(F6) |
+| `LLM_MODEL` | api | `openai/gpt-6.2-sol` | 바꾸면 다른 모델로 |
+| `LLM_API_KEY` | api(배포처·로컬 `.env`만) | 엘리스 플랫폼 발급 키 | 브라우저로 절대 보내지 않아요(D-21) |
+| `EMBEDDING_BASE_URL` | api | 엘리스 플랫폼 임베딩 주소 + `/v1` | RAG(F6). 없으면 장 검토가 근거 없이 돌아요 |
+| `EMBEDDING_MODEL` | api | `openai/text-embedding-3-small` | 1536차원(rag_chunk) |
+| `EMBEDDING_API_KEY` | api(배포처·로컬 `.env`만) | 엘리스 플랫폼 발급 키 | 브라우저로 절대 보내지 않아요 |
 | `NEXT_PUBLIC_API_URL` | web | `http://localhost:8000` / Railway 주소 | 서버 주소 |
 | `NEXT_PUBLIC_DEV_BAR` | web | 비움 / `1` / `0` | 배포에서 개발용 막대를 보이게 하려면 `1`. 개발 서버에서 숨기려면 `0` |
 
