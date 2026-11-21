@@ -454,3 +454,37 @@
 .card[data-card="comment"] {
   border-left-color: var(--bt-comment);
 }
+
+/* 근거(F6 RAG): 수정 이유 아래 13px 보조 글자. 발췌는 '원문 보기'로 펼쳐요(DESIGN.md 5장 카드) */
+.evidence {
+  font-size: var(--bt-size-sm);
+  color: var(--bt-text-2);
+}
+
+.evidence summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.evidence summary::-webkit-details-marker {
+  display: none;
+}
+
+.evidenceMore {
+  color: var(--bt-accent-text);
+  text-decoration: underline;
+  margin-left: var(--bt-space-1);
+}
+
+.evidence[open] .evidenceMore {
+  display: none;
+}
+
+.evidenceExcerpt {
+  margin-top: var(--bt-space-1);
+  padding: var(--bt-space-2);
+  border-left: 2px solid var(--bt-line-strong);
+  background: var(--bt-soft);
+  color: var(--bt-text);
+  white-space: pre-wrap;
+}

@@ -8,7 +8,7 @@ import type { Ctx, ReviewStore } from "./review-store";
 
 type S = components["schemas"];
 
-function toSuggestion(s: S["AiSuggestion"]): AiSuggestion {
+export function toSuggestion(s: S["AiSuggestion"]): AiSuggestion {
   return {
     id: s.id,
     chapter_id: s.chapter_id,
@@ -24,6 +24,7 @@ function toSuggestion(s: S["AiSuggestion"]): AiSuggestion {
     created_at: s.created_at,
     status: s.status,
     owner_participant_id: s.owner_participant_id,
+    evidence: s.evidence ? { type: s.evidence.type, label: s.evidence.label, excerpt: s.evidence.excerpt, chunk_id: s.evidence.chunk_id } : null,
   };
 }
 
