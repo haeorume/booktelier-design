@@ -2464,6 +2464,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorOut"];
                 };
             };
+            /** @description AI가 지금 답하지 않아요(다시 시도) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
         };
     };
     chapter_review_chapters__chapter_id__review_post: {
@@ -2528,6 +2537,15 @@ export interface operations {
             };
             /** @description 요청 모양이 맞지 않아요 */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description AI가 지금 답하지 않아요(다시 시도) */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

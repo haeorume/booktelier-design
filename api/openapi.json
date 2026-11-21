@@ -3394,6 +3394,16 @@
               }
             },
             "description": "요청 모양이 맞지 않아요"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "AI가 지금 답하지 않아요(다시 시도)"
           }
         },
         "security": [
@@ -3493,6 +3503,16 @@
               }
             },
             "description": "요청 모양이 맞지 않아요"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "AI가 지금 답하지 않아요(다시 시도)"
           }
         },
         "security": [

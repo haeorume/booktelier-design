@@ -18,6 +18,11 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings, normalize_db_url
 
+# 테스트·CI는 늘 데모 제공자(D-21). 개발용 .env가 AI_PROVIDER=llm이어도 실제 LLM을 부르지 않게 고정해요.
+# 환경 변수가 .env보다 앞서요(pydantic-settings).
+os.environ["AI_PROVIDER"] = "demo"
+get_settings.cache_clear()
+
 TEST_DB = normalize_db_url(os.environ.get("TEST_DATABASE_URL", ""))
 
 

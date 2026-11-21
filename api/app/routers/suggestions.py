@@ -3,19 +3,22 @@
 AI 요청은 원문을 받지 않고 장 id와 base_version만 받아요(C-9). 서버가 저장된 원고를 읽어요.
 """
 
+from collections.abc import Callable
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter
 
-from app.ai.demo import get_provider
+from app.ai import get_provider
+from app.ai.provider import AiUnavailable, BookRules, ReviewResult
 from app.auth.token import Identity, Me, require
 from app.db import chapters as chapter_db
+from app.db import shared as shared_db
 from app.db import suggestions as ai_db
 from app.db.models import AiSuggestion as AiRow
 from app.db.models import Chapter as ChapterRow
 from app.db.session import DbSession
-from app.errors import AppError
+from app.errors import AppError, ErrorOut
 from app.routers import _convert
 from app.routers.chapters import chapter_of
 from app.schemas.common import error_responses
@@ -64,18 +67,43 @@ def _version_conflict(e: chapter_db.VersionConflict) -> AppError:
     )
 
 
+def _book_rules(db: DbSession, project_id: UUID) -> BookRules:
+    """책 원칙(A-28)을 AI에 넘겨요. rule은 따를 원칙, keep은 고치지 말 표현(FR-31)."""
+    rows = shared_db.list_style_rules(db, project_id)
+    return BookRules(
+        rules=[r.text for r in rows if r.type == "rule"],
+        keep=[r.text for r in rows if r.type == "keep"],
+    )
+
+
+AI_UNAVAILABLE: dict[int | str, dict[str, Any]] = {
+    503: {"model": ErrorOut, "description": "AI가 지금 답하지 않아요(다시 시도)"}
+}
+
+
+def _run(call: Callable[[], ReviewResult]) -> ReviewResult:
+    """AI가 늦거나 실패하면 503으로 알려요. 화면은 안내와 다시 시도를 보이고 입력은 막지 않아요(NFR-03)."""
+    try:
+        return call()
+    except AiUnavailable:
+        raise AppError(
+            503, "ai_unavailable", "AI가 지금 답하지 않아요. 잠시 뒤 다시 시도해 주세요"
+        ) from None
+
+
 @router.post(
     "/chapters/{chapter_id}/live-check",
     summary="A-16 실시간 교정",
     response_model=list[AiSuggestion],
-    responses={**error_responses(401, 403, 404), **CONFLICT},
+    responses={**error_responses(401, 403, 404), **CONFLICT, **AI_UNAVAILABLE},
 )
 def live_check(chapter_id: UUID, body: LiveCheckIn, me: Me, db: DbSession) -> list[AiSuggestion]:
     """작가가 입력을 멈추면 바뀐 문단만(D-18). 이번에 대기로 뜬 내 제안을 돌려줘요. 실패해도 입력은 막지 않아요(NFR-03)."""
     chapter = chapter_of(db, me, chapter_id)
     require(me, "edit_manuscript")
     _fresh(chapter, body.base_version)
-    result = get_provider().live_check(chapter.doc, body.paragraph_ids)
+    book = _book_rules(db, chapter.project_id)
+    result = _run(lambda: get_provider().live_check(chapter.doc, body.paragraph_ids, book))
     rows = ai_db.save_proposals(
         db,
         chapter,
@@ -91,14 +119,15 @@ def live_check(chapter_id: UUID, body: LiveCheckIn, me: Me, db: DbSession) -> li
     "/chapters/{chapter_id}/review",
     summary="A-17 장 검토 실행",
     response_model=ReviewOut,
-    responses={**error_responses(401, 403, 404), **CONFLICT},
+    responses={**error_responses(401, 403, 404), **CONFLICT, **AI_UNAVAILABLE},
 )
 def chapter_review(chapter_id: UUID, body: ReviewIn, me: Me, db: DbSession) -> ReviewOut:
     """편집자가 눌러야만 돌고, 결과는 실행한 사람에게만 보여요(D-18, FR-21 ③). 바로 답해요(A-18 없음, F5 결정)."""
     chapter = chapter_of(db, me, chapter_id)
     require(me, "run_chapter_review")
     _fresh(chapter, body.base_version)
-    result = get_provider().chapter_review(chapter.doc)
+    book = _book_rules(db, chapter.project_id)
+    result = _run(lambda: get_provider().chapter_review(chapter.doc, book))
     rows = ai_db.save_proposals(
         db,
         chapter,

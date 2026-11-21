@@ -11,6 +11,8 @@ dependencies = [
     "psycopg[binary]>=3.2",
     "alembic>=1.14",
     "pgvector>=0.3.6",
+    "langchain-core>=1.8.4",
+    "langchain-openai>=1.8.5",
 ]
 
 [dependency-groups]
