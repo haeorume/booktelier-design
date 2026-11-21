@@ -157,3 +157,17 @@ test("다른 탭이 먼저 저장해 409가 나면 최신 원고로 다시 그�
   await author.reload();
   await expect(author.getByTestId("manuscript")).toContainText("이어서.");
 });
+
+test("이벤트가 서버에 쌓이고 /dev/events에 퍼널과 작업 지표가 보인다(A-33·A-34, F8)", async ({ page, request }) => {
+  const api = "http://localhost:8100";
+  const before = (await (await request.get(`${api}/dev/metrics`)).json()).events_total as number;
+  await createBook(page, `기록 책 ${Date.now()}`);
+  // 몇 초마다 묶어 보내요(SHIP_INTERVAL_MS 5초)
+  await expect
+    .poll(async () => (await (await request.get(`${api}/dev/metrics`)).json()).events_total as number, { timeout: 20_000 })
+    .toBeGreaterThan(before);
+  await page.goto("/dev/events");
+  await expect(page.getByTestId("funnel-row")).toHaveCount(13);
+  await expect(page.getByTestId("kpi-row")).toHaveCount(8);
+  await expect(page.getByTestId("kpis")).toContainText("AI 근거 표시율");
+});

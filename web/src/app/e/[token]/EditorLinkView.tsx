@@ -27,7 +27,7 @@ export function EditorLinkView({ token }: { token: string }) {
         return;
       }
       const me = await library.me(projectId);
-      setTrackContext({ participant_id: me?.id ?? null, project_id: projectId, chapter_id: null, role: "editor" });
+      setTrackContext({ participant_id: me?.id ?? null, project_id: projectId, chapter_id: null, role: "editor", chapter_version: null });
       track("editor_link_opened", { had_books: before > 0 });
       router.replace("/home");
     })();

@@ -1,6 +1,6 @@
 // 작업 지면(F7 조각 2): 쪽 경계·쪽 번호·머리말(FR-17 ①②, FR-44), 장 머리, 상단 바의 장 상태·저장 상태(DESIGN.md 3·4장). QA-F12.
 import { expect, test, type Page } from "@playwright/test";
-import { enterAsAuthor, paragraph, switchRole } from "./helpers";
+import { enterAsAuthor, events, paragraph, switchRole } from "./helpers";
 
 const LINE = "센강을 따라 걸으며 오래된 서점과 다리를 지났다. 강바람이 차가웠지만 햇빛은 따뜻했고, 나는 그 길을 몇 번이고 다시 걸었다.";
 
@@ -56,6 +56,10 @@ test("장 머리에 CHAPTER 01과 장 제목이 있고, 상단 바에 장 상태
   await paragraph(page, "para_01").click();
   await page.keyboard.type("가");
   await expect(bar.getByTestId("save-state")).toHaveText("저장됨");
+  // 작업 공간을 연 기록에 지금 원고 버전(공통 칸)이 붙어요(지면 영향 확인 시간 KPI, F8)
+  const entered = (await events(page)).filter((e) => e.name === "screen_entered" && e.role === "author");
+  expect(entered.length).toBeGreaterThan(0);
+  expect((entered.at(-1) as unknown as { chapter_version: number }).chapter_version).toBeGreaterThanOrEqual(1);
 });
 
 test("디자이너가 쪽 공통 설정을 바꾸면 지면에 반영되고, 작가는 값만 본다(FR-44 ①②③)", async ({ page }) => {

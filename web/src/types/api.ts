@@ -337,6 +337,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dev/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A-34 퍼널과 작업 지표
+         * @description 팀용(DV-01). 퍼널 13단계와 작업 지표 8개. 서버가 받은 이벤트와 DB 표로 셈해요.
+         */
+        get: operations["dev_metrics_dev_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A-33 이벤트 보내기
+         * @description 묶어서 받아요. 이름은 events 탭 목록만(모르는 이름이 하나라도 있으면 422). 받은 시각은 서버가 정해요.
+         */
+        post: operations["send_events_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1089,6 +1129,74 @@ export interface components {
             message: string;
         };
         /**
+         * EventIn
+         * @description 화면이 남긴 행동 하나(events 탭 '1. 공통 칸'). server_ts는 서버가 정해요.
+         */
+        EventIn: {
+            /**
+             * Anon Id
+             * Format: uuid
+             */
+            anon_id: string;
+            /** Chapter Id */
+            chapter_id?: string | null;
+            /** Chapter Version */
+            chapter_version?: number | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Name */
+            name: string;
+            /** Participant Id */
+            participant_id?: string | null;
+            /** Path */
+            path: string;
+            /** Project Id */
+            project_id?: string | null;
+            /** Props */
+            props?: {
+                [key: string]: unknown;
+            };
+            /** Role */
+            role?: ("editor" | "author" | "designer") | null;
+            /**
+             * Session Id
+             * Format: uuid
+             */
+            session_id: string;
+            /** Status After */
+            status_after?: string | null;
+            /** Target Id */
+            target_id?: string | null;
+            /** Target Type */
+            target_type?: ("ai_suggestion" | "suggested_edit" | "comment") | null;
+            /**
+             * Ts
+             * @description 브라우저 시각(ms)
+             */
+            ts: number;
+        };
+        /**
+         * EventsIn
+         * @description 묶어서 보내요(A-33). 화면을 떠날 때는 sendBeacon(text/plain)으로 와요.
+         */
+        EventsIn: {
+            /** Events */
+            events: components["schemas"]["EventIn"][];
+        };
+        /**
+         * EventsOut
+         * @description 받은 수와 새로 저장한 수. 같은 event_id가 다시 오면 저장하지 않아요.
+         */
+        EventsOut: {
+            /** Received */
+            received: number;
+            /** Stored */
+            stored: number;
+        };
+        /**
          * Evidence
          * @description AI 제안의 근거(RAG, D-26, data-contract ai_suggestion.evidence). 못 찾으면 evidence가 null이고 화면은 '근거 없음'.
          */
@@ -1104,6 +1212,24 @@ export interface components {
              * @enum {string}
              */
             type: "norm" | "chapter";
+        };
+        /**
+         * FunnelRow
+         * @description 퍼널 한 단계(FR-40). 도달: 그 단계 이벤트가 있는 책 수, 이탈: 직전 단계엔 왔지만 여기엔 없는 책 수.
+         */
+        FunnelRow: {
+            /** Dropped */
+            dropped: number;
+            /** Event */
+            event: string;
+            /** Label */
+            label: string;
+            /** Reached */
+            reached: number;
+            /** Role */
+            role: ("editor" | "author" | "designer") | null;
+            /** Step */
+            step: number;
         };
         /** HealthOut */
         HealthOut: {
@@ -1199,6 +1325,30 @@ export interface components {
             /** Participant Token */
             participant_token: string;
         };
+        /**
+         * Kpi
+         * @description 작업 지표 하나(FR-49, db 탭 5번). value가 null이면 셀 건이 없거나 계산 방법이 정해지지 않았어요.
+         */
+        Kpi: {
+            /**
+             * Count
+             * @description 계산에 쓴 건수(분모)
+             */
+            count: number;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Unit
+             * @enum {string}
+             */
+            unit: "분" | "%";
+            /** Value */
+            value: number | null;
+        };
         /** Layout */
         Layout: {
             /** Binding */
@@ -1293,6 +1443,23 @@ export interface components {
              * @enum {string}
              */
             role: "editor" | "author" | "designer";
+        };
+        /**
+         * MetricsOut
+         * @description A-34. 서버가 받은 이벤트와 DB 표로 셈해요.
+         */
+        MetricsOut: {
+            /** Events Total */
+            events_total: number;
+            /** Funnel */
+            funnel: components["schemas"]["FunnelRow"][];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Kpis */
+            kpis: components["schemas"]["Kpi"][];
         };
         /**
          * PageSide
@@ -3016,6 +3183,68 @@ export interface operations {
                 };
             };
             /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    dev_metrics_dev_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricsOut"];
+                };
+            };
+            /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    send_events_events_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventsOut"];
+                };
+            };
+            /** @description 오류 */
             422: {
                 headers: {
                     [name: string]: unknown;

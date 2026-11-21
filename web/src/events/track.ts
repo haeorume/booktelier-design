@@ -12,6 +12,8 @@ export interface TrackContext {
   chapter_id: Uuid | null;
   role: Role | null;
   panel_layout: PanelLayout;
+  /** 지금 보는 장의 원고 버전(공통 칸, F8). 작업 공간·미리보기가 알려 줘요. */
+  chapter_version: number | null;
 }
 
 export interface TrackerOptions {
@@ -37,6 +39,7 @@ const EMPTY_CONTEXT: TrackContext = {
   chapter_id: null,
   role: null,
   panel_layout: "single",
+  chapter_version: null,
 };
 
 function browserPath(): string {
@@ -72,6 +75,7 @@ export function createTracker(options: TrackerOptions): Tracker {
         role: context.role,
         path: path(),
         props: { ...props, panel_layout: context.panel_layout },
+        chapter_version: context.chapter_version,
       };
       void options.sink.appendEvent(event);
       return event;

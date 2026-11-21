@@ -219,5 +219,11 @@ test("데모 1~13단계: 책 만들기 → 초대 → 링크로 들어오기 →
   await expect(rows.nth(4)).toContainText("participant_joined (author)");
   await expect(rows.nth(11)).toContainText("participant_joined (designer)");
 
+  // S-09: 데모 흐름 내내 남긴 이벤트 어디에도 원고 문장이 없다(원고 글자는 이벤트에 넣지 않아요)
+  const all = JSON.stringify(await events(page));
+  for (const sentence of ["파리에 도착한지", "오르세 미술관은 기차역을", "루브르 박물관에서는", "다음 날은 비가 왔다"]) {
+    expect(all, `이벤트에 원고 문장 '${sentence}'`).not.toContain(sentence);
+  }
+
   expect(errors, "콘솔 오류").toEqual([]);
 });

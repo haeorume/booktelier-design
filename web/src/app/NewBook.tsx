@@ -46,7 +46,7 @@ export function NewBook() {
     setBusy(true);
     try {
       const { project, chapter, editor, editorUrl } = await bookDeps().library.createBook({ title, template_id: template, startWithSample: sample });
-      setTrackContext({ participant_id: editor.id, project_id: project.id, chapter_id: null, role: "editor" });
+      setTrackContext({ participant_id: editor.id, project_id: project.id, chapter_id: null, role: "editor", chapter_version: null });
       // 1·2단계는 만들기 한 번으로 함께 끝난다. 이 순서로 둘을 남긴다(정할 것 6).
       track("project_created");
       track("template_selected", { template_id: template });

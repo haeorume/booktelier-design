@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, NETWORK, VersionConflictError, type AppDeps } from "@/data";
-import { track } from "@/events";
+import { setTrackContext, track } from "@/events";
 import type { ChapterDoc } from "@/types";
 
 /** 원고 저장 상태(L-42). */
@@ -52,6 +52,7 @@ export function useManuscriptSave({ deps, projectId, chapterId, initialDoc, init
     try {
       const saved = await deps.library.saveChapterDoc(projectId, chapterId, docRef.current, version.current);
       version.current = saved.version;
+      setTrackContext({ chapter_version: saved.version }); // 이벤트 공통 칸(F8)
       savedOk.current = true;
       setSaveState("saved");
     } catch (e) {
@@ -71,6 +72,7 @@ export function useManuscriptSave({ deps, projectId, chapterId, initialDoc, init
         }
         if (drawn) {
           version.current = e.latest.version;
+          setTrackContext({ chapter_version: e.latest.version });
           savedOk.current = true;
         } else onConflict();
         return;
@@ -144,6 +146,7 @@ export function useManuscriptSave({ deps, projectId, chapterId, initialDoc, init
           fromServer.current = false;
         }
         version.current = newVersion;
+        setTrackContext({ chapter_version: newVersion });
         if (!ok) {
           onConflict();
           return null;
@@ -172,7 +175,10 @@ export function useManuscriptSave({ deps, projectId, chapterId, initialDoc, init
     } finally {
       fromServer.current = false;
     }
-    if (ok) version.current = newVersion;
+    if (ok) {
+      version.current = newVersion;
+      setTrackContext({ chapter_version: newVersion });
+    }
     return ok;
   }, []);
 
