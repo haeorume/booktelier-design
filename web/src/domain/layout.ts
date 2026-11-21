@@ -1,5 +1,5 @@
 // 조판 값의 범위와 바꾸기(FR-16, FR-44, FR-45, CS-15). 범위는 W5 잠정값이고, 정해지면 이 파일만 바꾼다.
-import type { Layout, Margins, TemplateId } from "@/types";
+import type { Layout, Margins, PageNumberPosition, RunningHeader, TemplateId } from "@/types";
 import { SANS_FAMILY, SERIF_FAMILY, TEMPLATES, templateLayout } from "./templates";
 
 /** 고를 수 있는 판형(mm). 세 템플릿 기본값(DESIGN.md 4장)과 1차 기본값(128x188·130x200)을 모두 담는다.
@@ -19,7 +19,23 @@ export const MARGIN_SIDES = ["top", "bottom", "inner", "outer"] as const;
 export type MarginSide = (typeof MARGIN_SIDES)[number];
 
 export type NumberField = `margin_${MarginSide}` | "binding" | "line_height" | "font_size";
-export type LayoutField = "template" | "trim" | "font_family" | NumberField;
+
+/** 쪽 공통 설정(FR-44): 왼쪽·오른쪽 쪽마다 쪽 번호 위치와 머리말. */
+export const PAGE_SIDES = ["left", "right"] as const;
+export type PageSideName = (typeof PAGE_SIDES)[number];
+export type RunningField = `running_${PageSideName}_${"page_number" | "header"}`;
+export const PAGE_NUMBER_OPTIONS: { value: PageNumberPosition; label: string }[] = [
+  { value: "bottom_outer", label: "바깥쪽 아래" },
+  { value: "bottom_center", label: "가운데 아래" },
+  { value: "none", label: "없음" },
+];
+export const HEADER_OPTIONS: { value: RunningHeader; label: string }[] = [
+  { value: "book_title", label: "책 제목" },
+  { value: "chapter_title", label: "장 제목" },
+  { value: "none", label: "없음" },
+];
+
+export type LayoutField = "template" | "trim" | "font_family" | NumberField | RunningField;
 
 export const LAYOUT_FIELD_LABEL: Record<LayoutField, string> = {
   template: "템플릿",
@@ -32,7 +48,22 @@ export const LAYOUT_FIELD_LABEL: Record<LayoutField, string> = {
   line_height: "행간",
   font_size: "글자 크기",
   font_family: "본문 글꼴",
+  running_left_page_number: "왼쪽 쪽 번호",
+  running_left_header: "왼쪽 머리말",
+  running_right_page_number: "오른쪽 쪽 번호",
+  running_right_header: "오른쪽 머리말",
 };
+
+/** 한쪽 면의 쪽 공통 설정. 비어 있으면 '없음'(FR-44). */
+export function pageSide(layout: Layout, side: PageSideName): { page_number: PageNumberPosition; header: RunningHeader } {
+  const v = layout.running?.[side];
+  return { page_number: v?.page_number ?? "none", header: v?.header ?? "none" };
+}
+
+function parseRunningField(field: RunningField): { side: PageSideName; key: "page_number" | "header" } {
+  const side = field.startsWith("running_left_") ? "left" : "right";
+  return { side, key: field.endsWith("_header") ? "header" : "page_number" };
+}
 
 export const NUMBER_RANGE: Record<NumberField, { min: number; max: number; step: number }> = {
   margin_top: MARGIN,
@@ -139,6 +170,15 @@ export function changeValue(
   value: string | number,
 ): LayoutChange {
   const { layout } = current;
+  if (field.startsWith("running_")) {
+    const { side, key } = parseRunningField(field as RunningField);
+    const options: readonly { value: string }[] = key === "header" ? HEADER_OPTIONS : PAGE_NUMBER_OPTIONS;
+    const before = pageSide(layout, side)[key];
+    const after = options.some((o) => o.value === value) ? String(value) : before;
+    const nextSide = { ...pageSide(layout, side), [key]: after };
+    const running = { left: pageSide(layout, "left"), right: pageSide(layout, "right"), [side]: nextSide };
+    return { template_id: current.template_id, layout: { ...layout, running }, field, before, after, reset_to_default: false, patch: { running: { [side]: { [key]: after } } } };
+  }
   if (field === "trim") {
     const after = (TRIM_OPTIONS as readonly string[]).includes(String(value)) ? String(value) : layout.trim;
     return { template_id: current.template_id, layout: { ...layout, trim: after }, field, before: layout.trim, after, reset_to_default: false, patch: { trim: after } };
@@ -147,10 +187,11 @@ export function changeValue(
     const after = FONT_OPTIONS.some((f) => f.family === value) ? String(value) : layout.font_family;
     return { template_id: current.template_id, layout: { ...layout, font_family: after }, field, before: layout.font_family, after, reset_to_default: false, patch: { font_family: after } };
   }
-  const after = clampStep(Number(value), NUMBER_RANGE[field]);
-  const next = withNumber(layout, field, after);
-  const patch: LayoutChange["patch"] = field.startsWith("margin_") ? { margin: { [field.slice(7)]: after } } : { [field]: after };
-  return { template_id: current.template_id, layout: next, field, before: numberValue(layout, field), after, reset_to_default: false, patch };
+  const numberField = field as NumberField;
+  const after = clampStep(Number(value), NUMBER_RANGE[numberField]);
+  const next = withNumber(layout, numberField, after);
+  const patch: LayoutChange["patch"] = numberField.startsWith("margin_") ? { margin: { [numberField.slice(7)]: after } } : { [numberField]: after };
+  return { template_id: current.template_id, layout: next, field, before: numberValue(layout, numberField), after, reset_to_default: false, patch };
 }
 
 /** 템플릿 이름(화면 문구). */

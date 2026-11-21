@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChapterHead } from "@/components/ChapterHead";
 import { ManuscriptEditor, type ChangeSource, type EditorHandle, type MarkClick } from "@/components/editor/ManuscriptEditor";
 import type { PickedText } from "@/components/editor/selection";
@@ -34,6 +35,8 @@ interface Props {
   onChapters: (changed: ChapterInfo[]) => void;
   /** 지금 이 책을 연 다른 사람(F4, A-31) */
   onPresence: (people: PresentPerson[]) => void;
+  /** 상단 바의 자리. 장 머리와 저장 상태를 여기 그려요(DESIGN.md 3장) */
+  slots: { chapter: HTMLElement | null; save: HTMLElement | null };
   /** 이 장 안에서 다른 사람의 작업 위치로 간다(FR-47 ②) */
   jump: { paragraphId: string; n: number } | null;
   layoutOpen: boolean;
@@ -49,7 +52,7 @@ interface Props {
  * 함께 봄(useShared)을 이어 붙인다(리뷰 R-3). 보내기 전 AI 제안은 주인 것만 온다(FR-23, D-29).
  */
 export function ChapterWorkspace(props: Props) {
-  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, slots, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
   const panelLayout = usePanelLayout();
   const deps = useMemo(() => bookDeps(), []);
   const ctx: Ctx = useMemo(
@@ -213,6 +216,31 @@ export function ChapterWorkspace(props: Props) {
   const { saveState } = save;
   return (
     <>
+      {/* 장 상태·검토 요청·검토 완료와 저장 상태는 상단 바에 그려요(DESIGN.md 3장, WS-31·WS-14). */}
+      {slots.chapter &&
+        createPortal(
+          <ChapterHead
+            chapter={chapter}
+            role={me.role}
+            busy={chapterBusy}
+            onRequestReview={() => void changeChapter("request_review")}
+            onCompleteReview={() => void changeChapter("complete_review")}
+          />,
+          slots.chapter,
+        )}
+      {slots.save &&
+        editable &&
+        createPortal(
+          <p className={styles.saveState} role="status" data-testid="save-state" data-state={saveState}>
+            {SAVE_LABEL[saveState]}
+            {(saveState === "failed" || saveState === "offline") && (
+              <button type="button" onClick={save.retrySave}>
+                다시 시도
+              </button>
+            )}
+          </p>,
+          slots.save,
+        )}
       <div className={styles.desk}>
         <ManuscriptEditor
           ref={editor}
@@ -222,27 +250,8 @@ export function ChapterWorkspace(props: Props) {
           templateId={project.template_id}
           layout={previewLayout ?? project.layout}
           chapterTitle={chapter.title}
-          header={
-            <>
-              <ChapterHead
-                chapter={chapter}
-                role={me.role}
-                busy={chapterBusy}
-                onRequestReview={() => void changeChapter("request_review")}
-                onCompleteReview={() => void changeChapter("complete_review")}
-              />
-              {editable && (
-                <p className={styles.saveState} role="status" data-testid="save-state" data-state={saveState}>
-                  {SAVE_LABEL[saveState]}
-                  {(saveState === "failed" || saveState === "offline") && (
-                    <button type="button" onClick={save.retrySave}>
-                      다시 시도
-                    </button>
-                  )}
-                </p>
-              )}
-            </>
-          }
+          chapterOrder={chapter.order}
+          bookTitle={project.title}
           spans={ai.spans}
           edits={shared.editMarks}
           comments={shared.commentMarks}

@@ -1,0 +1,75 @@
+/* 쪽 경계 층(DESIGN.md 4장): 1px 파선 --bt-line-control, 쪽 번호·머리말 12px --bt-text-3 */
+/* 본문 뒤에 깔아요(z-index -1, 지면이 isolation으로 쌓임 맥락을 만들어요). 선이 글자를 가리지 않아요. */
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-xs);
+  line-height: 1;
+  color: var(--bt-text-3);
+  text-indent: 0;
+}
+
+.row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+}
+
+/* 지면 끝에서 끝까지 이어지는 파선. 책상까지 조금 나가 쪽이 넘어가는 자리가 잘 보여요. */
+.line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-top: 1px dashed var(--bt-line-control);
+}
+
+/* 쪽 번호와 머리말은 본문 단 밖의 여백에만 놓아 글자와 겹치지 않게 해요 */
+.number,
+.header {
+  position: absolute;
+  top: 0;
+  padding: 0 var(--bt-space-1);
+  background: var(--bt-paper);
+  white-space: nowrap;
+}
+
+/* 쪽 번호(바깥쪽 아래): 오른쪽 쪽은 오른쪽 여백, 왼쪽 쪽은 왼쪽 여백의 가운데. 선 위에 얹어요. */
+.number[data-at="outer"][data-side="right"] {
+  right: calc(var(--page-margin-right) / 2);
+  transform: translate(50%, -50%);
+}
+
+.number[data-at="outer"][data-side="left"] {
+  left: calc(var(--page-margin-left) / 2);
+  transform: translate(-50%, -50%);
+}
+
+/* 가운데 아래: 마지막 쪽만 여기 와요(아래 여백 가운데라 본문과 겹치지 않아요). 다른 쪽은 바깥쪽 여백에 놓아요. */
+.number[data-at="center"] {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 머리말(다음 쪽 맨 위): 선 바로 아래, 그 쪽 바깥쪽 여백 안에서 말줄임 */
+.header {
+  top: var(--bt-space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header[data-side="right"] {
+  right: 0;
+  width: var(--page-margin-right);
+  text-align: center;
+}
+
+.header[data-side="left"] {
+  left: 0;
+  width: var(--page-margin-left);
+  text-align: center;
+}

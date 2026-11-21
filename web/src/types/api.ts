@@ -1288,7 +1288,7 @@ export interface components {
             /** Header */
             header?: ("none" | "book_title" | "chapter_title") | null;
             /** Page Number */
-            page_number?: string | null;
+            page_number?: ("bottom_outer" | "bottom_center" | "none") | null;
         };
         /** ParagraphAttrs */
         ParagraphAttrs: {

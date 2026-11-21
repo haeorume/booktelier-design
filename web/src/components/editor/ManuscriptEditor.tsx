@@ -6,12 +6,14 @@ import { UndoRedo } from "@tiptap/extensions";
 import { Fragment } from "@tiptap/pm/model";
 import { TextSelection } from "@tiptap/pm/state";
 import { EditorContent, useEditor } from "@tiptap/react";
-import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type ReactNode, type Ref } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type ReactNode, type Ref, type RefObject } from "react";
 import { changedParagraphIndexes } from "@/domain/live";
+import { pageCount, pageGeometry, pageMarks, sheetHeight, type PageMark } from "@/domain/pages";
 import { pageStyleVars } from "@/domain/templates";
 import type { UnderlineSpan } from "@/domain/underlines";
 import { changedParagraphs, paragraphTexts } from "@/workspace/suggestions";
 import { parseChapterDoc, type ChapterDoc, type Layout, type TemplateId } from "@/types";
+import { PageGuides } from "./PageGuides";
 import { ParagraphWithId } from "./paragraph-id";
 import { selectionToAnchor, type PickedText } from "./selection";
 import { AiUnderlines, toDocRange, underlineKey, type CommentMark, type EditMark } from "./underline-plugin";
@@ -44,7 +46,10 @@ interface Props {
   templateId: TemplateId;
   layout: Layout;
   chapterTitle: string;
-  header?: ReactNode;
+  /** 장 머리의 눈썹 글자 'CHAPTER 01'(DESIGN.md 4장) */
+  chapterOrder: number;
+  /** 머리말에 찍는 책 제목(FR-44) */
+  bookTitle: string;
   spans: UnderlineSpan[];
   edits: EditMark[];
   comments: CommentMark[];
@@ -66,7 +71,7 @@ const PROGRAM = "booktelier-program-change";
  * 글자 서식 도구는 없다(D-13). 작가가 아니면 읽기 전용이다(FR-09 ④). 읽기 전용이어도 글자는 고를 수 있다(의견).
  */
 export function ManuscriptEditor(props: Props) {
-  const { ref, initialDoc, editable, templateId, layout, chapterTitle, header, spans, edits, comments, selected, selectionMenu } = props;
+  const { ref, initialDoc, editable, templateId, layout, chapterTitle, chapterOrder, bookTitle, spans, edits, comments, selected, selectionMenu } = props;
   const texts = useRef(paragraphTexts(initialDoc));
   const handlers = useRef(props);
   const page = useRef<HTMLElement>(null);
@@ -107,6 +112,9 @@ export function ManuscriptEditor(props: Props) {
       reread.current();
     },
   });
+
+  // 편집기는 브라우저에서 늦게 그려져서(immediatelyRender: false) 그려진 뒤에 원고 높이를 재요.
+  const pages = usePages(page, layout, { book: bookTitle, chapter: chapterTitle }, editor !== null);
 
   useEffect(() => {
     // 잠그고 푸는 것은 원고 변경이 아니다. 바뀜 이벤트를 내지 않아 저장이 따로 나가지 않게 한다.
@@ -232,7 +240,7 @@ export function ManuscriptEditor(props: Props) {
       data-testid="page"
       data-template={templateId}
       data-editable={editable}
-      style={pageStyleVars(templateId, layout) as CSSProperties}
+      style={{ ...(pageStyleVars(templateId, layout) as CSSProperties), minHeight: pages ? `${pages.sheet}px` : undefined }}
       onClick={(e) => clickMark(e.target)}
       onMouseUp={readSelection}
       // 선택을 넓히거나 옮기는 키뿐 아니라 글자를 치거나 지우는 키에도 선택을 다시 읽는다.
@@ -241,9 +249,21 @@ export function ManuscriptEditor(props: Props) {
         if (e.key === "Enter" && !editable && (e.target as HTMLElement).closest?.("[data-suggestion-ids]")) clickMark(e.target);
       }}
     >
-      {header}
-      <h2 className={styles.chapterTitle}>{chapterTitle}</h2>
+      <div className={styles.reflowRow} role="status">
+        {pages?.reflowing && (
+          <span className={styles.reflowing} data-testid="reflowing">
+            반영 중
+          </span>
+        )}
+      </div>
+      {/* 장 머리: 눈썹 글자 → 장 제목 → 짧은 주황 선(DESIGN.md 4장). 영문 눈썹 글자는 지면에만 써요. */}
+      <header className={styles.chapterHead}>
+        <p className={styles.eyebrow}>CHAPTER {String(chapterOrder).padStart(2, "0")}</p>
+        <h2 className={styles.chapterTitle}>{chapterTitle}</h2>
+        <span className={styles.rule} aria-hidden="true" />
+      </header>
       <EditorContent editor={editor} />
+      {pages && <PageGuides marks={pages.marks} sheet={pages.sheet} bottom={pages.bottom} />}
       {menuAt && selectionMenu && (
         <div className={styles.selectionMenu} style={{ top: menuAt.top, left: menuAt.left }} onMouseUp={(e) => e.stopPropagation()}>
           {selectionMenu}
@@ -251,4 +271,57 @@ export function ManuscriptEditor(props: Props) {
       )}
     </article>
   );
+}
+
+/** 다시 계산을 기다리는 시간. 그동안 '반영 중'이 보여요(FR-17 ②, L-43). */
+const REFLOW_MS = 250;
+
+interface Pages {
+  marks: PageMark[];
+  sheet: number;
+  bottom: number;
+  reflowing: boolean;
+}
+
+/**
+ * 쪽 나누기(FR-17 ①②). 원고 높이가 바뀌거나 조판 값이 바뀌면 잠깐 '반영 중'을 띄우고 쪽 경계를 다시 계산해요.
+ * 본문 높이는 편집기(.prose)의 아래 끝으로 재요. 지면 높이(min-height)는 쪽 수에 맞춰 늘어나므로 지면 높이로 재지 않아요.
+ */
+function usePages(page: RefObject<HTMLElement | null>, layout: Layout, titles: { book: string; chapter: string }, ready: boolean): Pages | null {
+  const [state, setState] = useState<{ count: number; reflowing: boolean }>({ count: 1, reflowing: false });
+  const geometry = pageGeometry(layout);
+
+  useEffect(() => {
+    const el = page.current;
+    const g = pageGeometry(layout);
+    if (!el || !g || !ready) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const measure = () => {
+      const prose = el.querySelector<HTMLElement>("[data-testid='manuscript']");
+      const bottom = prose ? prose.offsetTop + prose.offsetHeight : 0;
+      setState({ count: pageCount(bottom, g), reflowing: false });
+    };
+    const schedule = () => {
+      setState((s) => (s.reflowing ? s : { ...s, reflowing: true }));
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(measure, REFLOW_MS);
+    };
+    measure();
+    const prose = el.querySelector<HTMLElement>("[data-testid='manuscript']");
+    const observer = new ResizeObserver(schedule);
+    if (prose) observer.observe(prose);
+    return () => {
+      observer.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+    // 조판 값(판형·여백·글자 크기)이 바뀌면 다시 재요. 글 높이 변화는 ResizeObserver가 잡아요.
+  }, [page, layout, ready]);
+
+  if (!geometry) return null;
+  return {
+    marks: pageMarks(state.count, geometry, layout, titles),
+    sheet: sheetHeight(state.count, geometry),
+    bottom: geometry.bottom,
+    reflowing: state.reflowing,
+  };
 }

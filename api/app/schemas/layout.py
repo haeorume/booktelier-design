@@ -20,8 +20,8 @@ class Margins(BaseModel):
 class PageSide(BaseModel):
     """한쪽 면(왼쪽 또는 오른쪽)의 쪽 공통 설정(FR-44 ②)."""
 
-    # 쪽 번호 위치. 값 목록은 F3에서 정해요(None이면 쪽 번호 없음).
-    page_number: str | None = None
+    # 쪽 번호 위치(F7 확정, 11.21): 바깥쪽 아래 · 가운데 아래 · 없음. 머리말과 같이 '없음'도 값으로 둬요.
+    page_number: Literal["bottom_outer", "bottom_center", "none"] | None = None
     header: Literal["none", "book_title", "chapter_title"] | None = None
 
 

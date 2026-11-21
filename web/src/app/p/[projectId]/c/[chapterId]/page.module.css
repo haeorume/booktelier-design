@@ -33,15 +33,46 @@
 /* 원고 저장 상태(L-42). 저장 실패·연결 끊김이면 '다시 시도'가 붙는다(NFR-06). */
 .saveState {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--bt-space-2);
   align-items: center;
-  font-size: 0.75rem;
+  font-size: var(--bt-size-xs);
   color: var(--bt-text-2);
-  margin: -0.75rem 0 1rem;
+  white-space: nowrap;
+}
+
+/* 저장 상태(DESIGN.md 5장): 점 6px + 글자. 저장됨 초록, 저장 중 주황, 실패 빨강, 연결 끊김 노랑. 낱말을 늘 같이 써요. */
+.saveState::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-success);
+}
+
+.saveState[data-state="saving"]::before {
+  background: var(--bt-brand);
+}
+
+.saveState[data-state="failed"]::before {
+  background: var(--bt-danger);
+}
+
+.saveState[data-state="offline"]::before {
+  background: var(--bt-warning);
 }
 
 .saveState[data-state="failed"],
 .saveState[data-state="offline"] {
   color: var(--bt-text);
-  font-weight: 600;
+  font-weight: var(--bt-weight-bold);
+}
+
+.saveState button {
+  height: 24px;
+  padding: 0 var(--bt-space-2);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-xs);
+  cursor: pointer;
 }

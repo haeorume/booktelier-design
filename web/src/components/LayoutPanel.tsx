@@ -6,6 +6,10 @@ import {
   changeValue,
   FONT_OPTIONS,
   fontLabel,
+  HEADER_OPTIONS,
+  PAGE_NUMBER_OPTIONS,
+  PAGE_SIDES,
+  pageSide,
   LAYOUT_FIELD_LABEL,
   NUMBER_RANGE,
   numberValue,
@@ -13,6 +17,8 @@ import {
   TRIM_OPTIONS,
   type LayoutChange,
   type NumberField,
+  type PageSideName,
+  type RunningField,
 } from "@/domain/layout";
 import { ROLE_LABEL } from "@/domain/labels";
 import { can } from "@/domain/permissions";
@@ -64,7 +70,7 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
     onPreview(next);
   }
 
-  function commit(field: "trim" | "font_family" | NumberField, value: string | number) {
+  function commit(field: "trim" | "font_family" | NumberField | RunningField, value: string | number) {
     const change = changeValue(current, field, value);
     onPreview(null);
     if (change.before === change.after) return;
@@ -103,6 +109,9 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
           <dd>
             {fontLabel(project.layout.font_family)} {project.layout.font_size}pt
           </dd>
+          {PAGE_SIDES.map((side) => (
+            <RunningValue key={side} side={side} layout={project.layout} />
+          ))}
         </dl>
       ) : (
         <div className={styles.controls}>
@@ -155,6 +164,49 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
               onCommit={(v) => commit(field, v)}
             />
           ))}
+
+          {/* 쪽 공통 설정(FR-44): 왼쪽·오른쪽 쪽을 따로 정해요(②). 작업 지면과 미리보기의 모든 쪽에 반영돼요(①). */}
+          <fieldset className={styles.running} data-testid="running-settings">
+            <legend className={styles.label}>쪽 공통 설정</legend>
+            {PAGE_SIDES.map((side) => {
+              const v = pageSide(project.layout, side);
+              return (
+                <div key={side} className={styles.runningSide}>
+                  <span className={styles.sideName}>{SIDE_LABEL[side]}</span>
+                  <label className={styles.inline}>
+                    쪽 번호
+                    <select
+                      className={styles.select}
+                      value={v.page_number}
+                      aria-label={LAYOUT_FIELD_LABEL[`running_${side}_page_number`]}
+                      onChange={(e) => commit(`running_${side}_page_number`, e.target.value)}
+                    >
+                      {PAGE_NUMBER_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className={styles.inline}>
+                    머리말
+                    <select
+                      className={styles.select}
+                      value={v.header}
+                      aria-label={LAYOUT_FIELD_LABEL[`running_${side}_header`]}
+                      onChange={(e) => commit(`running_${side}_header`, e.target.value)}
+                    >
+                      {HEADER_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              );
+            })}
+          </fieldset>
         </div>
       )}
 
@@ -173,6 +225,23 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
         />
       )}
     </aside>
+  );
+}
+
+const SIDE_LABEL: Record<PageSideName, string> = { left: "왼쪽 쪽", right: "오른쪽 쪽" };
+
+/** 작가에게 보이는 쪽 공통 설정 값(글자로만, D-15) */
+function RunningValue({ side, layout }: { side: PageSideName; layout: Layout }) {
+  const v = pageSide(layout, side);
+  const number = PAGE_NUMBER_OPTIONS.find((o) => o.value === v.page_number)?.label ?? "없음";
+  const header = HEADER_OPTIONS.find((o) => o.value === v.header)?.label ?? "없음";
+  return (
+    <>
+      <dt>{SIDE_LABEL[side]}</dt>
+      <dd>
+        쪽 번호 {number} · 머리말 {header}
+      </dd>
+    </>
   );
 }
 

@@ -156,3 +156,34 @@
     padding: 0.75rem;
   }
 }
+
+/* 쪽 공통 설정(FR-44) */
+.running {
+  border: none;
+  border-top: 1px solid var(--bt-line);
+  padding-top: var(--bt-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-3);
+}
+
+.runningSide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bt-space-2);
+}
+
+.sideName {
+  grid-column: 1 / -1;
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-text-2);
+}
+
+.inline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bt-space-1);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-2);
+}

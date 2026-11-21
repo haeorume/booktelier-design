@@ -1,19 +1,17 @@
-/* 장 머리(WS-31): 장 상태 배지와 검토 요청·검토 완료. 지면 위 화면 글자라 화면 글꼴을 써요. */
+/* 장 머리(WS-31): 장 상태 배지와 검토 요청·검토 완료. 상단 바의 역할 배지 옆에 놓여요(DESIGN.md 3장). */
 .head {
   display: flex;
   align-items: center;
   gap: var(--bt-space-2);
-  margin-bottom: var(--bt-space-4);
-  font-family: var(--bt-font-ui);
+  padding-left: var(--bt-space-3);
+  border-left: 1px solid var(--bt-line);
   font-size: var(--bt-size-sm);
   line-height: var(--bt-leading-tight);
-  text-indent: 0;
 }
 
 /* 주요 버튼(DESIGN.md 5장): 높이 36px, --bt-action 바탕, 흰 글자 13px 600 */
 .button {
-  margin-left: auto;
-  height: 36px;
+  height: 32px;
   padding: 0 var(--bt-space-4);
   border-radius: var(--bt-radius-md);
   border: 1px solid var(--bt-action);
