@@ -127,6 +127,16 @@ export interface Participant {
   display_name: string;
 }
 
+/** AI 제안의 근거(F6 RAG, D-26, data-contract ai_suggestion.evidence). 장 검토에서만 붙어요. */
+export interface Evidence {
+  /** norm: 어문 규범 조항, chapter: 같은 책의 다른 장 문단 */
+  type: "norm" | "chapter";
+  /** 예: 한글 맞춤법 제42항, 2장 1문단 */
+  label: string;
+  excerpt: string;
+  chunk_id: string;
+}
+
 export interface AiSuggestion {
   id: Uuid;
   chapter_id: Uuid;
@@ -143,6 +153,8 @@ export interface AiSuggestion {
   created_at: IsoDateTime;
   status: AiSuggestionStatus;
   owner_participant_id: Uuid;
+  /** 근거. 서버(F6)만 채워요. 1차 데모 구현과 예시 데이터에는 없어요. */
+  evidence?: Evidence | null;
 }
 
 export interface SuggestedEdit {

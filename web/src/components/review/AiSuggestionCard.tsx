@@ -18,6 +18,34 @@ interface Props {
   onSelect: () => void;
 }
 
+const EVIDENCE_SOURCE: Record<"norm" | "chapter", string> = { norm: "", chapter: "같은 책 " };
+
+/**
+ * 근거(F6 RAG, D-26). 장 검토 카드에만 둬요. 근거가 없으면 '근거 없음'(data-contract).
+ * 실시간 교정은 RAG를 쓰지 않아 늘 없으므로 줄 자체를 두지 않아요(F6 조각 3 결정).
+ * 발췌는 '원문 보기'를 눌러야 펼쳐져 카드가 길어지지 않아요. 카드를 고르는 클릭과 겹치지 않게 막아요.
+ */
+function EvidenceLine({ suggestion: s }: { suggestion: AiSuggestion }) {
+  if (s.source !== "chapter_review") return null;
+  const ev = s.evidence;
+  if (!ev) {
+    return (
+      <p className={styles.evidence} data-testid="ai-evidence" data-state="none">
+        근거 없음
+      </p>
+    );
+  }
+  return (
+    <details className={styles.evidence} data-testid="ai-evidence" data-state={ev.type} onClick={(e) => e.stopPropagation()}>
+      <summary>
+        근거 · {EVIDENCE_SOURCE[ev.type]}
+        {ev.label} <span className={styles.evidenceMore}>원문 보기</span>
+      </summary>
+      <blockquote className={styles.evidenceExcerpt}>{ev.excerpt}</blockquote>
+    </details>
+  );
+}
+
 /**
  * AI 제안 카드(WS-46, FR-24). 종류, 원문, 수정안 1개와 대안 최대 2개, 수정 이유.
  * 버튼은 역할에 맞는 것만 보인다(D-15): 적용은 작가만, 보내기는 편집자만(FR-29 ④), 무시와 이 표현 유지는 작가·편집자.
@@ -77,6 +105,7 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
         </ul>
       )}
       <p className={styles.reason}>{s.reason}</p>
+      <EvidenceLine suggestion={s} />
       {pending && (
         <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
           {canApply && (
