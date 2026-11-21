@@ -792,10 +792,7 @@ export interface components {
             created_at: string;
             /** Decided At */
             decided_at: string | null;
-            /** Evidence */
-            evidence: {
-                [key: string]: unknown;
-            } | null;
+            evidence: components["schemas"]["Evidence"] | null;
             /**
              * Id
              * Format: uuid
@@ -1090,6 +1087,23 @@ export interface components {
             code: string;
             /** Message */
             message: string;
+        };
+        /**
+         * Evidence
+         * @description AI 제안의 근거(RAG, D-26, data-contract ai_suggestion.evidence). 못 찾으면 evidence가 null이고 화면은 '근거 없음'.
+         */
+        Evidence: {
+            /** Chunk Id */
+            chunk_id: string;
+            /** Excerpt */
+            excerpt: string;
+            /** Label */
+            label: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "norm" | "chapter";
         };
         /** HealthOut */
         HealthOut: {

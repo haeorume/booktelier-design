@@ -6,11 +6,12 @@
 """
 
 import json
+from collections.abc import Sequence
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from app.ai.provider import BookRules, Proposal, ReviewResult
+from app.ai.provider import BookRules, EvidenceChunk, Proposal, ReviewResult
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -49,7 +50,9 @@ class DemoProvider:
             return ReviewResult([], self.model)
         return ReviewResult(_proposals(fixture["suggestions"]), self.model)
 
-    def chapter_review(self, doc: dict[str, Any], book: BookRules) -> ReviewResult:
+    def chapter_review(
+        self, doc: dict[str, Any], book: BookRules, evidence: Sequence[EvidenceChunk] = ()
+    ) -> ReviewResult:
         return ReviewResult(_proposals(load("chapter_review.json")["suggestions"]), self.model)
 
 

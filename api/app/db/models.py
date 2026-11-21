@@ -13,6 +13,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     BigInteger,
     DateTime,
@@ -267,6 +268,40 @@ class FirstView(Base):
     target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     participant_id: Mapped[uuid.UUID] = _fk("participant.id", "CASCADE")
     first_viewed_at: Mapped[datetime] = _now()
+
+
+# 임베딩 차원. text-embedding-3-small(F6, 엘리스 플랫폼)을 따라요('정할 것' 26, 0005).
+EMBEDDING_DIM = 1536
+
+
+class RagChunk(Base):
+    """AI가 근거로 찾아 쓰는 글 조각과 벡터(D-26, db 탭 4번). 화면에는 evidence.chunk_id로만 나가요.
+
+    source=norm은 어문 규범 조항(project_id 없음), source=chapter는 같은 책의 다른 장 문단이에요.
+    책 원칙(style_rule)은 넣지 않아요(통째로 프롬프트에). 검색은 app/db/rag.py가 해요.
+    """
+
+    __tablename__ = "rag_chunk"
+    __table_args__ = (
+        Index("ix_rag_chunk_source_project_chapter", "source", "project_id", "chapter_id"),
+        Index(
+            "ix_rag_chunk_embedding_hnsw",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = _pk()
+    source: Mapped[str] = mapped_column(Text, nullable=False)
+    project_id: Mapped[uuid.UUID | None] = _fk("project.id", "CASCADE", nullable=True)
+    chapter_id: Mapped[uuid.UUID | None] = _fk("chapter.id", "CASCADE", nullable=True)
+    chapter_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    paragraph_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIM), nullable=False)
+    created_at: Mapped[datetime] = _now()
 
 
 class Event(Base):

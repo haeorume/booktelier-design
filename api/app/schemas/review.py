@@ -1,7 +1,7 @@
 """AI 제안·의견·수정 제안·처음 본 기록·표기 원칙(A-16~A-28). 이름과 상태 값은 data-contract 확정 값(D-05)."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -22,6 +22,15 @@ class Anchor(BaseModel):
     end: int = Field(ge=0)
 
 
+class Evidence(BaseModel):
+    """AI 제안의 근거(RAG, D-26, data-contract ai_suggestion.evidence). 못 찾으면 evidence가 null이고 화면은 '근거 없음'."""
+
+    type: Literal["norm", "chapter"]  # 어문 규범 조항 · 같은 책의 다른 장 문단
+    label: str  # 예: 한글 맞춤법 제42항, 3장 2문단
+    excerpt: str
+    chunk_id: str
+
+
 class AiSuggestion(BaseModel):
     """보내기 전까지 주인만 봐요(D-29)."""
 
@@ -34,7 +43,7 @@ class AiSuggestion(BaseModel):
     alternatives: list[str]
     kind: Kind
     reason: str
-    evidence: dict[str, Any] | None
+    evidence: Evidence | None
     source: Literal["live_check", "chapter_review"]
     target_role: Role
     base_version: int

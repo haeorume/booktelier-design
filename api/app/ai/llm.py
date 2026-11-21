@@ -8,6 +8,7 @@
 
 import json
 import logging
+from collections.abc import Sequence
 from typing import Any, Literal
 
 import openai
@@ -17,7 +18,7 @@ from pydantic import BaseModel, Field, SecretStr, ValidationError
 
 from app import docops
 from app.ai import prompts
-from app.ai.provider import AiUnavailable, BookRules, Proposal, ReviewResult
+from app.ai.provider import AiUnavailable, BookRules, EvidenceChunk, Proposal, ReviewResult
 from app.config import Settings
 
 log = logging.getLogger(__name__)
@@ -36,6 +37,8 @@ class Item(BaseModel):
     reason: str = Field(min_length=1)
     # 같은 문단에 같은 원문이 여럿이면 몇 번째인지(1부터). 하나뿐이면 비워도 돼요.
     occurrence: int | None = Field(default=None, ge=1)
+    # 장 검토의 참고 자료 번호([근거 n]). 없으면 null(D-26).
+    evidence: int | None = None
 
 
 class Answer(BaseModel):
@@ -56,8 +59,28 @@ def _paragraphs(doc: dict[str, Any], ids: list[str] | None) -> list[tuple[str, s
     return out
 
 
+# 화면에 보일 근거 발췌 길이(글자)
+EXCERPT = 200
+
+
+def evidence_of(item: Item, evidence: Sequence[EvidenceChunk]) -> dict[str, Any] | None:
+    """LLM이 적은 근거 번호 → evidence. 넣어 준 자료의 번호가 아니면 버려요(지어낸 근거 막기)."""
+    chunk = next((e for e in evidence if e.n == item.evidence), None) if item.evidence else None
+    if chunk is None:
+        return None
+    return {
+        "type": chunk.type,
+        "label": chunk.label,
+        "excerpt": chunk.content[:EXCERPT],
+        "chunk_id": chunk.chunk_id,
+    }
+
+
 def to_proposals(
-    answer: Answer, paragraphs: list[tuple[str, str]], target_role: str
+    answer: Answer,
+    paragraphs: list[tuple[str, str]],
+    target_role: str,
+    evidence: Sequence[EvidenceChunk] = (),
 ) -> list[Proposal]:
     """LLM 답 → 제안. 원문을 원고에서 찾아 UTF-16 위치를 붙여요(D-19).
 
@@ -93,6 +116,7 @@ def to_proposals(
                 kind=item.kind,
                 reason=item.reason.strip(),
                 target_role=target_role,
+                evidence=evidence_of(item, evidence),
             )
         )
     return out
@@ -175,14 +199,16 @@ class LlmProvider:
         )
         return ReviewResult(to_proposals(answer, paragraphs, "author"), self.model)
 
-    def chapter_review(self, doc: dict[str, Any], book: BookRules) -> ReviewResult:
+    def chapter_review(
+        self, doc: dict[str, Any], book: BookRules, evidence: Sequence[EvidenceChunk] = ()
+    ) -> ReviewResult:
         paragraphs = _paragraphs(doc, None)
         if not paragraphs:
             return ReviewResult([], self.model)
         answer = self._ask(
             self._review,
-            prompts.chapter_review_prompt(paragraphs, book),
+            prompts.chapter_review_prompt(paragraphs, book, evidence),
             "chapter_review",
             len(paragraphs),
         )
-        return ReviewResult(to_proposals(answer, paragraphs, "editor"), self.model)
+        return ReviewResult(to_proposals(answer, paragraphs, "editor", evidence), self.model)

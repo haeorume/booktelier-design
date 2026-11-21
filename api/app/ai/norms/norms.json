@@ -1,0 +1,105 @@
+{
+ "_about": "어문 규범 조항 본문과 예시(rag_chunk source=norm, db 탭 4번). 국립국어원 한국어 어문 규범 누리집에서 옮김(11.21). 한글 맞춤법은 문체부 고시라 저작권법 제7조 보호 대상이 아님. 해설은 넣지 않음('정할 것' 25). 화살괄호는 누리집 표기가 깨져 《 》·〈 〉로 바로잡음. 사람 대조 필요: 제46항 예시, 문장 부호 두 항목.",
+ "norms": [
+  {
+   "label": "한글 맞춤법 제1항",
+   "content": "한글 맞춤법은 표준어를 소리대로 적되, 어법에 맞도록 함을 원칙으로 한다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제2항",
+   "content": "문장의 각 단어는 띄어 씀을 원칙으로 한다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제27항",
+   "content": "둘 이상의 단어가 어울리거나 접두사가 붙어서 이루어진 말은 각각 그 원형을 밝히어 적는다.\n국말이, 꺾꽂이, 꽃잎, 끝장, 물난리, 밑천, 부엌일, 싫증, 옷안, 웃옷, 젖몸살, 첫아들, 칼날, 팥알, 헛웃음, 홀아비, 홑몸, 흙내\n값없다, 겉늙다, 굶주리다, 낮잡다, 맞먹다, 받내다, 벋놓다, 빗나가다, 빛나다, 새파랗다\n샛노랗다, 시꺼멓다, 싯누렇다, 엇나가다, 엎누르다, 엿듣다, 옻오르다, 짓이기다, 헛되다\n[붙임 1] 어원은 분명하나 소리만 특이하게 변한 것은 변한 대로 적는다.\n할아버지, 할아범\n[붙임 2] 어원이 분명하지 아니한 것은 원형을 밝히어 적지 아니한다.\n골병, 골탕, 끌탕, 며칠, 아재비, 오라비, 업신여기다, 부리나케\n[붙임 3] ‘이[齒, 虱]’가 합성어나 이에 준하는 말에서 ‘니’ 또는‘리’로 소리 날 때에는 ‘니’로 적는다.\n간니, 덧니, 사랑니, 송곳니, 앞니, 어금니, 윗니, 젖니, 톱니, 틀니, 가랑니, 머릿니",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제41항",
+   "content": "조사는 그 앞말에 붙여 쓴다.\n꽃이, 꽃마저, 꽃밖에, 꽃에서부터, 꽃으로만, 꽃이나마, 꽃이다, 꽃입니다, 꽃처럼, 어디까지나, 거기도, 멀리는, 웃고만",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제42항",
+   "content": "의존 명사는 띄어 쓴다.\n아는 것이 힘이다.\n나도 할 수 있다.\n먹을 만큼 먹어라.\n아는 이를 만났다.\n네가 뜻한 바를 알겠다.\n그가 떠난 지가 오래다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제43항",
+   "content": "단위를 나타내는 명사는 띄어 쓴다.\n한 개, 차 한 대, 금 서 돈, 소 한 마리, 옷 한 벌, 열 살\n조기 한 손, 연필 한 자루, 버선 한 죽, 집 한 채, 신 두 켤레, 북어 한 쾌\n다만, 순서를 나타내는 경우나 숫자와 어울리어 쓰이는 경우에는 붙여 쓸 수 있다.\n두시 삼십분 오초, 제일과, 삼학년, 육층, 1446년 10월 9일, 2대대, 16동 502호, 제1실습실, 80원, 10개, 7미터",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제44항",
+   "content": "수를 적을 적에는 ‘만(萬)’ 단위로 띄어 쓴다.\n십이억 삼천사백오십육만 칠천팔백구십팔\n12억 3456만 7898",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제45항",
+   "content": "두 말을 이어 주거나 열거할 적에 쓰이는 다음의 말들은 띄어 쓴다.\n국장 겸 과장\n열 내지 스물\n청군 대 백군\n책상, 걸상 등이 있다\n이사장 및 이사들\n사과, 배, 귤 등등\n사과, 배 등속\n부산, 광주 등지",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제46항",
+   "content": "단음절로 된 단어가 연이어 나타날 적에는 붙여 쓸 수 있다.\n좀더 큰것\n이말 저말\n한잎 두잎",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제47항",
+   "content": "보조 용언은 띄어 씀을 원칙으로 하되, 경우에 따라 붙여 씀도 허용한다.(ㄱ을 원칙으로 하고, ㄴ을 허용함.)\nㄱ 불이 꺼져 간다. / ㄴ 불이 꺼져간다.\nㄱ 내 힘으로 막아 낸다. / ㄴ 내 힘으로 막아낸다.\nㄱ 어머니를 도와 드린다. / ㄴ 어머니를 도와드린다.\nㄱ 그릇을 깨뜨려 버렸다. / ㄴ 그릇을 깨뜨려버렸다.\nㄱ 비가 올 듯하다. / ㄴ 비가 올듯하다.\nㄱ 그 일은 할 만하다. / ㄴ 그 일은 할만하다.\nㄱ 일이 될 법하다. / ㄴ 일이 될법하다.\nㄱ 비가 올 성싶다. / ㄴ 비가 올성싶다.\nㄱ 잘 아는 척한다. / ㄴ 잘 아는척한다.\n다만, 앞말에 조사가 붙거나 앞말이 합성 용언인 경우, 그리고 중간에 조사가 들어갈 적에는 그 뒤에 오는 보조 용언은 띄어 쓴다.\n잘도 놀아만 나는구나!\n책을 읽어도 보고…….\n네가 덤벼들어 보아라.\n이런 기회는 다시없을 듯하다.\n그가 올 듯도 하다.\n잘난 체를 한다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제48항",
+   "content": "성과 이름, 성과 호 등은 붙여 쓰고, 이에 덧붙는 호칭어, 관직명 등은 띄어 쓴다.\n김양수(金良洙), 서화담(徐花潭), 채영신 씨, 최치원 선생, 박동식 박사, 충무공 이순신 장군\n다만, 성과 이름, 성과 호를 분명히 구분할 필요가 있을 경우에는 띄어 쓸 수 있다.\n남궁억/남궁 억, 독고준/독고 준, 황보지봉(皇甫芝峰)/황보 지봉",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제49항",
+   "content": "성명 이외의 고유 명사는 단어별로 띄어 씀을 원칙으로 하되, 단위별로 띄어 쓸 수 있다.(ㄱ을 원칙으로 하고, ㄴ을 허용함.)\nㄱ 대한 중학교 / ㄴ 대한중학교\nㄱ 한국 대학교 사범 대학 / ㄴ 한국대학교 사범대학",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 제50항",
+   "content": "전문 용어는 단어별로 띄어 씀을 원칙으로 하되, 붙여 쓸 수 있다.(ㄱ을 원칙으로 하고, ㄴ을 허용함.)\nㄱ 만성 골수성 백혈병 / ㄴ 만성골수성백혈병\nㄱ 중거리 탄도 유도탄 / ㄴ 중거리탄도유도탄",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 문장 부호 겹낫표·겹화살괄호",
+   "content": "책의 제목이나 신문 이름 등을 나타낼 때 쓴다.\n우리나라 최초의 민간 신문은 1896년에 창간된 『독립신문』이다.\n『훈민정음』은 1997년에 유네스코 세계 기록 유산으로 지정되었다.\n《한성순보》는 우리나라 최초의 근대 신문이다.\n윤동주의 유고 시집인 《하늘과 바람과 별과 시》에는 31편의 시가 실려 있다.\n[붙임] 겹낫표나 겹화살괄호 대신 큰따옴표를 쓸 수 있다.\n우리나라 최초의 민간 신문은 1896년에 창간된 “독립신문”이다.\n윤동주의 유고 시집인 “하늘과 바람과 별과 시”에는 31편의 시가 실려 있다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "한글 맞춤법 문장 부호 홑낫표·홑화살괄호",
+   "content": "소제목, 그림이나 노래와 같은 예술 작품의 제목, 상호, 법률, 규정 등을 나타낼 때 쓴다.\n「국어 기본법 시행령」은 「국어 기본법」에서 위임된 사항과 그 시행에 필요한 사항을 규정함을 목적으로 한다.\n이 곡은 베르디가 작곡한 「축배의 노래」이다.\n사무실 밖에 「해와 달」이라고 쓴 간판을 달았다.\n〈한강〉은 사진집 《아름다운 땅》에 실린 작품이다.\n백남준은 2005년에 〈엄마〉라는 작품을 선보였다.\n[붙임] 홑낫표나 홑화살괄호 대신 작은따옴표를 쓸 수 있다.\n사무실 밖에 ‘해와 달’이라고 쓴 간판을 달았다.\n‘한강’은 사진집 “아름다운 땅”에 실린 작품이다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0001"
+  },
+  {
+   "label": "외래어 표기법 제1항",
+   "content": "외래어는 국어의 현용 24 자모만으로 적는다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003"
+  },
+  {
+   "label": "외래어 표기법 제2항",
+   "content": "외래어의 1 음운은 원칙적으로 1 기호로 적는다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003"
+  },
+  {
+   "label": "외래어 표기법 제3항",
+   "content": "받침에는 ‘ㄱ, ㄴ, ㄹ, ㅁ, ㅂ, ㅅ, ㅇ’만을 쓴다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003"
+  },
+  {
+   "label": "외래어 표기법 제4항",
+   "content": "파열음 표기에는 된소리를 쓰지 않는 것을 원칙으로 한다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003"
+  },
+  {
+   "label": "외래어 표기법 제5항",
+   "content": "이미 굳어진 외래어는 관용을 존중하되, 그 범위와 용례는 따로 정한다.",
+   "source_url": "https://korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003"
+  }
+ ]
+}
