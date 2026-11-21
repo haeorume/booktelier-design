@@ -69,3 +69,21 @@ def require(me: Identity, action: Action) -> None:
     """역할 권한 표로 막아요(D-14, D-15, S-05)."""
     if not can(me.role, action):
         raise AppError(403, "forbidden", "이 역할로는 할 수 없어요")
+
+
+def optional_identity(
+    cred: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)], db: DbSession
+) -> Identity | None:
+    """토큰이 있으면 신원, 없거나 맞지 않으면 None. 이벤트(A-33)처럼 토큰 없이도 받는 곳에서 써요.
+
+    화면을 떠날 때 쓰는 sendBeacon은 토큰 헤더를 붙일 수 없고, 책을 만들기 전 화면에는 토큰이 아직 없어요.
+    """
+    if cred is None or not cred.credentials.strip():
+        return None
+    try:
+        return current_identity(cred.credentials, db)
+    except AppError:
+        return None
+
+
+MaybeMe = Annotated[Identity | None, Depends(optional_identity)]

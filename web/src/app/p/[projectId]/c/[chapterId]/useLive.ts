@@ -4,6 +4,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import { CHANGES_INTERVAL_MS, PRESENCE_INTERVAL_MS, type AppDeps, type ChapterInfo, type PresentPerson } from "@/data";
 import type { EditorHandle } from "@/components/editor/ManuscriptEditor";
 import type { Project } from "@/types";
+import { track } from "@/events";
 import type { useManuscriptSave } from "./useManuscriptSave";
 
 interface Options {
@@ -68,7 +69,12 @@ export function useLive(options: Options) {
       const handle = editor.current;
       // 한글을 조합하는 중이면 다음 간격으로 미룬다. 조합 중인 글자는 아직 저장 줄에 들어오지 않았다.
       if (!handle || handle.isComposing()) return;
-      if (!save.applyRemote(remote.version, () => handle.syncDoc(remote.doc))) latest.current.onConflict();
+      if (!save.applyRemote(remote.version, () => handle.syncDoc(remote.doc))) {
+        latest.current.onConflict();
+        return;
+      }
+      // 다른 곳에서 바뀐 버전이 이 화면에 보였어요(지면 영향 확인 시간 KPI, F8). 버전은 공통 칸에 들어가요.
+      track("screen_entered", { screen: "workspace", via: "live" });
     }
 
     /**

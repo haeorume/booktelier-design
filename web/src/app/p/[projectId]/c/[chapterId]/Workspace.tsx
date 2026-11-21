@@ -69,7 +69,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
             const [chapters, participants] = await Promise.all([library.listChapters(project.id), library.listParticipants(project.id)]);
             const links = me.role === "editor" ? await library.listRoleLinks(project.id) : [];
             value = { kind: "ready", project, chapter, chapters, me, participants, links, loadId };
-            setTrackContext({ participant_id: me.id, project_id: project.id, chapter_id: chapter.id, role: me.role });
+            setTrackContext({ participant_id: me.id, project_id: project.id, chapter_id: chapter.id, role: me.role, chapter_version: chapter.version });
+            // 이 장·버전을 화면에 보였어요. 지면 영향 확인 시간 KPI가 디자이너의 이 기록을 써요(db 탭 5번, F8).
+            if (alive) track("screen_entered", { screen: "workspace" });
           }
         }
       } catch {

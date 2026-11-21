@@ -1,4 +1,4 @@
-import { getClientSession, getIdentityStore, getRepository } from "@/data";
+import { eventSink, getClientSession, getIdentityStore } from "@/data";
 import { createTracker, type TrackContext, type Tracker, type TrackProps } from "./track";
 import type { EventName } from "./names";
 
@@ -8,7 +8,8 @@ export { createTracker, SESSION_TIMEOUT_MS, type TrackContext, type Tracker, typ
 let tracker: Tracker | null = null;
 
 function defaultTracker(): Tracker {
-  tracker ??= createTracker({ sink: getRepository(), identity: getIdentityStore() });
+  // 브라우저에 남기고, 서버가 있으면 서버로도 보내요(A-33, F8).
+  tracker ??= createTracker({ sink: eventSink(), identity: getIdentityStore() });
   return tracker;
 }
 

@@ -102,11 +102,11 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
   const show = useCallback((got: { view: View; marks: PreviewMark[] }) => {
     if (got.view.kind === "ready") {
       const { me, project, chapter } = got.view;
-      setTrackContext({ participant_id: me.id, project_id: project.id, chapter_id: chapter.id, role: me.role });
+      setTrackContext({ participant_id: me.id, project_id: project.id, chapter_id: chapter.id, role: me.role, chapter_version: chapter.version });
       if (!opened.current) {
         opened.current = true;
-        // 지면 영향 확인 시간 KPI에 쓰는 원고 버전. 공통 칸은 F8에서 만들어 옮겨요(F7 조각 3 결정).
-        track("preview_opened", { from: openedFrom(), chapter_version: chapter.version });
+        // 원고 버전은 공통 칸 chapter_version으로 남아요(지면 영향 확인 시간 KPI, F8).
+        track("preview_opened", { from: openedFrom() });
       }
       setRendering(true);
     }

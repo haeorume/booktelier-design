@@ -34,7 +34,7 @@ export function JoinView({ token }: { token: string }) {
       }
       setView({ kind: "ready", role: check.role, title: check.project_title });
       // 화면이 열릴 때마다 남긴다(뒤로 가기로 다시 열어도).
-      setTrackContext({ participant_id: null, project_id: check.project_id, chapter_id: null, role: check.role });
+      setTrackContext({ participant_id: null, project_id: check.project_id, chapter_id: null, role: check.role, chapter_version: null });
       track("role_link_opened", { role: check.role });
     })();
     return () => {

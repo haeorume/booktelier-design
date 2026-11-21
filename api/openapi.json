@@ -783,6 +783,201 @@
         "title": "ErrorOut",
         "type": "object"
       },
+      "EventIn": {
+        "description": "화면이 남긴 행동 하나(events 탭 '1. 공통 칸'). server_ts는 서버가 정해요.",
+        "properties": {
+          "anon_id": {
+            "format": "uuid",
+            "title": "Anon Id",
+            "type": "string"
+          },
+          "chapter_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter Id"
+          },
+          "chapter_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chapter Version"
+          },
+          "event_id": {
+            "format": "uuid",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "participant_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Id"
+          },
+          "path": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "props": {
+            "additionalProperties": true,
+            "title": "Props",
+            "type": "object"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "editor",
+                  "author",
+                  "designer"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "status_after": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status After"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ai_suggestion",
+                  "suggested_edit",
+                  "comment"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Type"
+          },
+          "ts": {
+            "description": "브라우저 시각(ms)",
+            "minimum": 0.0,
+            "title": "Ts",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_id",
+          "name",
+          "ts",
+          "anon_id",
+          "session_id",
+          "path"
+        ],
+        "title": "EventIn",
+        "type": "object"
+      },
+      "EventsIn": {
+        "description": "묶어서 보내요(A-33). 화면을 떠날 때는 sendBeacon(text/plain)으로 와요.",
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EventIn"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "title": "EventsIn",
+        "type": "object"
+      },
+      "EventsOut": {
+        "description": "받은 수와 새로 저장한 수. 같은 event_id가 다시 오면 저장하지 않아요.",
+        "properties": {
+          "received": {
+            "title": "Received",
+            "type": "integer"
+          },
+          "stored": {
+            "title": "Stored",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "received",
+          "stored"
+        ],
+        "title": "EventsOut",
+        "type": "object"
+      },
       "Evidence": {
         "description": "AI 제안의 근거(RAG, D-26, data-contract ai_suggestion.evidence). 못 찾으면 evidence가 null이고 화면은 '근거 없음'.",
         "properties": {
@@ -814,6 +1009,57 @@
           "chunk_id"
         ],
         "title": "Evidence",
+        "type": "object"
+      },
+      "FunnelRow": {
+        "description": "퍼널 한 단계(FR-40). 도달: 그 단계 이벤트가 있는 책 수, 이탈: 직전 단계엔 왔지만 여기엔 없는 책 수.",
+        "properties": {
+          "dropped": {
+            "title": "Dropped",
+            "type": "integer"
+          },
+          "event": {
+            "title": "Event",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "reached": {
+            "title": "Reached",
+            "type": "integer"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "editor",
+                  "author",
+                  "designer"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "step": {
+            "title": "Step",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "step",
+          "label",
+          "event",
+          "role",
+          "reached",
+          "dropped"
+        ],
+        "title": "FunnelRow",
         "type": "object"
       },
       "HealthOut": {
@@ -1031,6 +1277,63 @@
           "participant_token"
         ],
         "title": "JoinOut",
+        "type": "object"
+      },
+      "Kpi": {
+        "description": "작업 지표 하나(FR-49, db 탭 5번). value가 null이면 셀 건이 없거나 계산 방법이 정해지지 않았어요.",
+        "properties": {
+          "count": {
+            "description": "계산에 쓴 건수(분모)",
+            "title": "Count",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "unit": {
+            "enum": [
+              "분",
+              "%"
+            ],
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "unit",
+          "count"
+        ],
+        "title": "Kpi",
         "type": "object"
       },
       "Layout": {
@@ -1307,6 +1610,42 @@
           "project_id"
         ],
         "title": "MeOut",
+        "type": "object"
+      },
+      "MetricsOut": {
+        "description": "A-34. 서버가 받은 이벤트와 DB 표로 셈해요.",
+        "properties": {
+          "events_total": {
+            "title": "Events Total",
+            "type": "integer"
+          },
+          "funnel": {
+            "items": {
+              "$ref": "#/components/schemas/FunnelRow"
+            },
+            "title": "Funnel",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "kpis": {
+            "items": {
+              "$ref": "#/components/schemas/Kpi"
+            },
+            "title": "Kpis",
+            "type": "array"
+          }
+        },
+        "required": [
+          "generated_at",
+          "events_total",
+          "funnel",
+          "kpis"
+        ],
+        "title": "MetricsOut",
         "type": "object"
       },
       "PageSide": {
@@ -4206,6 +4545,85 @@
         "summary": "A-24 의견 해결",
         "tags": [
           "shared"
+        ]
+      }
+    },
+    "/dev/metrics": {
+      "get": {
+        "description": "팀용(DV-01). 퍼널 13단계와 작업 지표 8개. 서버가 받은 이벤트와 DB 표로 셈해요.",
+        "operationId": "dev_metrics_dev_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "요청 모양이 맞지 않아요"
+          }
+        },
+        "summary": "A-34 퍼널과 작업 지표",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/events": {
+      "post": {
+        "description": "묶어서 받아요. 이름은 events 탭 목록만(모르는 이름이 하나라도 있으면 422). 받은 시각은 서버가 정해요.",
+        "operationId": "send_events_events_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventsIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "오류"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-33 이벤트 보내기",
+        "tags": [
+          "events"
         ]
       }
     },

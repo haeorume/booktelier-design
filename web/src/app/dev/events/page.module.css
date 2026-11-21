@@ -48,3 +48,9 @@
   color: var(--bt-text-2);
   font-size: 0.85rem;
 }
+
+.subtitle {
+  font-size: var(--bt-size-lg);
+  font-weight: var(--bt-weight-bold);
+  margin-top: var(--bt-space-4);
+}

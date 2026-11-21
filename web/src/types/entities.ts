@@ -222,6 +222,8 @@ export interface TrackedEvent {
   role: Role | null;
   path: string;
   props: EventProps;
+  /** 그때의 원고 버전(events 탭 공통 칸, F8). 지면 영향 확인 시간 KPI에 써요. 장과 무관하면 null. */
+  chapter_version?: number | null;
 }
 
 /** 실시간 교정 응답(data-contract 예시 JSON 1). */

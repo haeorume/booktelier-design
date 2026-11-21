@@ -15,6 +15,8 @@ import { getAiProvider } from "@/ai";
 import type { Library } from "./library";
 import { createLocalLibrary } from "./local-library";
 import { createTokenStore } from "./tokens";
+import { createEventShipper, SHIP_INTERVAL_MS, type EventShipper } from "./event-shipper";
+import type { components } from "@/types/api";
 
 export * from "./repository";
 export * from "./books";
@@ -23,6 +25,7 @@ export * from "./studio";
 export * from "./library";
 export * from "./review-store";
 export * from "./live";
+export { createEventShipper, groupForShipping, type EventShipper } from "./event-shipper";
 export { ApiError, NETWORK } from "./http";
 export { createClientIdentityStore, createLocalStorageRepository } from "./local-storage-repository";
 export { createClientSession, type ClientSession } from "./session";
@@ -87,4 +90,40 @@ export function bookDeps(): AppDeps {
     review ??= createLocalReview(base, getAiProvider);
   }
   return { ...base, library, review, live: dataSource() === "server" ? live : null };
+}
+
+let shipper: EventShipper | null = null;
+
+/**
+ * 이벤트를 남길 곳(F8). 브라우저 기록(localStorage)에 남기고, 서버가 있으면 서버로도 묶어 보내요(A-33).
+ * 몇 초마다 보내고, 화면을 떠날 때(pagehide) 남은 것을 sendBeacon으로 보내요.
+ */
+export function eventSink(): Pick<Repository, "appendEvent"> {
+  const repo = getRepository();
+  if (dataSource() !== "server" || typeof window === "undefined") return repo;
+  if (!shipper) {
+    const session = getClientSession();
+    const ship = createEventShipper({
+      http: createHttpClient(),
+      tokenFor: createTokenResolver(createTokenStore(defaultLocalStorage()), session),
+      beacon: typeof navigator !== "undefined" && navigator.sendBeacon ? (url, body) => navigator.sendBeacon(url, body) : undefined,
+      url: `${apiBaseUrl()}/events`,
+    });
+    window.setInterval(() => void ship.flush(), SHIP_INTERVAL_MS);
+    window.addEventListener("pagehide", () => ship.flushOnLeave());
+    shipper = ship;
+  }
+  const ship = shipper;
+  return {
+    async appendEvent(event) {
+      await repo.appendEvent(event);
+      ship.enqueue(event);
+    },
+  };
+}
+
+/** 퍼널과 작업 지표(A-34). 서버가 없으면 null(1차 /dev 화면은 브라우저 기록으로 세요). */
+export async function fetchMetrics(): Promise<components["schemas"]["MetricsOut"] | null> {
+  if (dataSource() !== "server") return null;
+  return createHttpClient().request<components["schemas"]["MetricsOut"]>("GET", "/dev/metrics");
 }
