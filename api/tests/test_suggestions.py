@@ -254,3 +254,79 @@ def test_send_as_comment_and_author_cannot_send(db_client: TestClient, book: Boo
         headers=auth(book.author),
     )
     assert blocked.status_code == 403  # 작가 카드에는 보내기 없음(FR-29 ④)
+
+
+# ---- F6: AI가 답하지 않으면 503, 책 원칙이 AI에 넘어감(NFR-03, A-28) ----
+
+
+class _Recorder:
+    """제공자 대신. 받은 책 원칙을 기록하고, 정하면 실패해요."""
+
+    def __init__(self, fail: bool = False) -> None:
+        self.fail = fail
+        self.books: list[Any] = []
+
+    def live_check(self, doc: Any, paragraph_ids: list[str], book: Any) -> Any:
+        from app.ai.provider import AiUnavailable, ReviewResult
+
+        self.books.append(book)
+        if self.fail:
+            raise AiUnavailable("늦었어요")
+        return ReviewResult([], "fake")
+
+    def chapter_review(self, doc: Any, book: Any) -> Any:
+        return self.live_check(doc, [], book)
+
+
+def test_ai_failure_is_503_and_manuscript_still_saves(
+    db_client: TestClient, book: Book, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.routers import suggestions as router
+
+    monkeypatch.setattr(router, "get_provider", lambda: _Recorder(fail=True))
+    ch = db_client.get(f"/chapters/{book.chapter_id}", headers=auth(book.author)).json()
+    res = db_client.post(
+        f"/chapters/{book.chapter_id}/live-check",
+        json={"paragraph_ids": ["para_02"], "base_version": ch["version"]},
+        headers=auth(book.author),
+    )
+    assert res.status_code == 503
+    assert res.json()["code"] == "ai_unavailable"
+    res = db_client.post(
+        f"/chapters/{book.chapter_id}/review",
+        json={"base_version": ch["version"]},
+        headers=auth(book.editor),
+    )
+    assert res.status_code == 503
+    # AI가 실패해도 원고 저장은 막히지 않아요(NFR-03)
+    saved = db_client.put(
+        f"/chapters/{book.chapter_id}/doc",
+        json={"doc": ch["doc"], "base_version": ch["version"]},
+        headers=auth(book.author),
+    )
+    assert saved.status_code == 200, saved.text
+
+
+def test_book_rules_reach_the_provider(
+    db_client: TestClient, book: Book, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.routers import suggestions as router
+
+    rec = _Recorder()
+    monkeypatch.setattr(router, "get_provider", lambda: rec)
+    for type_, text in (("rule", "외래어는 국립국어원 표기"), ("keep", "~하였다")):
+        made = db_client.post(
+            f"/projects/{book.project_id}/style-rules",
+            json={"type": type_, "text": text},
+            headers=auth(book.editor),
+        )
+        assert made.status_code == 201
+    ch = db_client.get(f"/chapters/{book.chapter_id}", headers=auth(book.editor)).json()
+    res = db_client.post(
+        f"/chapters/{book.chapter_id}/review",
+        json={"base_version": ch["version"]},
+        headers=auth(book.editor),
+    )
+    assert res.status_code == 200, res.text
+    assert "외래어는 국립국어원 표기" in rec.books[0].rules
+    assert rec.books[0].keep == ["~하였다"]

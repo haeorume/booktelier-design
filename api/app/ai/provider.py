@@ -30,11 +30,25 @@ class ReviewResult:
     model: str
 
 
+@dataclass(frozen=True)
+class BookRules:
+    """책 원칙(표기 원칙, A-28, FR-31). LLM이 따르고(rules), 고치자고 하지 않아요(keep)."""
+
+    rules: list[str] = field(default_factory=list)
+    keep: list[str] = field(default_factory=list)
+
+
+class AiUnavailable(Exception):
+    """AI가 답하지 않았어요(시간 초과, 오류, 읽을 수 없는 답). 부르는 쪽은 503으로 알리고 원고는 막지 않아요(NFR-03)."""
+
+
 class AiProvider(Protocol):
-    def live_check(self, doc: dict[str, Any], paragraph_ids: list[str]) -> ReviewResult:
+    def live_check(
+        self, doc: dict[str, Any], paragraph_ids: list[str], book: BookRules
+    ) -> ReviewResult:
         """작가가 고친 문단만 본다(D-18). 실시간 교정에는 RAG를 쓰지 않는다(D-26)."""
         ...
 
-    def chapter_review(self, doc: dict[str, Any]) -> ReviewResult:
+    def chapter_review(self, doc: dict[str, Any], book: BookRules) -> ReviewResult:
         """편집자가 누른 장 검토(FR-21)."""
         ...
