@@ -113,6 +113,10 @@ def save_proposals(
         if free:
             row = min(free, key=lambda e: abs(int(e.anchor["start"]) - found.start))
             row.anchor, row.base_version = found.as_dict(), chapter.version
+            # 이번에 근거를 찾았으면 새 근거로(RAG가 전에 실패했던 제안도 근거가 붙게, Codex 검수 11.21).
+            # 이번에 못 찾았으면 예전 근거를 남겨요.
+            if p.evidence is not None:
+                row.evidence = p.evidence
             claimed.add(row.id)
             out.append(row)
             continue

@@ -4,6 +4,7 @@
 (app/routers·app/db)이 해요. 실패해도 원고 저장은 막지 않아요(NFR-03).
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -38,6 +39,17 @@ class BookRules:
     keep: list[str] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class EvidenceChunk:
+    """장 검토 프롬프트에 [근거 n]으로 넣는 조각(RAG, D-26). 제안의 evidence가 이것을 가리켜요."""
+
+    n: int
+    chunk_id: str
+    type: str  # norm(어문 규범) · chapter(같은 책의 다른 장)
+    label: str
+    content: str
+
+
 class AiUnavailable(Exception):
     """AI가 답하지 않았어요(시간 초과, 오류, 읽을 수 없는 답). 부르는 쪽은 503으로 알리고 원고는 막지 않아요(NFR-03)."""
 
@@ -49,6 +61,8 @@ class AiProvider(Protocol):
         """작가가 고친 문단만 본다(D-18). 실시간 교정에는 RAG를 쓰지 않는다(D-26)."""
         ...
 
-    def chapter_review(self, doc: dict[str, Any], book: BookRules) -> ReviewResult:
-        """편집자가 누른 장 검토(FR-21)."""
+    def chapter_review(
+        self, doc: dict[str, Any], book: BookRules, evidence: Sequence[EvidenceChunk] = ()
+    ) -> ReviewResult:
+        """편집자가 누른 장 검토(FR-21). evidence는 RAG로 찾은 근거 자료(없으면 근거 없이)."""
         ...

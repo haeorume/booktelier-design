@@ -3,6 +3,7 @@
 AI 요청은 원문을 받지 않고 장 id와 base_version만 받아요(C-9). 서버가 저장된 원고를 읽어요.
 """
 
+import logging
 from collections.abc import Callable
 from typing import Any
 from uuid import UUID
@@ -10,8 +11,9 @@ from uuid import UUID
 from fastapi import APIRouter
 
 from app.ai import get_provider
-from app.ai.provider import AiUnavailable, BookRules, ReviewResult
+from app.ai.provider import AiUnavailable, BookRules, EvidenceChunk, ReviewResult
 from app.auth.token import Identity, Me, require
+from app.config import get_settings
 from app.db import chapters as chapter_db
 from app.db import shared as shared_db
 from app.db import suggestions as ai_db
@@ -35,6 +37,8 @@ from app.schemas.review import (
     SendOut,
     UndoIn,
 )
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(tags=["ai"])
 
@@ -74,6 +78,25 @@ def _book_rules(db: DbSession, project_id: UUID) -> BookRules:
         rules=[r.text for r in rows if r.type == "rule"],
         keep=[r.text for r in rows if r.type == "keep"],
     )
+
+
+def _rag_context(db: DbSession, chapter: ChapterRow) -> list[EvidenceChunk]:
+    """장 검토 근거 자료(RAG, D-26). 실제 LLM일 때만 찾아요(테스트·데모는 근거 없음).
+
+    임베딩·검색이 실패해도 근거 없이 장 검토를 계속해요(NFR-03). 원고 글자는 로그에 남기지 않아요.
+    """
+    settings = get_settings()
+    if settings.ai_provider != "llm":
+        return []
+    try:
+        from app.ai import rag
+        from app.ai.embeddings import make_embeddings
+
+        return rag.build_context(db, chapter, make_embeddings(settings))
+    except Exception as e:
+        db.rollback()
+        log.warning("근거 자료를 찾지 못해 근거 없이 검토해요 (%s)", type(e).__name__)
+        return []
 
 
 AI_UNAVAILABLE: dict[int | str, dict[str, Any]] = {
@@ -127,7 +150,8 @@ def chapter_review(chapter_id: UUID, body: ReviewIn, me: Me, db: DbSession) -> R
     require(me, "run_chapter_review")
     _fresh(chapter, body.base_version)
     book = _book_rules(db, chapter.project_id)
-    result = _run(lambda: get_provider().chapter_review(chapter.doc, book))
+    evidence = _rag_context(db, chapter)
+    result = _run(lambda: get_provider().chapter_review(chapter.doc, book, evidence))
     rows = ai_db.save_proposals(
         db,
         chapter,

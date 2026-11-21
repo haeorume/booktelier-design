@@ -111,14 +111,12 @@
           "evidence": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/Evidence"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Evidence"
+            ]
           },
           "id": {
             "format": "uuid",
@@ -783,6 +781,39 @@
           "message"
         ],
         "title": "ErrorOut",
+        "type": "object"
+      },
+      "Evidence": {
+        "description": "AI 제안의 근거(RAG, D-26, data-contract ai_suggestion.evidence). 못 찾으면 evidence가 null이고 화면은 '근거 없음'.",
+        "properties": {
+          "chunk_id": {
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "excerpt": {
+            "title": "Excerpt",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "norm",
+              "chapter"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "label",
+          "excerpt",
+          "chunk_id"
+        ],
+        "title": "Evidence",
         "type": "object"
       },
       "HealthOut": {
