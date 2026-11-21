@@ -265,6 +265,7 @@ class _Recorder:
     def __init__(self, fail: bool = False) -> None:
         self.fail = fail
         self.books: list[Any] = []
+        self.evidence: list[Any] = []
 
     def live_check(self, doc: Any, paragraph_ids: list[str], book: Any) -> Any:
         from app.ai.provider import AiUnavailable, ReviewResult
@@ -274,7 +275,9 @@ class _Recorder:
             raise AiUnavailable("늦었어요")
         return ReviewResult([], "fake")
 
-    def chapter_review(self, doc: Any, book: Any) -> Any:
+    def chapter_review(self, doc: Any, book: Any, evidence: Any = ()) -> Any:
+        # 장 검토는 근거 자료(RAG, F6 조각 2)도 받아요. 데모·테스트에서는 빈 목록이에요.
+        self.evidence.append(evidence)
         return self.live_check(doc, [], book)
 
 
@@ -330,3 +333,4 @@ def test_book_rules_reach_the_provider(
     assert res.status_code == 200, res.text
     assert "외래어는 국립국어원 표기" in rec.books[0].rules
     assert rec.books[0].keep == ["~하였다"]
+    assert list(rec.evidence[0]) == []  # AI_PROVIDER=demo라 RAG를 건너뛰어요
