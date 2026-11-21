@@ -55,6 +55,13 @@ def replace_norms(db: Session, chunks: Sequence[NewChunk]) -> int:
     return len(chunks)
 
 
+def count_norms(db: Session) -> int:
+    """넣어 둔 어문 규범 조각 수. 배포 때 비어 있을 때만 넣으려고 써요(scripts/seed_norms.py --if-empty)."""
+    return int(
+        db.scalar(select(func.count()).select_from(RagChunk).where(RagChunk.source == "norm")) or 0
+    )
+
+
 def stale_chapters(db: Session, project_id: uuid.UUID, exclude: uuid.UUID) -> list[Chapter]:
     """마지막으로 임베딩한 뒤 바뀐(또는 한 번도 넣지 않은) 같은 책의 다른 장('정할 것' 23)."""
     indexed = (
