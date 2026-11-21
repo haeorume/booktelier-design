@@ -105,3 +105,20 @@
   background: var(--bt-accent-soft);
   color: var(--bt-accent-text);
 }
+
+/* 작업 공간이 그려 넣는 자리: 장 상태·검토 요청 버튼(WS-31), 저장 상태(WS-14) */
+.chapterSlot {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.chapterSlot:empty,
+.saveSlot:empty {
+  display: none;
+}
+
+.saveSlot {
+  display: flex;
+  align-items: center;
+}

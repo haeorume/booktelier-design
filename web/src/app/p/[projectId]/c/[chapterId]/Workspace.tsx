@@ -48,6 +48,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const [present, setPresent] = useState<PresentPerson[] | null>(() => (bookDeps().live ? [] : null));
   /** 같은 장 안에서 다른 사람의 작업 위치로 갈 때. n은 같은 문단을 다시 눌러도 움직이게 한다. */
   const [jump, setJump] = useState<{ paragraphId: string; n: number } | null>(null);
+  /** 상단 바의 자리(장 머리, 저장 상태). 상단 바가 그려진 뒤 작업 공간이 여기에 그려 넣어요. */
+  const [chapterSlot, setChapterSlot] = useState<HTMLElement | null>(null);
+  const [saveSlot, setSaveSlot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -192,6 +195,8 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         present={present}
         chapterTitles={chapterTitles}
         onJump={onJump}
+        chapterSlotRef={setChapterSlot}
+        saveSlotRef={setSaveSlot}
         layoutOpen={layoutOpen}
         onShare={() => setSharing(true)}
         onSnapshots={() => setSnapshotsOpen(true)}
@@ -211,6 +216,7 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
           onChapters={onChapters}
           onPresence={onPresence}
           jump={jump}
+          slots={{ chapter: chapterSlot, save: saveSlot }}
           layoutOpen={layoutOpen}
           onLayoutOpenChange={setLayoutOpen}
           snapshotsOpen={snapshotsOpen}

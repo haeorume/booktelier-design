@@ -68,6 +68,9 @@ export function pageStyleVars(templateId: TemplateId, layout: Layout): Record<st
     "--page-width": `${trim.width}mm`,
     "--page-min-height": `${trim.height}mm`,
     "--page-margin": `${top}mm ${outer}mm ${bottom}mm ${inner + layout.binding}mm`,
+    // 쪽 경계 층(PageGuides)이 본문 단의 왼쪽·오른쪽 끝을 알게 따로도 둬요.
+    "--page-margin-left": `${inner + layout.binding}mm`,
+    "--page-margin-right": `${outer}mm`,
     "--page-line-height": String(layout.line_height),
     "--page-font-size": `${layout.font_size}pt`,
     "--page-font": layout.font_family === SANS_FAMILY ? FONT_STACK.sans : layout.font_family === SERIF_FAMILY ? FONT_STACK.serif : FONT_STACK[TEMPLATES[templateId].font],

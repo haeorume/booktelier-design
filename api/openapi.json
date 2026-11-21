@@ -1300,6 +1300,11 @@
           "page_number": {
             "anyOf": [
               {
+                "enum": [
+                  "bottom_outer",
+                  "bottom_center",
+                  "none"
+                ],
                 "type": "string"
               },
               {

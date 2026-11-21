@@ -49,9 +49,12 @@ export interface Margins {
 
 export type RunningHeader = "none" | "book_title" | "chapter_title";
 
-/** 쪽 공통 설정의 한쪽 면(FR-44 ②). 쪽 번호 위치 값은 F7에서 정한다. */
+/** 쪽 번호 위치(F7 확정): 바깥쪽 아래 · 가운데 아래 · 없음. */
+export type PageNumberPosition = "bottom_outer" | "bottom_center" | "none";
+
+/** 쪽 공통 설정의 한쪽 면(FR-44 ②). 비어 있으면 '없음'으로 본다. */
 export interface PageSide {
-  page_number?: string | null;
+  page_number?: PageNumberPosition | null;
   header?: RunningHeader | null;
 }
 

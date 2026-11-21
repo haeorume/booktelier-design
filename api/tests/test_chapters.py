@@ -191,6 +191,18 @@ def test_author_cannot_change_layout(db_client: TestClient, book: Book) -> None:
     assert _layout(db_client, book, book.author, {"layout": {"font_size": 12}}).status_code == 403
 
 
+def test_running_side_merges_and_page_number_values(db_client: TestClient, book: Book) -> None:
+    # FR-44 ②: 왼쪽 쪽만 바꿔도 오른쪽은 그대로. 쪽 번호 위치는 세 값만(F7)
+    patch = {"layout": {"running": {"left": {"page_number": "none", "header": "none"}}}}
+    res = _layout(db_client, book, book.designer, patch)
+    assert res.status_code == 200, res.text
+    running = res.json()["layout"]["running"]
+    assert running["left"] == {"page_number": "none", "header": "none"}
+    assert running["right"] == {"page_number": "bottom_outer", "header": "chapter_title"}
+    bad = {"layout": {"running": {"right": {"page_number": "top_left"}}}}
+    assert _layout(db_client, book, book.designer, bad).status_code == 422
+
+
 # ---- A-29 검토본 ----
 
 
