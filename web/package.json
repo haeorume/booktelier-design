@@ -23,6 +23,7 @@
     "@tiptap/pm": "3.32.2",
     "@tiptap/react": "3.32.2",
     "next": "16.4.6",
+    "pagedjs": "0.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

@@ -142,3 +142,32 @@ test("편집자가 템플릿을 바꾸면 열어 둔 작가 창의 지면과 조
   await expect(author.getByTestId("layout-values")).toContainText("실용서");
   await expect(author.getByTestId("layout-last-change")).toContainText("편집자");
 });
+
+test("미리보기를 열어 둔 채 다른 브라우저에서 원고를 고치면 '반영 중' 뒤 다시 그려진다(FR-43 ③, QA-F14)", async ({ page: editor, browser }) => {
+  await createBook(editor, `미리보기 반영 ${Date.now()}`);
+  const author = await freshPage(browser);
+  await join(author, await inviteUrl(editor, "author"), "정작가");
+
+  await editor.getByTestId("preview-link").click();
+  await expect(editor).toHaveURL(/\/preview$/, { timeout: NAVIGATE_MS });
+  await expect(editor.getByTestId("preview-range")).toBeVisible({ timeout: NAVIGATE_MS });
+  // '반영 중'은 잠깐 보였다 사라져서, 보였는지를 기록해 둔다
+  await editor.evaluate(() => {
+    const w = window as unknown as { sawReflow: boolean };
+    w.sawReflow = false;
+    new MutationObserver(() => {
+      if (document.querySelector("[data-testid='preview-reflowing']")) w.sawReflow = true;
+    }).observe(document.body, { subtree: true, childList: true });
+  });
+
+  // 아무것도 바뀌지 않으면 다시 그리지 않는다(바뀐 것 받기 세 번 넘게 기다림)
+  await editor.waitForTimeout(10_000);
+  expect(await editor.evaluate(() => (window as unknown as { sawReflow: boolean }).sawReflow)).toBe(false);
+
+  await author.getByTestId("manuscript").click();
+  await author.keyboard.type("미리보기에 들어올 문장.");
+  await expect(author.getByTestId("save-state")).toHaveText("저장됨", { timeout: LIVE_MS });
+
+  await expect(editor.getByTestId("preview-stage")).toContainText("미리보기에 들어올 문장.", { timeout: LIVE_MS });
+  expect(await editor.evaluate(() => (window as unknown as { sawReflow: boolean }).sawReflow)).toBe(true);
+});
