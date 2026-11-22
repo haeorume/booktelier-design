@@ -69,33 +69,3 @@
   color: var(--bt-badge-designer-text);
 }
 
-/* 시안 .be-utility-btn(일정) */
-.utility {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 5px 9px;
-  border: 1px solid var(--bt-line);
-  border-radius: var(--bt-radius-md);
-  background: var(--bt-surface);
-  color: var(--bt-utility-text);
-  font-size: var(--bt-size-sm);
-  font-weight: var(--bt-weight-medium);
-}
-
-.utility:hover {
-  border-color: var(--bt-line-hover);
-  color: var(--bt-ink);
-}
-
-@media (max-width: 720px) {
-  .header {
-    padding: 0 var(--bt-space-4);
-  }
-
-  .prototype,
-  .utility {
-    display: none;
-  }
-}

@@ -23,38 +23,9 @@ function coverOf(id: string): 1 | 2 | 3 | 4 {
   return ((h % 4) + 1) as 1 | 2 | 3 | 4;
 }
 
-/** 협업 일정(시안 '협업 일정'). 일정 기능은 아직 없어 예시 세 장이에요. 책 이름과 참여자 이름은 내 책에서 가져와요. */
-interface ScheduleItem {
-  role: Role;
-  when: string;
-  title: string;
-  who: string;
-}
-
-function scheduleFrom(cards: ProjectCard[], now: Date): ScheduleItem[] {
-  const at = (days: number, hour: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() + days);
-    d.setHours(hour, 0, 0, 0);
-    const week = d.toLocaleDateString("ko-KR", { weekday: "short" });
-    return `${d.getMonth() + 1}. ${d.getDate()}. (${week}) ${String(hour).padStart(2, "0")}:00`;
-  };
-  const book = (i: number) => cards[i % Math.max(1, cards.length)]?.title ?? "새 책";
-  const name = (role: Role) => {
-    const p = cards.flatMap((c) => c.participants).find((x) => x.role === role);
-    return p ? `${p.display_name} ${ROLE_LABEL[role]}` : ROLE_LABEL[role];
-  };
-  return [
-    { role: "author", when: at(0, 18), title: "원고 공동 검토", who: `${name("author")} · ${book(0)}` },
-    { role: "designer", when: at(1, 14), title: "지면과 표지 디자인 회의", who: `${name("designer")} · ${book(1)}` },
-    { role: "editor", when: at(2, 11), title: "출간 준비 일정 점검", who: `나 · ${book(0)}` },
-  ];
-}
-
 /** 편집자 홈(HM-01, 시안 11.22 '#home'). 이 브라우저가 만든 책만 보인다(FR-02, FR-07). */
 export default function EditorHome() {
   const [cards, setCards] = useState<ProjectCard[] | null>(null);
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const server = bookDeps().library.source === "server";
 
   useEffect(() => {
@@ -63,7 +34,6 @@ export default function EditorHome() {
     const show = (list: ProjectCard[]) => {
       if (!alive) return;
       setCards(list);
-      setSchedule(scheduleFrom(list, new Date()));
     };
     bookDeps()
       .library.myBooks()
@@ -78,7 +48,7 @@ export default function EditorHome() {
 
   return (
     <div className={styles.page}>
-      <ServiceHeader role="editor" homeLink schedule themeToggle />
+      <ServiceHeader role="editor" homeLink themeToggle />
       <main className={styles.main}>
         <HomeHero />
 
@@ -95,36 +65,6 @@ export default function EditorHome() {
             <Icon name="plus" className={styles.buttonIcon} />새 책 만들기
           </Link>
         </div>
-
-        <section id="home-schedule" className={styles.schedule} aria-labelledby="home-schedule-title">
-          <div className={styles.scheduleHead}>
-            <div>
-              <h2 id="home-schedule-title">협업 일정</h2>
-              <p>함께할 작업을 미리 확인하세요.</p>
-            </div>
-            <div className={styles.scheduleActions}>
-              {/* 일정 기능은 아직 없어요(시안의 자리만). 누르면 아무 일도 하지 않아요. */}
-              <button type="button" className={styles.utility} aria-disabled="true" title="시제품에서는 아직 쓰지 않아요">
-                알림 미리보기
-              </button>
-              <button type="button" className={styles.utility} aria-disabled="true" title="시제품에서는 아직 쓰지 않아요">
-                일정 관리 <span aria-hidden="true">↗</span>
-              </button>
-            </div>
-          </div>
-          <ul className={styles.scheduleList}>
-            {schedule.map((s) => (
-              <li key={s.title} className={styles.scheduleCard}>
-                <span className={styles.roleChip} data-role={s.role}>
-                  {ROLE_LABEL[s.role]} · 예시
-                </span>
-                <time>{s.when}</time>
-                <strong>{s.title}</strong>
-                <small>{s.who}</small>
-              </li>
-            ))}
-          </ul>
-        </section>
 
         <section id="home-intro" className={styles.intro} aria-labelledby="home-intro-title">
           <div className={styles.introCopy}>
