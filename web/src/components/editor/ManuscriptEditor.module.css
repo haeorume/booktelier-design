@@ -73,7 +73,8 @@
 }
 
 .prose :global(p) {
-  text-indent: 1em;
+  text-indent: var(--page-text-indent, 1em);
+  text-align: var(--page-text-align, left); /* 본문 정렬(D-41) */
   margin-bottom: 0.6em;
   min-height: 1em;
 }

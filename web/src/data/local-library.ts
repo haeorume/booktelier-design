@@ -100,6 +100,13 @@ export function createLocalLibrary(deps: BookDeps): Library {
       return repo.createChapter({ project_id: projectId, order, title, doc: structuredClone(EMPTY) as never });
     },
 
+    async renameProject(projectId, title) {
+      const p = await repo.getProject(projectId);
+      if (!p) throw new Error("책을 찾을 수 없어요");
+      const saved = await repo.updateProject({ ...p, title: title.trim(), updated_at: new Date().toISOString() });
+      return { ...saved, layout: fillLayout(saved.template_id, saved.layout) };
+    },
+
     async updateLayout(projectId, change, by) {
       const saved = await saveLayout(deps, projectId, change, by);
       return { ...saved, layout: fillLayout(saved.template_id, saved.layout) };

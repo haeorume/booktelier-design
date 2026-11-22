@@ -1,5 +1,5 @@
 // 조판 값의 범위와 바꾸기(FR-16, FR-44, FR-45, CS-15). 범위는 W5 잠정값이고, 정해지면 이 파일만 바꾼다.
-import type { Layout, Margins, PageNumberPosition, RunningHeader, TemplateId } from "@/types";
+import type { Layout, Margins, PageNumberPosition, RunningHeader, TemplateId, TextAlign } from "@/types";
 import { SANS_FAMILY, SERIF_FAMILY, TEMPLATES, templateLayout } from "./templates";
 
 /** 고를 수 있는 판형(mm). 세 템플릿 기본값(DESIGN.md 4장)과 1차 기본값(128x188·130x200)을 모두 담는다.
@@ -14,6 +14,14 @@ export const FONT_OPTIONS = [
   { family: SERIF_FAMILY, label: "명조" },
   { family: SANS_FAMILY, label: "고딕" },
 ] as const;
+
+/** 본문 정렬(FR-16 ⑥, D-41). 기본은 왼쪽(11.22 결정: 이미 만든 책의 모양이 바뀌지 않게). */
+export const TEXT_ALIGN_OPTIONS: { value: TextAlign; label: string }[] = [
+  { value: "left", label: "왼쪽" },
+  { value: "center", label: "가운데" },
+  { value: "right", label: "오른쪽" },
+  { value: "justify", label: "양쪽" },
+];
 
 export const MARGIN_SIDES = ["top", "bottom", "inner", "outer"] as const;
 export type MarginSide = (typeof MARGIN_SIDES)[number];
@@ -35,7 +43,7 @@ export const HEADER_OPTIONS: { value: RunningHeader; label: string }[] = [
   { value: "none", label: "없음" },
 ];
 
-export type LayoutField = "template" | "trim" | "font_family" | NumberField | RunningField;
+export type LayoutField = "template" | "trim" | "font_family" | "text_align" | NumberField | RunningField;
 
 export const LAYOUT_FIELD_LABEL: Record<LayoutField, string> = {
   template: "템플릿",
@@ -48,6 +56,7 @@ export const LAYOUT_FIELD_LABEL: Record<LayoutField, string> = {
   line_height: "행간",
   font_size: "글자 크기",
   font_family: "본문 글꼴",
+  text_align: "정렬",
   running_left_page_number: "왼쪽 쪽 번호",
   running_left_header: "왼쪽 머리말",
   running_right_page_number: "오른쪽 쪽 번호",
@@ -112,6 +121,7 @@ export function fillLayout(templateId: TemplateId, raw: unknown): Layout {
     line_height: typeof v.line_height === "number" ? v.line_height : base.line_height,
     font_family: typeof v.font_family === "string" ? v.font_family : base.font_family,
     font_size: typeof v.font_size === "number" ? v.font_size : base.font_size,
+    text_align: TEXT_ALIGN_OPTIONS.some((o) => o.value === v.text_align) ? (v.text_align as TextAlign) : base.text_align,
     running: v.running ?? base.running,
   };
 }
@@ -134,7 +144,8 @@ export function isValidLayout(layout: Layout): boolean {
   return (
     numbers &&
     (TRIM_OPTIONS as readonly string[]).includes(layout.trim) &&
-    FONT_OPTIONS.some((f) => f.family === layout.font_family)
+    FONT_OPTIONS.some((f) => f.family === layout.font_family) &&
+    TEXT_ALIGN_OPTIONS.some((o) => o.value === layout.text_align)
   );
 }
 
@@ -182,6 +193,10 @@ export function changeValue(
   if (field === "trim") {
     const after = (TRIM_OPTIONS as readonly string[]).includes(String(value)) ? String(value) : layout.trim;
     return { template_id: current.template_id, layout: { ...layout, trim: after }, field, before: layout.trim, after, reset_to_default: false, patch: { trim: after } };
+  }
+  if (field === "text_align") {
+    const after = TEXT_ALIGN_OPTIONS.some((o) => o.value === value) ? (value as TextAlign) : layout.text_align;
+    return { template_id: current.template_id, layout: { ...layout, text_align: after }, field, before: layout.text_align, after, reset_to_default: false, patch: { text_align: after } };
   }
   if (field === "font_family") {
     const after = FONT_OPTIONS.some((f) => f.family === value) ? String(value) : layout.font_family;

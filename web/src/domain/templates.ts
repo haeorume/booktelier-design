@@ -25,19 +25,19 @@ export const TEMPLATES: Record<TemplateId, Template> = {
     id: "novel",
     label: "소설",
     font: "serif",
-    layout: { trim: "127x188", margin: { top: 18, bottom: 20, inner: 17, outer: 14 }, binding: 3, line_height: 1.75, font_family: SERIF_FAMILY, font_size: 10, running: RUNNING },
+    layout: { trim: "127x188", margin: { top: 18, bottom: 20, inner: 17, outer: 14 }, binding: 3, line_height: 1.75, font_family: SERIF_FAMILY, font_size: 10, running: RUNNING, text_align: "left" },
   },
   essay: {
     id: "essay",
     label: "에세이",
     font: "serif",
-    layout: { trim: "148x210", margin: { top: 20, bottom: 22, inner: 20, outer: 16 }, binding: 3, line_height: 1.8, font_family: SERIF_FAMILY, font_size: 10.5, running: RUNNING },
+    layout: { trim: "148x210", margin: { top: 20, bottom: 22, inner: 20, outer: 16 }, binding: 3, line_height: 1.8, font_family: SERIF_FAMILY, font_size: 10.5, running: RUNNING, text_align: "left" },
   },
   practical: {
     id: "practical",
     label: "실용서",
     font: "sans",
-    layout: { trim: "152x225", margin: { top: 20, bottom: 20, inner: 18, outer: 16 }, binding: 3, line_height: 1.65, font_family: SANS_FAMILY, font_size: 10, running: RUNNING },
+    layout: { trim: "152x225", margin: { top: 20, bottom: 20, inner: 18, outer: 16 }, binding: 3, line_height: 1.65, font_family: SANS_FAMILY, font_size: 10, running: RUNNING, text_align: "left" },
   },
 };
 
@@ -73,6 +73,9 @@ export function pageStyleVars(templateId: TemplateId, layout: Layout): Record<st
     "--page-margin-right": `${outer}mm`,
     "--page-line-height": String(layout.line_height),
     "--page-font-size": `${layout.font_size}pt`,
+    // 본문 정렬(D-41). 가운데·오른쪽은 첫 줄 들여쓰기를 없애요(들여쓰면 가운데가 어긋나 보여요).
+    "--page-text-align": layout.text_align,
+    "--page-text-indent": layout.text_align === "center" || layout.text_align === "right" ? "0" : "1em",
     "--page-font": layout.font_family === SANS_FAMILY ? FONT_STACK.sans : layout.font_family === SERIF_FAMILY ? FONT_STACK.serif : FONT_STACK[TEMPLATES[templateId].font],
   };
 }

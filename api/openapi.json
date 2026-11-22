@@ -1405,6 +1405,23 @@
               }
             ]
           },
+          "text_align": {
+            "anyOf": [
+              {
+                "enum": [
+                  "left",
+                  "center",
+                  "right",
+                  "justify"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Align"
+          },
           "trim": {
             "anyOf": [
               {
@@ -2169,6 +2186,21 @@
           "editor_tokens"
         ],
         "title": "ProjectListIn",
+        "type": "object"
+      },
+      "ProjectTitleIn": {
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "ProjectTitleIn",
         "type": "object"
       },
       "ReviewIn": {
@@ -5184,6 +5216,93 @@
           }
         ],
         "summary": "A-10 책 열기",
+        "tags": [
+          "projects"
+        ]
+      },
+      "patch": {
+        "description": "편집자만(FR-55, D-42). 다른 참여자는 다음에 책을 열 때 새 제목을 봐요.",
+        "operationId": "rename_project_projects__project_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectTitleIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "토큰이 없거나 틀려요"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "이 책이나 역할로는 할 수 없어요"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "찾을 수 없어요"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            },
+            "description": "오류"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "A-36 책 제목 고치기",
         "tags": [
           "projects"
         ]

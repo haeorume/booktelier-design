@@ -5,6 +5,7 @@ import { can } from "@/domain/permissions";
 import { ROLE_LABEL } from "@/domain/labels";
 import type { PresentPerson } from "@/data";
 import type { Participant, Role } from "@/types";
+import { BookTitle } from "./BookTitle";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./Theme";
 import { Participants } from "./Participants";
@@ -13,6 +14,8 @@ import styles from "./TopBar.module.css";
 interface Props {
   role: Role;
   bookTitle: string;
+  /** 책 제목 고치기(A-36). 편집자만 넘어와요. */
+  onRename?: (title: string) => Promise<void>;
   chapterTitle: string;
   participants: Participant[];
   currentId: string;
@@ -25,6 +28,8 @@ interface Props {
   saveSlotRef: (el: HTMLElement | null) => void;
   /** 미리보기 주소(WS-15, PV-01). 새 탭으로도 열 수 있게 링크로 둬요. */
   previewHref: string;
+  /** 미리보기를 작업 공간 안에서 열어요(D-40). 새 탭으로 열 때(Ctrl·가운데 클릭)는 주소로 가요. */
+  onPreview: () => void;
   /** 오른쪽 검토 패널을 접었는지(DESIGN.md 3장 '오른쪽 패널 접기') */
   panelCollapsed: boolean;
   onTogglePanel: () => void;
@@ -39,7 +44,7 @@ interface Props {
  * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 초대(L-07)는 편집자만.
  */
 export function TopBar(props: Props) {
-  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, previewHref, panelCollapsed, onTogglePanel, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
+  const { role, bookTitle, onRename, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, previewHref, onPreview, panelCollapsed, onTogglePanel, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
   return (
     <header className={styles.bar}>
       {/* 로고를 누르면 편집자 홈으로(11.22). 편집자 홈은 편집자만 있어서(D-15) 다른 역할에는 링크가 아니에요. */}
@@ -59,7 +64,7 @@ export function TopBar(props: Props) {
             <span aria-hidden="true">›</span>
           </>
         )}
-        <span className={styles.book}>{bookTitle}</span>
+        <BookTitle key={bookTitle} title={bookTitle} onRename={can(role, "rename_project") ? onRename : undefined} />
         <span aria-hidden="true">›</span>
         <span>{chapterTitle}</span>
       </nav>
@@ -70,7 +75,16 @@ export function TopBar(props: Props) {
       <div className={styles.tools}>
         <Participants participants={participants} currentId={currentId} present={present} chapterTitles={chapterTitles} onJump={onJump} />
         <div className={styles.saveSlot} ref={saveSlotRef} />
-        <Link className={styles.button} href={previewHref} data-testid="preview-link">
+        <Link
+          className={styles.button}
+          href={previewHref}
+          data-testid="preview-link"
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return; // 새 탭·새 창은 주소로
+            e.preventDefault();
+            onPreview();
+          }}
+        >
           미리보기
         </Link>
         {can(role, "view_snapshots") && (

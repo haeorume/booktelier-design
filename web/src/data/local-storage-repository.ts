@@ -265,7 +265,7 @@ export function createLocalStorageRepository(options: LocalRepositoryOptions): R
     },
 
     async createStyleRule(input) {
-      return insert("style_rules", { id: newId(), ...input });
+      return insert("style_rules", { id: newId(), ...input, created_at: nowIso() });
     },
     async listStyleRules(projectId) {
       return where("style_rules", (r) => r.project_id === projectId);

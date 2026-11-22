@@ -1,7 +1,7 @@
 // AI 제안·의견·수정 제안(F5). 서버 구현은 서버가 원고를 바꾸고(D-30) 새 버전을 돌려준다.
 // 1차 브라우저 저장 구현은 화면 편집기가 원고를 바꾸고 저장한다(chapterVersion = null).
 // 화면은 결과의 chapterVersion으로 둘을 구분한다: 값이 있으면 편집기에 같은 글자를 반영하고 다시 저장하지 않는다.
-import type { AiSuggestion, Anchor, AiSuggestionKind, ChapterDoc, Comment, SuggestedEdit, Uuid } from "@/types";
+import type { AiSuggestion, Anchor, AiSuggestionKind, ChapterDoc, Comment, StyleRule, StyleRuleType, SuggestedEdit, Uuid } from "@/types";
 import type { Viewer } from "./repository";
 
 import type { SendMethod } from "./review";
@@ -51,5 +51,9 @@ export interface ReviewStore {
   reject(ctx: Ctx, e: SuggestedEdit): Promise<SuggestedEdit>;
   markSeen(ctx: Ctx, target: { type: "comment" | "suggested_edit"; id: Uuid }): Promise<void>;
   /** 1차 구현만: 원고가 바뀌면 의견·수정 제안의 새 자리를 저장한다. 서버는 읽을 때 스스로 한다. */
+  /** 표기 원칙 목록(A-28, FR-31). 통일 규칙(rule)과 유지 표현(keep). */
+  listStyleRules(ctx: Ctx): Promise<StyleRule[]>;
+  /** 표기 원칙 한 줄 더하기(A-28). 그 책 참여자면 누구나. */
+  addStyleRule(ctx: Ctx, input: { type: StyleRuleType; text: string }): Promise<StyleRule>;
   saveAnchors(ctx: Ctx, moved: { comments: { comment: Comment; anchor: Anchor }[]; edits: { edit: SuggestedEdit; anchor: Anchor }[] }): Promise<void>;
 }

@@ -62,6 +62,8 @@ export interface PageSide {
  * 조판 값(FR-16, FR-44, FR-45). 서버 계약(api.ts Layout)과 같은 이름. 판형은 "폭x높이"(mm).
  * 서버는 칸을 선택값으로 두지만, 화면은 템플릿 기본값으로 채운 뒤 쓴다(domain/layout.ts fillLayout).
  */
+export type TextAlign = "left" | "center" | "right" | "justify";
+
 export interface Layout {
   trim: string;
   margin: Margins;
@@ -69,6 +71,8 @@ export interface Layout {
   line_height: number;
   font_family: string;
   font_size: number;
+  /** 본문 문단 정렬(FR-16 ⑥, D-41). 비어 있던 옛 책은 왼쪽으로 채워요. */
+  text_align: TextAlign;
   running?: { left?: PageSide | null; right?: PageSide | null } | null;
 }
 
@@ -196,6 +200,8 @@ export interface StyleRule {
   type: StyleRuleType;
   text: string;
   created_by: Uuid;
+  /** 더한 시각(DB 초안 11.19의 새 칸). 1차 예시 데이터에는 없어요. */
+  created_at?: IsoDateTime;
 }
 
 export interface Snapshot {

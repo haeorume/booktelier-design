@@ -110,7 +110,7 @@ export function pageCss(templateId: TemplateId, layout: Layout, titles: { book: 
   }
   rules.push(`@page :first { @top-left { content: none; } @top-right { content: none; } }`);
   rules.push(
-    `.bt-p { font-family: ${vars["--page-font"]}; font-size: ${vars["--page-font-size"]}; line-height: ${vars["--page-line-height"]}; text-indent: 1em; margin: 0 0 0.6em; min-height: 1em; word-break: keep-all; white-space: break-spaces; color: var(--bt-ink); }`,
+    `.bt-p { font-family: ${vars["--page-font"]}; font-size: ${vars["--page-font-size"]}; line-height: ${vars["--page-line-height"]}; text-align: ${vars["--page-text-align"]}; text-indent: ${vars["--page-text-indent"]}; margin: 0 0 0.6em; min-height: 1em; word-break: keep-all; white-space: break-spaces; color: var(--bt-ink); }`,
     `.bt-chapter-head { margin-bottom: 2em; font-family: ${vars["--page-font"]}; font-size: ${vars["--page-font-size"]}; }`,
     `.bt-eyebrow { font-family: var(--bt-font-ui); font-size: 8pt; font-weight: 600; letter-spacing: var(--bt-tracking-eyebrow); color: var(--bt-accent-text); margin: 0 0 0.6em; }`,
     `.bt-chapter-title { font-size: 1.6em; font-weight: 600; line-height: 1.3; color: var(--bt-ink); margin: 0; }`,

@@ -72,7 +72,7 @@ test("다크 테마를 고르면 새로고침 뒤에도 유지되고, 미리보�
   expect((r + g + b) / 3).toBeGreaterThan(230);
 
   // 다시 밝게. 직전 작업 공간도 숨겨진 채 DOM에 남아 있어서(Next 16) 보이는 버튼을 눌러요.
-  await page.getByTestId("theme-toggle").locator("visible=true").click();
+  await page.getByRole("dialog", { name: "미리보기" }).getByTestId("theme-toggle").click();
   await expect(html).toHaveAttribute("data-theme", "light");
 });
 
@@ -83,4 +83,44 @@ test("컴퓨터가 다크 모드면 처음부터 어둡게 보인다", async ({ 
   const bg = await page.locator("body").evaluate((el) => getComputedStyle(el).backgroundColor);
   const [r, g, b] = bg.match(/\d+/g)!.map(Number);
   expect((r + g + b) / 3).toBeLessThan(60);
+});
+
+test("편집자는 상단 바의 책 제목을 눌러 고치고, 편집자 홈에도 새 제목이 보인다(FR-55, A-36)", async ({ page }) => {
+  await createBookAndCopyLinks(page);
+  await page.getByTestId("book-title").click();
+  const input = page.getByRole("navigation", { name: "경로" }).getByLabel("책 제목", { exact: true });
+  await input.fill("런던에서 보낸 한 달");
+  await input.press("Enter");
+  await expect(page.getByTestId("book-title")).toHaveText("런던에서 보낸 한 달");
+
+  // Esc는 취소, 비우면 원래 제목
+  await page.getByTestId("book-title").click();
+  await page.getByRole("navigation", { name: "경로" }).getByLabel("책 제목", { exact: true }).fill("");
+  await page.getByRole("navigation", { name: "경로" }).getByLabel("책 제목", { exact: true }).press("Enter");
+  await expect(page.getByTestId("book-title")).toHaveText("런던에서 보낸 한 달");
+
+  await page.reload();
+  await expect(page.getByTestId("book-title")).toHaveText("런던에서 보낸 한 달");
+  await page.getByTestId("logo-home").click();
+  await expect(page).toHaveURL(/\/home$/, { timeout: NAVIGATE_MS });
+  await expect(page.getByText("런던에서 보낸 한 달").first()).toBeVisible();
+});
+
+test("한글 조합 중의 Enter로는 제목이 저장되지 않는다(Codex 검수 11.22)", async ({ page }) => {
+  await createBookAndCopyLinks(page);
+  await page.getByTestId("book-title").click();
+  const input = page.getByRole("navigation", { name: "경로" }).getByLabel("책 제목", { exact: true });
+  await input.fill("런던에서 보낸 한");
+  // 조합을 확정하는 Enter(isComposing)는 저장·닫기로 받지 않아요
+  await input.dispatchEvent("keydown", { key: "Enter", isComposing: true });
+  await expect(input).toBeVisible();
+  await input.fill("런던에서 보낸 한 달");
+  await input.press("Enter");
+  await expect(page.getByTestId("book-title")).toHaveText("런던에서 보낸 한 달");
+});
+
+test("작가에게는 책 제목이 글자로만 보이고 고칠 수 없다(D-42)", async ({ page }) => {
+  await enterAsAuthor(page);
+  await expect(page.getByTestId("book-title")).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "경로" })).toContainText("파리에서 보낸 한 달");
 });

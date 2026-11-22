@@ -265,3 +265,15 @@ def test_layout_patch_after_template_change_keeps_new_template(
     again = db_client.get(f"/projects/{book.project_id}", headers=auth(book.author)).json()
     assert again["project"]["template_id"] == "novel"
     assert again["project"]["layout"]["font_size"] == 11
+
+
+def test_layout_text_align_is_saved_and_validated(db_client: TestClient, book: Book) -> None:
+    """본문 정렬(FR-16 ⑥, D-41): 편집자·디자이너가 바꾸고, 넷 밖의 값은 막아요. 작가는 못 바꿔요."""
+    data = _layout(db_client, book, book.designer, {"layout": {"text_align": "justify"}}).json()
+    assert data["layout"]["text_align"] == "justify"
+    again = db_client.get(f"/projects/{book.project_id}", headers=auth(book.author)).json()
+    assert again["project"]["layout"]["text_align"] == "justify"
+    bad = _layout(db_client, book, book.editor, {"layout": {"text_align": "middle"}})
+    assert bad.status_code == 422
+    denied = _layout(db_client, book, book.author, {"layout": {"text_align": "center"}})
+    assert denied.status_code == 403

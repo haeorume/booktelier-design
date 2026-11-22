@@ -579,7 +579,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * A-36 책 제목 고치기
+         * @description 편집자만(FR-55, D-42). 다른 참여자는 다음에 책을 열 때 새 제목을 봐요.
+         */
+        patch: operations["rename_project_projects__project_id__patch"];
         trace?: never;
     };
     "/projects/{project_id}/changes": {
@@ -1361,6 +1365,8 @@ export interface components {
             line_height?: number | null;
             margin?: components["schemas"]["Margins"] | null;
             running?: components["schemas"]["Running"] | null;
+            /** Text Align */
+            text_align?: ("left" | "center" | "right" | "justify") | null;
             /** Trim */
             trim?: string | null;
         };
@@ -1685,6 +1691,11 @@ export interface components {
         ProjectListIn: {
             /** Editor Tokens */
             editor_tokens: string[];
+        };
+        /** ProjectTitleIn */
+        ProjectTitleIn: {
+            /** Title */
+            title: string;
         };
         /** ReviewIn */
         ReviewIn: {
@@ -3674,6 +3685,68 @@ export interface operations {
                 };
             };
             /** @description 요청 모양이 맞지 않아요 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+        };
+    };
+    rename_project_projects__project_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectTitleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description 토큰이 없거나 틀려요 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 이 책이나 역할로는 할 수 없어요 */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 찾을 수 없어요 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorOut"];
+                };
+            };
+            /** @description 오류 */
             422: {
                 headers: {
                     [name: string]: unknown;

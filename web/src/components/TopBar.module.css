@@ -44,6 +44,36 @@
   font-weight: var(--bt-weight-bold);
 }
 
+/* 편집자는 책 제목을 눌러 고쳐요(D-42). 올리면 밑줄로 누를 수 있음을 알려요. */
+.titleButton {
+  font: inherit;
+  font-weight: var(--bt-weight-bold);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: text;
+  max-width: 16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titleButton:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.titleInput {
+  font: inherit;
+  font-weight: var(--bt-weight-bold);
+  width: 14em;
+  padding: 0 var(--bt-space-1);
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  color: var(--bt-ink);
+}
+
 /* 역할 배지(WS-12): 역할 색 세 벌 + 글자. 색만으로 구분하지 않아요. */
 .badge {
   flex: none;

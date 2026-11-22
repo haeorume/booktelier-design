@@ -152,6 +152,11 @@ class ChapterStatusIn(BaseModel):
     to: ChapterStatus
 
 
+# A-36 책 제목 고치기(FR-55, D-42)
+class ProjectTitleIn(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+
+
 # A-15 조판 값 바꾸기
 class LayoutPatchIn(BaseModel):
     """바꾼 값만 보내요. 템플릿을 바꾸면 조판 값이 그 템플릿 기본값으로 돌아가요(FR-16 ④)."""

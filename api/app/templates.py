@@ -30,6 +30,7 @@ def default_layout(template_id: TemplateId) -> Layout:
             font_family=SERIF,
             font_size=10,
             running=_running(),
+            text_align="left",
         )
     if template_id == "essay":
         return Layout(
@@ -40,6 +41,7 @@ def default_layout(template_id: TemplateId) -> Layout:
             font_family=SERIF,
             font_size=10.5,
             running=_running(),
+            text_align="left",
         )
     return Layout(
         trim="152x225",
@@ -49,4 +51,5 @@ def default_layout(template_id: TemplateId) -> Layout:
         font_family=SANS,
         font_size=10,
         running=_running(),
+        text_align="left",
     )

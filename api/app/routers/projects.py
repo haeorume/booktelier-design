@@ -31,7 +31,9 @@ from app.schemas.project import (
     ProjectCreateOut,
     ProjectDetail,
     ProjectListIn,
+    ProjectTitleIn,
 )
+from app.schemas.project import Project as ProjectOut
 from app.templates import default_layout
 
 router = APIRouter(tags=["projects"])
@@ -219,6 +221,25 @@ def patch_layout(project_id: UUID, body: LayoutPatchIn, me: Me, db: DbSession) -
         layout_updated_by=saved.layout_updated_by,
         layout_updated_at=saved.layout_updated_at,
     )
+
+
+@router.patch(
+    "/projects/{project_id}",
+    summary="A-36 책 제목 고치기",
+    response_model=ProjectOut,
+    responses=error_responses(401, 403, 404, 422),
+)
+def rename_project(project_id: UUID, body: ProjectTitleIn, me: Me, db: DbSession) -> ProjectOut:
+    """편집자만(FR-55, D-42). 다른 참여자는 다음에 책을 열 때 새 제목을 봐요."""
+    _project_of(db, me, project_id)
+    require(me, "rename_project")
+    title = body.title.strip()
+    if not title:
+        raise AppError(422, "invalid_request", "title: 비어 있어요")
+    row = project_db.lock(db, project_id)
+    if row is None:
+        raise AppError(404, "not_found", "책을 찾을 수 없어요")
+    return _convert.project(project_db.update_title(db, row, title))
 
 
 def _editor_of(me: Me, project_id: UUID, db: DbSession) -> None:

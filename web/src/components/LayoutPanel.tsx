@@ -15,6 +15,7 @@ import {
   numberValue,
   trimLabel,
   TRIM_OPTIONS,
+  TEXT_ALIGN_OPTIONS,
   type LayoutChange,
   type NumberField,
   type PageSideName,
@@ -70,7 +71,7 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
     onPreview(next);
   }
 
-  function commit(field: "trim" | "font_family" | NumberField | RunningField, value: string | number) {
+  function commit(field: "trim" | "font_family" | "text_align" | NumberField | RunningField, value: string | number) {
     const change = changeValue(current, field, value);
     onPreview(null);
     if (change.before === change.after) return;
@@ -109,6 +110,8 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
           <dd>
             {fontLabel(project.layout.font_family)} {project.layout.font_size}pt
           </dd>
+          <dt>정렬</dt>
+          <dd>{TEXT_ALIGN_OPTIONS.find((o) => o.value === project.layout.text_align)?.label}</dd>
           {PAGE_SIDES.map((side) => (
             <RunningValue key={side} side={side} layout={project.layout} />
           ))}
@@ -152,6 +155,23 @@ export function LayoutPanel({ project, role, participants, onPreview, onCommit, 
               ))}
             </select>
           </label>
+
+          {/* 본문 정렬(FR-16 ⑥, D-41). 본문 문단에만 적용돼요. 고른 것은 테두리와 체크로도 보여요(CS-05). */}
+          <fieldset className={`${styles.templates} ${styles.aligns}`} data-testid="text-align">
+            <legend className={styles.label}>정렬</legend>
+            {TEXT_ALIGN_OPTIONS.map((o) => (
+              <label key={o.value} className={styles.template} data-selected={project.layout.text_align === o.value}>
+                <input
+                  type="radio"
+                  name="layout-text-align"
+                  checked={project.layout.text_align === o.value}
+                  onChange={() => commit("text_align", o.value)}
+                />
+                {project.layout.text_align === o.value && <span aria-hidden="true">✓ </span>}
+                {o.label}
+              </label>
+            ))}
+          </fieldset>
 
           {SLIDERS.map(([field, unit]) => (
             <Slider

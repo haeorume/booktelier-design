@@ -39,4 +39,6 @@ class Layout(BaseModel):
     line_height: float | None = Field(default=None, gt=0)
     font_family: str | None = None  # FR-45, 라이선스를 확인한 웹 글꼴
     font_size: float | None = Field(default=None, gt=0)  # pt
+    # 본문 문단 정렬(FR-16 ⑥, D-41, 11.22 사용자 의견). 장 제목·머리말은 그대로예요. 비어 있으면 왼쪽.
+    text_align: Literal["left", "center", "right", "justify"] | None = None
     running: Running | None = None

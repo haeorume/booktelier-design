@@ -1,7 +1,7 @@
 // 서버 구현(F5). 계약은 web/src/types/api.ts. 보내기 전 AI 제안은 주인 것만 온다(D-29).
 // 적용·실행 취소·수락은 서버가 원고를 바꾸고 새 버전을 준다(D-30). 그사이 원고가 바뀌었으면 VersionConflictError.
 import type { components } from "@/types/api";
-import type { AiSuggestion, Anchor, Comment, SuggestedEdit, Uuid } from "@/types";
+import type { AiSuggestion, Anchor, Comment, StyleRule, SuggestedEdit, Uuid } from "@/types";
 import { ApiError, type HttpClient } from "./http";
 import { rethrowConflict } from "./http-library";
 import type { Ctx, ReviewStore } from "./review-store";
@@ -63,6 +63,10 @@ function toComments(list: S["Comment"][]): Comment[] {
       resolved_at: c.resolved_at ?? null,
     };
   });
+}
+
+function toStyleRule(r: S["StyleRule"]): StyleRule {
+  return { id: r.id, project_id: r.project_id, type: r.type, text: r.text, created_by: r.created_by, created_at: r.created_at };
 }
 
 export function createHttpReview(http: HttpClient, tokenFor: (projectId: Uuid) => string | null): ReviewStore {
@@ -156,6 +160,12 @@ export function createHttpReview(http: HttpClient, tokenFor: (projectId: Uuid) =
     },
     async markSeen(ctx, target) {
       await call(ctx, "POST", "/views", { target_type: target.type, target_id: target.id });
+    },
+    async listStyleRules(ctx) {
+      return (await call<S["StyleRule"][]>(ctx, "GET", `/projects/${ctx.projectId}/style-rules`)).map(toStyleRule);
+    },
+    async addStyleRule(ctx, input) {
+      return toStyleRule(await call<S["StyleRule"]>(ctx, "POST", `/projects/${ctx.projectId}/style-rules`, input));
     },
     async saveAnchors() {
       // 서버는 읽을 때 자리를 다시 찾아 저장한다(A-22, NFR-05).
