@@ -1,0 +1,18 @@
+/* 테마 전환 버튼: 아이콘 버튼(DESIGN.md 5장, 32×32, aria-label 필수) */
+.toggle {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  color: var(--bt-text);
+  font-size: var(--bt-size-md);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--bt-soft);
+}

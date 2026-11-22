@@ -28,7 +28,7 @@ export * from "./live";
 export { createEventShipper, groupForShipping, type EventShipper } from "./event-shipper";
 export { ApiError, NETWORK } from "./http";
 export { createClientIdentityStore, createLocalStorageRepository } from "./local-storage-repository";
-export { createClientSession, type ClientSession } from "./session";
+export { createClientSession, type ClientSession, type ThemeChoice } from "./session";
 export { MemoryStorage, type KeyValueStorage } from "./storage";
 export { clearInviteToken, readInviteToken, stashInviteToken } from "./tokens";
 

@@ -111,7 +111,27 @@
   font-size: var(--bt-size-xs);
 }
 
-/* ── Paged.js가 그린 쪽(펼침면) ── */
+/* ── Paged.js가 그린 쪽(펼침면) ──
+   책 모양을 확인하는 화면이라 다크 테마에서도 늘 밝은 종이와 짙은 글자예요(11.22 결정, tokens-dark.css --bt-print-*). */
+.stage {
+  --bt-paper: var(--bt-print-paper);
+  --bt-ink: var(--bt-print-ink);
+  --bt-text-3: var(--bt-print-text-3);
+  --bt-accent-text: var(--bt-print-accent-text);
+  --bt-brand: var(--bt-print-brand);
+  --bt-line: var(--bt-print-line);
+  --bt-line-control: var(--bt-print-line-control);
+  --bt-soft: var(--bt-print-soft);
+  --bt-kind-spelling: var(--bt-print-kind-spelling);
+  --bt-kind-spacing: var(--bt-print-kind-spacing);
+  --bt-kind-notation: var(--bt-print-kind-notation);
+  --bt-kind-polish: var(--bt-print-kind-polish);
+  --bt-kind-polish-wash: var(--bt-print-kind-polish-wash);
+  --bt-edit: var(--bt-print-edit);
+  --bt-comment: var(--bt-print-comment);
+  --bt-comment-wash: var(--bt-print-comment-wash);
+}
+
 .stage :global(.pagedjs_pages) {
   display: flex;
   justify-content: center;

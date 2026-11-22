@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChapterList } from "@/components/ChapterList";
-import { useSessionVersion } from "@/components/hooks";
+import { usePanelLayout, useSessionVersion } from "@/components/hooks";
 import { MessageView, NOT_FOUND } from "@/components/MessageView";
 import { ShareDialog } from "@/components/ShareDialog";
 import { TopBar } from "@/components/TopBar";
@@ -38,6 +38,9 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const [view, setView] = useState<{ key: string; value: View }>({ key: "", value: { kind: "loading" } });
   const [sharing, setSharing] = useState(false);
   const [layoutOpen, setLayoutOpen] = useState(false);
+  /** 오른쪽 검토 패널 접기(DESIGN.md 3장). 접으면 지면이 넓어져요. */
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const panelLayout = usePanelLayout();
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
   const key = `${projectId}/${chapterId}/${version}`;
 
@@ -200,6 +203,12 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
         chapterSlotRef={setChapterSlot}
         saveSlotRef={setSaveSlot}
         previewHref={`/p/${project.id}/c/${chapter.id}/preview?from=top_bar`}
+        panelCollapsed={panelCollapsed}
+        onTogglePanel={() => {
+          // 펼 때 '하나씩' 배치(D-10)면 조판 설정을 닫아야 검토 패널이 보여요(지면 표시를 누를 때와 같아요, Codex 검수 11.22).
+          if (panelCollapsed && panelLayout === "single") setLayoutOpen(false);
+          setPanelCollapsed((v) => !v);
+        }}
         layoutOpen={layoutOpen}
         onShare={() => setSharing(true)}
         onSnapshots={() => setSnapshotsOpen(true)}
@@ -222,6 +231,8 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
           slots={{ chapter: chapterSlot, save: saveSlot }}
           layoutOpen={layoutOpen}
           onLayoutOpenChange={setLayoutOpen}
+          panelCollapsed={panelCollapsed}
+          onPanelReveal={() => setPanelCollapsed(false)}
           snapshotsOpen={snapshotsOpen}
           onSnapshotsClose={() => setSnapshotsOpen(false)}
           onConflict={onConflict}

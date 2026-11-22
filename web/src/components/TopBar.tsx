@@ -6,6 +6,7 @@ import { ROLE_LABEL } from "@/domain/labels";
 import type { PresentPerson } from "@/data";
 import type { Participant, Role } from "@/types";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./Theme";
 import { Participants } from "./Participants";
 import styles from "./TopBar.module.css";
 
@@ -24,6 +25,9 @@ interface Props {
   saveSlotRef: (el: HTMLElement | null) => void;
   /** 미리보기 주소(WS-15, PV-01). 새 탭으로도 열 수 있게 링크로 둬요. */
   previewHref: string;
+  /** 오른쪽 검토 패널을 접었는지(DESIGN.md 3장 '오른쪽 패널 접기') */
+  panelCollapsed: boolean;
+  onTogglePanel: () => void;
   layoutOpen: boolean;
   onShare: () => void;
   onSnapshots: () => void;
@@ -35,12 +39,19 @@ interface Props {
  * 검토본(목록은 모두)과 조판 설정(작가는 값만 봄)은 세 역할 모두에게 보인다. 초대(L-07)는 편집자만.
  */
 export function TopBar(props: Props) {
-  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, previewHref, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
+  const { role, bookTitle, chapterTitle, participants, currentId, present, chapterTitles, onJump, chapterSlotRef, saveSlotRef, previewHref, panelCollapsed, onTogglePanel, layoutOpen, onShare, onSnapshots, onToggleLayout } = props;
   return (
     <header className={styles.bar}>
-      <span className={styles.logo}>
-        <Logo />
-      </span>
+      {/* 로고를 누르면 편집자 홈으로(11.22). 편집자 홈은 편집자만 있어서(D-15) 다른 역할에는 링크가 아니에요. */}
+      {can(role, "open_editor_home") ? (
+        <Link className={styles.logo} href="/home" aria-label="BOOKTELIER 홈으로" data-testid="logo-home">
+          <Logo />
+        </Link>
+      ) : (
+        <span className={styles.logo}>
+          <Logo />
+        </span>
+      )}
       <nav className={styles.path} aria-label="경로">
         {can(role, "open_editor_home") && (
           <>
@@ -75,6 +86,17 @@ export function TopBar(props: Props) {
             초대
           </button>
         )}
+        <ThemeToggle />
+        {/* 검토 패널을 접으면 지면이 넓어져요. 접어도 보던 탭과 거르기는 남아요. */}
+        <button
+          type="button"
+          className={styles.button}
+          aria-pressed={panelCollapsed}
+          data-testid="panel-toggle"
+          onClick={onTogglePanel}
+        >
+          {panelCollapsed ? "검토 패널 펴기" : "검토 패널 접기"}
+        </button>
       </div>
     </header>
   );
