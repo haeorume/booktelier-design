@@ -347,6 +347,8 @@ PERMISSION_TABLE: list[tuple[str, str, str, dict[str, Any] | None, set[str]]] = 
         {"editor", "author", "designer"},
     ),
     ("A-31", "GET", "/projects/{p}/changes", None, {"editor", "author", "designer"}),
+    # 11.22 사용자 의견: 책 제목 고치기는 편집자만(FR-55, D-42)
+    ("A-36", "PATCH", "/projects/{p}", {"title": "새 제목"}, {"editor"}),
 ]
 
 
@@ -493,3 +495,19 @@ def test_todo_count_counts_unseen_comments_and_review_only(
     chapter.status = "review_requested"
     db.flush()
     assert todo() == 2
+
+
+def test_rename_project_trims_and_rejects_blank(db_client: TestClient) -> None:
+    """A-36 책 제목 고치기(FR-55): 앞뒤 빈칸을 지우고, 비어 있으면 막아요. 다른 참여자도 새 제목을 봐요."""
+    b = _make_book(db_client, sample=True)
+    res = db_client.patch(
+        f"/projects/{b.project_id}", json={"title": "  새 제목  "}, headers=_auth(b.editor)
+    )
+    assert res.status_code == 200
+    assert res.json()["title"] == "새 제목"
+    seen = db_client.get(f"/projects/{b.project_id}", headers=_auth(b.author)).json()
+    assert seen["project"]["title"] == "새 제목"
+    blank = db_client.patch(
+        f"/projects/{b.project_id}", json={"title": "   "}, headers=_auth(b.editor)
+    )
+    assert blank.status_code == 422

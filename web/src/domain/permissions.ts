@@ -27,6 +27,7 @@ export const PERMISSIONS = {
   view_ai_suggestions: AUTHOR_EDITOR,
   dismiss_ai_suggestion: AUTHOR_EDITOR,
   keep_ai_suggestion: AUTHOR_EDITOR,
+  rename_project: EDITOR, // A-36, FR-55(11.22 추가), D-42
   // 조판 설정은 편집자·디자이너, 작가는 값만 글자로 봄(FR-16 ③, D-15)
   change_layout: EDITOR_DESIGNER,
   // 세 역할 모두

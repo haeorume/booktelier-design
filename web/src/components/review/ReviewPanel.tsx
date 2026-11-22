@@ -8,7 +8,7 @@ import type { AiSuggestion, AiSuggestionKind, Role } from "@/types";
 import { AiSuggestionCard } from "./AiSuggestionCard";
 import styles from "./ReviewPanel.module.css";
 
-type Tab = "ai" | "shared";
+type Tab = "ai" | "shared" | "rules";
 
 export interface ReviewPanelHandle {
   /** 밑줄을 눌렀을 때: AI 제안 탭을 열고, 그 카드를 가리는 거르기를 풀어 카드가 보이게 한다(N-07). */
@@ -35,6 +35,11 @@ interface Props {
   /** 함께 봄 탭 내용과 처리하지 않은 개수 */
   shared: ReactNode;
   sharedCount: number;
+  /** 표기 원칙 탭 내용과 원칙 수(WS-51) */
+  rules: ReactNode;
+  rulesCount: number;
+  /** 표기 원칙 탭을 열 때(목록을 다시 읽어요) */
+  onOpenRules: () => void;
   onRunReview: () => void;
   onRetry: () => void;
   onUndo: () => void;
@@ -54,7 +59,7 @@ export function ReviewPanel({ ref, ...p }: Props) {
   const [tab, setTab] = useState<Tab>(showAi ? "ai" : "shared");
   const [kind, setKind] = useState<AiSuggestionKind | null>(null);
   const list = useRef<HTMLDivElement>(null);
-  const current: Tab = showAi ? tab : "shared";
+  const current: Tab = showAi || tab !== "ai" ? tab : "shared";
 
   const counts = Object.fromEntries(KIND_ORDER.map((k) => [k, p.suggestions.filter((s) => s.kind === k).length])) as Record<AiSuggestionKind, number>;
   const visible = kind ? p.suggestions.filter((s) => s.kind === kind) : p.suggestions;
@@ -111,6 +116,18 @@ export function ReviewPanel({ ref, ...p }: Props) {
         )}
         <button type="button" role="tab" aria-selected={current === "shared"} className={styles.tab} onClick={() => setTab("shared")}>
           함께 봄 <span className={styles.count}>{p.sharedCount}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={current === "rules"}
+          className={styles.tab}
+          onClick={() => {
+            setTab("rules");
+            p.onOpenRules();
+          }}
+        >
+          표기 원칙 <span className={styles.count}>{p.rulesCount}</span>
         </button>
       </div>
 
@@ -187,6 +204,10 @@ export function ReviewPanel({ ref, ...p }: Props) {
               <ul className={styles.cards}>{p.sent.map(card)}</ul>
             </>
           )}
+        </div>
+      ) : current === "rules" ? (
+        <div className={styles.body} role="tabpanel" aria-label="표기 원칙">
+          {p.rules}
         </div>
       ) : (
         <div className={styles.body} role="tabpanel" aria-label="함께 봄" ref={list}>

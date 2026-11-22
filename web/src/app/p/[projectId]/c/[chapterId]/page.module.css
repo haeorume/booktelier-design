@@ -1,9 +1,16 @@
+/* 작업 공간은 화면 높이에 고정하고 지면(desk)과 패널이 각자 스크롤해요. 상단 바가 늘 보여요.
+   flex: 1이면 긴 원고에서 페이지 전체가 늘어나 상단 바가 함께 올라갔어요(11.22, D-40 미리보기에서 발견). */
 .workspace {
-  flex: 1;
+  flex: none;
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: 100vh;
+}
+
+/* 배치에는 끼지 않고 inert만 묶어요(D-40) */
+.workspaceInner {
+  display: contents;
 }
 
 .columns {

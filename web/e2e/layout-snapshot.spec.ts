@@ -66,6 +66,24 @@ test("템플릿을 바꾸면 확인 창 뒤 그 템플릿 기본값으로 돌아
   await expectEvent(page, "layout_changed", { role: "editor", props: { field: "template", before: "essay", after: "practical", reset_to_default: true } });
 });
 
+test("정렬을 가운데로 바꾸면 작업 지면과 미리보기의 본문이 가운데 정렬된다(FR-16 ⑥, D-41)", async ({ page }) => {
+  await enterAsAuthor(page);
+  const para = page.getByTestId("manuscript").locator("p").first();
+  await expect.poll(() => para.evaluate((el) => getComputedStyle(el).textAlign)).toMatch(/left|start/);
+  await switchRole(page, "디자이너", "디자이너 C");
+  await page.getByRole("button", { name: "조판 설정", exact: true }).click();
+  const align = page.getByTestId("text-align");
+  await align.getByText("가운데", { exact: true }).click();
+  await expect(align.getByRole("radio", { name: /가운데/ })).toBeChecked();
+  await expect.poll(() => para.evaluate((el) => getComputedStyle(el).textAlign)).toBe("center");
+  await expectEvent(page, "layout_changed", { role: "designer", props: { field: "text_align", before: "left", after: "center" } });
+
+  await page.getByTestId("preview-link").click();
+  await expect(page.getByTestId("preview-range")).toBeVisible({ timeout: 30_000 });
+  const p0 = page.locator(".bt-p").first();
+  await expect.poll(() => p0.evaluate((el) => getComputedStyle(el).textAlign)).toBe("center");
+});
+
 test("디자이너가 바꾼 뒤 편집자로 열면 마지막에 바꾼 사람과 시각이 보인다(QA-44)", async ({ page }) => {
   await enterAsAuthor(page);
   await switchRole(page, "디자이너", "디자이너 C");

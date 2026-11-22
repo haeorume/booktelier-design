@@ -24,6 +24,7 @@ const EXPECTED: Record<Action, Role[]> = {
   create_comment: ["editor", "author", "designer"],
   view_snapshots: ["editor", "author", "designer"],
   add_chapter: ["author", "editor"], // Q-20, A-13
+  rename_project: ["editor"], // A-36
 };
 
 const ROLES: Role[] = ["editor", "author", "designer"];

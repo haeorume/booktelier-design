@@ -148,8 +148,7 @@ test("미리보기를 열어 둔 채 다른 브라우저에서 원고를 고치�
   const author = await freshPage(browser);
   await join(author, await inviteUrl(editor, "author"), "정작가");
 
-  await editor.getByTestId("preview-link").click();
-  await expect(editor).toHaveURL(/\/preview$/, { timeout: NAVIGATE_MS });
+  await editor.getByTestId("preview-link").click(); // 작업 공간 안에서 열려요(D-40)
   await expect(editor.getByTestId("preview-range")).toBeVisible({ timeout: NAVIGATE_MS });
   // '반영 중'은 잠깐 보였다 사라져서, 보였는지를 기록해 둔다
   await editor.evaluate(() => {

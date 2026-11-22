@@ -7,6 +7,15 @@
   background: var(--bt-soft);
 }
 
+/* 작업 공간 안에서 열 때(D-40): 주소는 그대로이고 지면 위를 덮어요. 닫으면 작업하던 자리가 그대로 있어요. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  min-height: 0;
+  overflow: auto;
+}
+
 .bar {
   display: flex;
   align-items: center;
@@ -17,8 +26,12 @@
   background: var(--bt-surface);
 }
 
-/* 돌아가기(PV-05): 위 왼쪽 */
+/* 돌아가기(PV-05): 위 왼쪽. 작업 공간 안에서는 버튼이라 글꼴·바탕을 링크와 맞춰요. */
 .back {
+  font: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   height: 32px;

@@ -1,6 +1,6 @@
 // AI 제안 카드 동작과 역할별로 보이는 것(W3).
 import { expect, test, type Page } from "@playwright/test";
-import { aiCards, card, enterAsAuthor, events, expectEvent, paragraph, typeAtEnd } from "./helpers";
+import { aiCards, card, enterAsAuthor, events, expectEvent, paragraph, switchRole, typeAtEnd } from "./helpers";
 
 async function liveCheckOnPara02(page: Page) {
   await enterAsAuthor(page);
@@ -81,6 +81,31 @@ test("이 표현 유지를 누르면 카드가 사라지고 유지 표현으로 
   const rules = await page.evaluate(() => JSON.parse(window.localStorage.getItem("booktelier:style_rules") ?? "[]"));
   expect(rules).toEqual([expect.objectContaining({ type: "keep", text: "한참동안" })]);
   await expectEvent(page, "ai_suggestion_kept", { props: { kind: "spacing" } });
+
+  // 유지한 표현은 표기 원칙 탭의 '유지 표현'에서 누가 남겼는지와 함께 보인다(FR-31, WS-51, 11.22 사용자 의견)
+  await page.getByRole("tab", { name: /표기 원칙/ }).click();
+  const tab = page.getByTestId("style-rules");
+  await expect(tab.getByTestId("style-rule-keep")).toHaveCount(1);
+  await expect(tab.getByTestId("style-rule-keep")).toContainText("한참동안");
+  await expect(tab.getByTestId("style-rule-keep")).toContainText("작가 A · 작가");
+});
+
+test("표기 원칙 탭에서 누구나 통일 규칙을 더하고, 다른 역할도 같은 목록을 본다(FR-31, A-28)", async ({ page }) => {
+  await enterAsAuthor(page);
+  await page.getByRole("tab", { name: /표기 원칙/ }).click();
+  const tab = page.getByTestId("style-rules");
+  await expect(tab.getByText("아직 통일 규칙이 없어요.")).toBeVisible();
+  const add = tab.getByRole("button", { name: "더하기" });
+  await expect(add).toBeDisabled();
+  await tab.getByLabel("내용").fill("숫자는 아라비아 숫자로 쓴다");
+  await add.click();
+  await expect(tab.getByTestId("style-rule-rule")).toHaveText(/숫자는 아라비아 숫자로 쓴다/);
+  await expect(tab.getByLabel("내용")).toHaveValue("");
+  await expect(page.getByRole("tab", { name: /표기 원칙/ })).toContainText("1");
+
+  await switchRole(page, "디자이너", "디자이너 C");
+  await page.getByRole("tab", { name: /표기 원칙/ }).click();
+  await expect(page.getByTestId("style-rule-rule")).toHaveText(/숫자는 아라비아 숫자로 쓴다/);
 });
 
 test("카드는 원고 순서로 늘어서고 종류로 거를 수 있다(QA-34)", async ({ page }) => {

@@ -9,6 +9,7 @@ import { ComposeDialog, type ComposeKind } from "@/components/review/ComposeDial
 import { ReviewPanel, type ReviewPanelHandle } from "@/components/review/ReviewPanel";
 import { SendDialog } from "@/components/review/SendDialog";
 import { SharedTab } from "@/components/review/SharedTab";
+import { StyleRulesTab } from "@/components/review/StyleRulesTab";
 import { usePanelLayout } from "@/components/hooks";
 import { LayoutPanel } from "@/components/LayoutPanel";
 import { SnapshotDialog } from "@/components/SnapshotDialog";
@@ -22,6 +23,7 @@ import { NOT_SAVED, useAiSuggestions } from "./useAiSuggestions";
 import { SAVE_LABEL, useManuscriptSave } from "./useManuscriptSave";
 import { useLive } from "./useLive";
 import { useShared } from "./useShared";
+import { useStyleRules } from "./useStyleRules";
 import styles from "./page.module.css";
 
 interface Props {
@@ -103,6 +105,7 @@ export function ChapterWorkspace(props: Props) {
     onHandled,
   });
   const shared = useShared({ deps, ctx, doc, participants, save, onConflict });
+  const styleRules = useStyleRules(deps, ctx);
   const { reconcile, rememberApplied, setNotice, markChanged } = ai;
   const { relocate } = shared;
 
@@ -335,7 +338,10 @@ export function ChapterWorkspace(props: Props) {
           onSelect={setSelected}
           onApply={(s, text, choice) => void ai.apply(s, text, choice)}
           onDismiss={(s) => void ai.dismiss(s)}
-          onKeep={(s) => void ai.keep(s)}
+          onKeep={(s) => void ai.keep(s).then(() => styleRules.reload())}
+          rulesCount={styleRules.rules.length}
+          onOpenRules={() => void styleRules.reload()}
+          rules={<StyleRulesTab rules={styleRules.rules} failed={styleRules.failed} participants={shared.byId} onAdd={styleRules.add} />}
           onSend={setSending}
         />
       </div>

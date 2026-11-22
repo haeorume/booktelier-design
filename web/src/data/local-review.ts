@@ -128,6 +128,8 @@ export function createLocalReview(deps: BookDeps, provider: () => AiProvider): R
       // 1차 읽음 기록은 책마다 하나라 편집자가 연 것만 남긴다(FR-02 ②, 1차와 같음, Codex 검수 11.21).
       if (target.type === "comment" && ctx.viewer.role === "editor") session.markCommentSeen(ctx.projectId, target.id);
     },
+    listStyleRules: (ctx) => repo.listStyleRules(ctx.projectId),
+    addStyleRule: (ctx, input) => repo.createStyleRule({ project_id: ctx.projectId, type: input.type, text: input.text.trim(), created_by: ctx.viewer.participant_id }),
     async saveAnchors(ctx, moved) {
       // 저장하는 동안 다른 처리가 끝날 수 있다. 저장하기 직전에 최신 값을 다시 읽고 자리만 바꾼다(1차와 같음).
       for (const { comment, anchor } of moved.comments) {

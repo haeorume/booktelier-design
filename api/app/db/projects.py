@@ -108,6 +108,15 @@ def update_layout(
     return project
 
 
+def update_title(db: Session, project: Project, title: str) -> Project:
+    """책 제목 고치기(A-36). 편집자 홈의 최근 변경 순서에도 반영되게 updated_at을 올려요."""
+    project.title = title
+    project.updated_at = datetime.now(UTC)
+    db.commit()
+    db.refresh(project)
+    return project
+
+
 @dataclass(frozen=True)
 class CardRow:
     project: Project

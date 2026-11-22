@@ -55,12 +55,31 @@ function removePagedStyles(extra: (HTMLStyleElement | undefined)[]) {
  * 미리보기(PV-01~05, FR-43). 마지막 저장본을 펼침면(왼쪽·오른쪽 두 쪽)으로 그리는 읽기 전용 화면이에요.
  * 새 API 없이 A-10·A-11만 읽고(D-34, A-35) Paged.js로 실제 쪽을 나눠요. 원고나 조판 값이 바뀌면 '반영 중' 뒤 다시 그려요(③).
  */
-export function Preview({ projectId, chapterId }: { projectId: string; chapterId: string }) {
+/** 작업 공간 안에서 열 때(D-40). 주소를 옮기지 않고 지면 위에 덮어 보여 주고, 보던 쪽이 든 펼침면부터 열어요. */
+export interface EmbeddedPreview {
+  /** 작업 지면에서 보던 쪽(1부터) */
+  startPage: number;
+  onClose: () => void;
+}
+
+/** 쪽 번호가 든 펼침면 번호. 1쪽은 0번(오른쪽 혼자), 2·3쪽은 1번 … */
+export function spreadOf(page: number): number {
+  return Math.floor(Math.max(1, page) / 2);
+}
+
+export function Preview({ projectId, chapterId, embedded }: { projectId: string; chapterId: string; embedded?: EmbeddedPreview }) {
   const [view, setView] = useState<View>({ kind: "loading" });
   const [marks, setMarks] = useState<PreviewMark[]>([]);
   const [layers, setLayers] = useState<Set<Layer>>(new Set());
   const [pages, setPages] = useState(0);
-  const [spread, setSpread] = useState(0);
+  const [spread, setSpread] = useState(() => (embedded ? spreadOf(embedded.startPage) : 0));
+  const back = useRef<HTMLButtonElement>(null);
+  // 작업 공간은 함께 작업 때문에 몇 초마다 다시 그려져 embedded 객체가 매번 새로 와요. 효과는 참·거짓에만 기대요.
+  const isEmbedded = Boolean(embedded);
+  const close = useRef(embedded?.onClose);
+  useEffect(() => {
+    close.current = embedded?.onClose;
+  });
   const [rendering, setRendering] = useState(true);
   const stage = useRef<HTMLDivElement>(null);
   const opened = useRef(false);
@@ -107,13 +126,22 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
       if (!opened.current) {
         opened.current = true;
         // 원고 버전은 공통 칸 chapter_version으로 남아요(지면 영향 확인 시간 KPI, F8).
-        track("preview_opened", { from: openedFrom() });
+        track("preview_opened", { from: isEmbedded ? "top_bar" : openedFrom() });
       }
       setRendering(true);
     }
     setView(got.view);
     setMarks(got.marks);
-  }, []);
+  }, [isEmbedded]);
+
+  // 작업 공간 안에서 열었으면 Esc로 닫고, 포커스를 '돌아가기'로 옮겨요(창과 같은 약속, CS-13).
+  useEffect(() => {
+    if (!isEmbedded) return;
+    back.current?.focus();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close.current?.();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isEmbedded, view.kind]);
 
   useEffect(() => {
     let alive = true;
@@ -226,6 +254,25 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
     // 장 버전이 바뀌면(다시 읽은 뒤) 새 기준으로 다시 시작해요.
   }, [projectId, chapterId, ready, version, fetchView, show]);
 
+  // 작업 공간 안에서 열었으면 읽는 중·실패에도 덮개와 '돌아가기'를 보여요. 아래 작업 공간은 inert라
+  // 여기서 닫을 수단이 없으면 갇혀요(Codex 검수 11.22).
+  if (embedded && view.kind !== "ready") {
+    const failed = view.kind !== "loading";
+    return (
+      <div className={`${styles.preview} ${styles.overlay}`} role="dialog" aria-modal="true" aria-label="미리보기" data-testid="preview">
+        <header className={styles.bar}>
+          <button ref={back} type="button" className={styles.back} onClick={embedded.onClose}>
+            <span aria-hidden="true">← </span>돌아가기
+          </button>
+        </header>
+        <main className={styles.desk}>
+          <p className={styles.reflowing} role="status" data-testid="preview-status">
+            {failed ? "미리보기를 열지 못했어요. 돌아가서 다시 열어 주세요." : "미리보기를 불러오는 중이에요"}
+          </p>
+        </main>
+      </div>
+    );
+  }
   if (view.kind === "loading") return null;
   if (view.kind === "not_found") return <MessageView {...NOT_FOUND} />;
   if (view.kind === "no_role") return <MessageView title="받은 링크로 다시 들어와 주세요" body="이 브라우저에는 이 책의 역할이 없어요." />;
@@ -242,11 +289,21 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
     });
 
   return (
-    <div className={styles.preview}>
+    <div
+      className={embedded ? `${styles.preview} ${styles.overlay}` : styles.preview}
+      {...(embedded ? { role: "dialog", "aria-modal": true, "aria-label": "미리보기" } : {})}
+      data-testid="preview"
+    >
       <header className={styles.bar}>
-        <Link className={styles.back} href={`/p/${project.id}/c/${chapter.id}`}>
-          <span aria-hidden="true">← </span>돌아가기
-        </Link>
+        {embedded ? (
+          <button ref={back} type="button" className={styles.back} onClick={embedded.onClose}>
+            <span aria-hidden="true">← </span>돌아가기
+          </button>
+        ) : (
+          <Link className={styles.back} href={`/p/${project.id}/c/${chapter.id}`}>
+            <span aria-hidden="true">← </span>돌아가기
+          </Link>
+        )}
         {can(view.me.role, "open_editor_home") ? (
           <Link href="/home" aria-label="BOOKTELIER 홈으로" data-testid="preview-logo-home">
             <Logo />

@@ -48,6 +48,21 @@ describe("조판 값 바꾸기(FR-16, FR-45)", () => {
   });
 });
 
+describe("본문 정렬(FR-16 ⑥, D-41)", () => {
+  it("기본은 왼쪽이고, 바꾸면 그 칸만 보내며 넷 밖의 값은 받지 않는다", () => {
+    const current = { template_id: "essay" as const, layout: TEMPLATES.essay.layout };
+    expect(current.layout.text_align).toBe("left");
+    const c = changeValue(current, "text_align", "justify");
+    expect(c.layout.text_align).toBe("justify");
+    expect(c.patch).toEqual({ text_align: "justify" });
+    expect(changeValue(current, "text_align", "middle").layout.text_align).toBe("left");
+  });
+  it("정렬이 없던 옛 책은 왼쪽으로 채운다", () => {
+    expect(fillLayout("novel", { font_size: 11 }).text_align).toBe("left");
+    expect(fillLayout("novel", { text_align: "center" }).text_align).toBe("center");
+  });
+});
+
 describe("fillLayout", () => {
   it("빈 칸은 템플릿 기본값으로 채운다", () => {
     expect(fillLayout("novel", {})).toEqual(TEMPLATES.novel.layout);

@@ -215,6 +215,11 @@ export function createHttpLibrary(deps: HttpLibraryDeps): Library {
       return toChapter(res);
     },
 
+    async renameProject(projectId, title) {
+      const res = await http.request<S["Project"]>("PATCH", `/projects/${projectId}`, { token: need(projectId), body: { title } });
+      return toProject(res);
+    },
+
     async updateLayout(projectId, change: LayoutChange) {
       const body = change.reset_to_default ? { template_id: change.template_id } : { layout: change.patch };
       await http.request<S["LayoutOut"]>("PATCH", `/projects/${projectId}/layout`, { token: need(projectId), body });

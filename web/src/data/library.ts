@@ -68,6 +68,8 @@ export interface Library {
   saveChapterDoc(projectId: Uuid, chapterId: Uuid, doc: ChapterDoc, baseVersion: number): Promise<{ version: number; updated_at: string }>;
   changeChapterStatus(projectId: Uuid, chapterId: Uuid, to: ChapterStatus): Promise<ChapterInfo>;
   addChapter(projectId: Uuid, title: string): Promise<Chapter>;
+  /** 책 제목 고치기(A-36, FR-55). 편집자만. 앞뒤 빈칸은 지워요. */
+  renameProject(projectId: Uuid, title: string): Promise<Project>;
   updateLayout(projectId: Uuid, change: LayoutChange, by: Participant): Promise<Project>;
 
   listRoleLinks(projectId: Uuid): Promise<RoleLink[]>;

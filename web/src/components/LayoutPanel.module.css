@@ -77,6 +77,11 @@
   gap: 0.4rem;
 }
 
+/* 정렬은 넷이라 한 줄에 넷(D-41) */
+.aligns {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .templates legend {
   margin-bottom: 0.35rem;
 }

@@ -13,6 +13,7 @@ import { can } from "@/domain/permissions";
 import { setTrackContext, track } from "@/events";
 import type { Chapter, Participant, Project, Role, RoleLink } from "@/types";
 import { ChapterWorkspace } from "./ChapterWorkspace";
+import { Preview } from "./preview/Preview";
 import styles from "./page.module.css";
 
 interface Ready {
@@ -40,6 +41,8 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const [layoutOpen, setLayoutOpen] = useState(false);
   /** 오른쪽 검토 패널 접기(DESIGN.md 3장). 접으면 지면이 넓어져요. */
   const [panelCollapsed, setPanelCollapsed] = useState(false);
+  /** 작업 공간 안 미리보기(D-40). 열었으면 보던 쪽 번호. */
+  const [previewAt, setPreviewAt] = useState<number | null>(null);
   const panelLayout = usePanelLayout();
   const [snapshotsOpen, setSnapshotsOpen] = useState(false);
   const key = `${projectId}/${chapterId}/${version}`;
@@ -125,6 +128,18 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
     setView((v) => (v.value.kind === "ready" && v.value.project.id === next.id ? { ...v, value: { ...v.value, project: next } } : v));
   }, []);
 
+  /**
+   * 책 제목만 바꾼다(A-36). 저장을 기다리는 사이 다른 곳의 조판 변경이 들어왔을 수 있어
+   * 그때의 최신 책에 제목과 저장 시각만 얹는다(Codex 검수 11.22).
+   */
+  const onTitleSaved = useCallback((saved: Project) => {
+    setView((v) =>
+      v.value.kind === "ready" && v.value.project.id === saved.id
+        ? { ...v, value: { ...v.value, project: { ...v.value.project, title: saved.title, updated_at: saved.updated_at } } }
+        : v,
+    );
+  }, []);
+
   /** 다른 곳에서 장이 더해지거나 상태가 바뀌었다(A-31). 원고·버전은 편집기가 따로 받는다(useLive). */
   const onChapters = useCallback((changed: ChapterInfo[]) => {
     setView((v) => {
@@ -191,74 +206,98 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const { project, chapter, chapters, me, participants, links, loadId } = current;
   return (
     <div className={styles.workspace}>
-      <TopBar
-        role={me.role}
-        bookTitle={project.title}
-        chapterTitle={chapter.title}
-        participants={participants}
-        currentId={me.id}
-        present={present}
-        chapterTitles={chapterTitles}
-        onJump={onJump}
-        chapterSlotRef={setChapterSlot}
-        saveSlotRef={setSaveSlot}
-        previewHref={`/p/${project.id}/c/${chapter.id}/preview?from=top_bar`}
-        panelCollapsed={panelCollapsed}
-        onTogglePanel={() => {
-          // 펼 때 '하나씩' 배치(D-10)면 조판 설정을 닫아야 검토 패널이 보여요(지면 표시를 누를 때와 같아요, Codex 검수 11.22).
-          if (panelCollapsed && panelLayout === "single") setLayoutOpen(false);
-          setPanelCollapsed((v) => !v);
-        }}
-        layoutOpen={layoutOpen}
-        onShare={() => setSharing(true)}
-        onSnapshots={() => setSnapshotsOpen(true)}
-        onToggleLayout={() => setLayoutOpen((o) => !o)}
-      />
-      <div className={styles.columns}>
-        <ChapterList projectId={project.id} chapters={chapters} currentId={chapter.id} onAdd={can(me.role, "add_chapter") ? addChapter : undefined} />
-        {/* 역할이나 장이 바뀌면 편집 상태를 새로 시작한다. */}
-        <ChapterWorkspace
-          key={`${chapter.id}/${me.id}/${loadId}`}
-          project={project}
-          chapter={chapter}
-          me={me}
+      {/* 미리보기를 덮어 연 동안 아래 작업 공간은 누르거나 Tab으로 갈 수 없어요(inert, D-40). */}
+      <div className={styles.workspaceInner} inert={previewAt !== null}>
+        <TopBar
+          role={me.role}
+          bookTitle={project.title}
+          onRename={async (title) => {
+            onTitleSaved(await bookDeps().library.renameProject(project.id, title));
+          }}
+          chapterTitle={chapter.title}
           participants={participants}
-          onChapterChange={onChapterChange}
-          onProjectChange={onProjectChange}
-          onChapters={onChapters}
-          onPresence={onPresence}
-          jump={jump}
-          slots={{ chapter: chapterSlot, save: saveSlot }}
-          layoutOpen={layoutOpen}
-          onLayoutOpenChange={setLayoutOpen}
+          currentId={me.id}
+          present={present}
+          chapterTitles={chapterTitles}
+          onJump={onJump}
+          chapterSlotRef={setChapterSlot}
+          saveSlotRef={setSaveSlot}
+          previewHref={`/p/${project.id}/c/${chapter.id}/preview?from=top_bar`}
+          onPreview={() => setPreviewAt(visiblePage())}
           panelCollapsed={panelCollapsed}
-          onPanelReveal={() => setPanelCollapsed(false)}
-          snapshotsOpen={snapshotsOpen}
-          onSnapshotsClose={() => setSnapshotsOpen(false)}
-          onConflict={onConflict}
+          onTogglePanel={() => {
+            // 펼 때 '하나씩' 배치(D-10)면 조판 설정을 닫아야 검토 패널이 보여요(지면 표시를 누를 때와 같아요, Codex 검수 11.22).
+            if (panelCollapsed && panelLayout === "single") setLayoutOpen(false);
+            setPanelCollapsed((v) => !v);
+          }}
+          layoutOpen={layoutOpen}
+          onShare={() => setSharing(true)}
+          onSnapshots={() => setSnapshotsOpen(true)}
+          onToggleLayout={() => setLayoutOpen((o) => !o)}
         />
+        <div className={styles.columns}>
+          <ChapterList projectId={project.id} chapters={chapters} currentId={chapter.id} onAdd={can(me.role, "add_chapter") ? addChapter : undefined} />
+          {/* 역할이나 장이 바뀌면 편집 상태를 새로 시작한다. */}
+          <ChapterWorkspace
+            key={`${chapter.id}/${me.id}/${loadId}`}
+            project={project}
+            chapter={chapter}
+            me={me}
+            participants={participants}
+            onChapterChange={onChapterChange}
+            onProjectChange={onProjectChange}
+            onChapters={onChapters}
+            onPresence={onPresence}
+            jump={jump}
+            slots={{ chapter: chapterSlot, save: saveSlot }}
+            layoutOpen={layoutOpen}
+            onLayoutOpenChange={setLayoutOpen}
+            panelCollapsed={panelCollapsed}
+            onPanelReveal={() => setPanelCollapsed(false)}
+            snapshotsOpen={snapshotsOpen}
+            onSnapshotsClose={() => setSnapshotsOpen(false)}
+            onConflict={onConflict}
+          />
+        </div>
+        {sharing && me.role === "editor" && (
+          <ShareDialog
+            links={links}
+            onCreate={async (role: Role) => {
+              await bookDeps().library.createRoleLink(project.id, role);
+              track("invite_link_created", { role });
+              await reloadLinks();
+            }}
+            onRotate={async (link: RoleLink) => {
+              await bookDeps().library.rotateRoleLink(link);
+              track("invite_link_rotated", { role: link.role });
+              await reloadLinks();
+            }}
+            onRevoke={async (link: RoleLink) => {
+              await bookDeps().library.revokeRoleLink(link);
+              track("invite_link_revoked", { role: link.role });
+              await reloadLinks();
+            }}
+            onClose={closeShare}
+          />
+        )}
       </div>
-      {sharing && me.role === "editor" && (
-        <ShareDialog
-          links={links}
-          onCreate={async (role: Role) => {
-            await bookDeps().library.createRoleLink(project.id, role);
-            track("invite_link_created", { role });
-            await reloadLinks();
-          }}
-          onRotate={async (link: RoleLink) => {
-            await bookDeps().library.rotateRoleLink(link);
-            track("invite_link_rotated", { role: link.role });
-            await reloadLinks();
-          }}
-          onRevoke={async (link: RoleLink) => {
-            await bookDeps().library.revokeRoleLink(link);
-            track("invite_link_revoked", { role: link.role });
-            await reloadLinks();
-          }}
-          onClose={closeShare}
-        />
+      {previewAt !== null && (
+        <Preview projectId={project.id} chapterId={chapter.id} embedded={{ startPage: previewAt, onClose: () => setPreviewAt(null) }} />
       )}
     </div>
   );
+}
+
+/**
+ * 작업 지면에서 지금 보고 있는 쪽(1부터). 화면 가운데 높이보다 위에 있는 쪽 경계 수 + 1이에요.
+ * 쪽 경계는 PageGuides가 그린 선이라 DOM에서 읽어요(D-40).
+ */
+function visiblePage(): number {
+  const middle = window.innerHeight / 2;
+  const lines = document.querySelectorAll<HTMLElement>("[data-testid='page-boundary']");
+  let page = 1;
+  lines.forEach((line) => {
+    if (line.getBoundingClientRect().top < middle) page += 1;
+  });
+  return page;
 }
