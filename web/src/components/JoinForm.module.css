@@ -1,0 +1,179 @@
+/* 링크로 들어오기 카드 가운데(시안 .bf-invited-book · .bf-join-explain · .bf-join-permissions · #bf-join-form) */
+.join {
+  width: 100%;
+  text-align: center;
+  color: var(--bt-ink);
+}
+
+/* 초대한 책 상자 */
+.invited {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 15px;
+  border: 1px solid var(--bt-well-line);
+  border-radius: 6px;
+  background: var(--bt-well);
+}
+
+.invitedLabel {
+  font-size: var(--bt-size-2xs);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.book {
+  font-size: var(--bt-size-lg);
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.6;
+  color: var(--bt-ink);
+  word-break: keep-all;
+}
+
+/* 역할 표시(시안 .bf-role-badge) */
+.badge {
+  margin-top: 5px;
+  padding: 1px 6px;
+  border: 1px solid var(--bt-badge-editor-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-badge-editor-bg);
+  color: var(--bt-badge-editor-text);
+  font-size: var(--bt-size-2xs);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.join[data-role="author"] .badge {
+  border-color: var(--bt-badge-author-line);
+  background: var(--bt-badge-author-bg);
+  color: var(--bt-badge-author-text);
+}
+
+.join[data-role="designer"] .badge {
+  border-color: var(--bt-badge-designer-line);
+  background: var(--bt-badge-designer-bg);
+  color: var(--bt-badge-designer-text);
+}
+
+.explain {
+  margin: 19px 0;
+  font-size: var(--bt-size-sm);
+  line-height: 1.9;
+  color: var(--bt-text-3);
+}
+
+.explain strong {
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-ink);
+}
+
+.permissions {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 10px;
+  padding: 0 var(--bt-space-3);
+  list-style: none;
+  text-align: left;
+}
+
+.permissions li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.7;
+  color: var(--bt-text-3);
+}
+
+.permissions svg {
+  color: var(--bt-note-icon);
+}
+
+.form {
+  margin-top: var(--bt-space-6);
+  text-align: left;
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--bt-space-2);
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--bt-space-3);
+  border: 1px solid var(--bt-input-line);
+  border-radius: 6px;
+  background: var(--bt-input-bg);
+  color: var(--bt-input-text);
+  font-size: var(--bt-size-base);
+}
+
+.input::placeholder {
+  color: var(--bt-quiet);
+}
+
+.input:hover {
+  border-color: var(--bt-line-hover);
+}
+
+.actions {
+  display: flex;
+  gap: var(--bt-space-2);
+  margin-top: 14px;
+}
+
+/* 들어가기(시안 .bf-join form>.bf-button: 폭 가득, 높이 44) */
+.primary,
+.secondary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bt-space-2);
+  height: 44px;
+  padding: 0 var(--bt-space-4);
+  border-radius: 6px;
+  font-size: var(--bt-size-lg);
+  white-space: nowrap;
+  transition: background var(--bt-duration) var(--bt-ease), border-color var(--bt-duration) var(--bt-ease);
+}
+
+.primary {
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
+  box-shadow: var(--bt-shadow-action);
+}
+
+.primary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--bt-action-hover);
+  border-color: var(--bt-action-hover);
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.secondary {
+  flex: none;
+  border: 1px solid var(--bt-line-strong);
+  background: var(--bt-surface);
+  color: var(--bt-button-text);
+}
+
+.secondary:hover {
+  background: var(--bt-hover);
+  color: var(--bt-ink);
+}

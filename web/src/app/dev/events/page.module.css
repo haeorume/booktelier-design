@@ -1,0 +1,56 @@
+.main {
+  width: min(100%, 56rem);
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.note {
+  color: var(--bt-text-2);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--bt-line-strong);
+  text-align: left;
+}
+
+.table th {
+  font-weight: 600;
+  background: var(--bt-panel);
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.role {
+  color: var(--bt-text-2);
+  font-size: 0.85rem;
+}
+
+.subtitle {
+  font-size: var(--bt-size-lg);
+  font-weight: var(--bt-weight-bold);
+  margin-top: var(--bt-space-4);
+}

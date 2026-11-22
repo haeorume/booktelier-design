@@ -1,0 +1,22 @@
+/* 시안 .icon: 17px, 선 1.65, 둥근 끝. 작은 것(.icon.tiny) 12px. */
+.icon {
+  display: block;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon[data-size="sm"] {
+  width: 14px;
+  height: 14px;
+}
+
+.icon[data-size="xs"] {
+  width: 12px;
+  height: 12px;
+}

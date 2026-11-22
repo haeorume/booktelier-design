@@ -1,0 +1,97 @@
+/* 안내 화면(시안 '초대장을 열 수 없어요' .bf-join-card) */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 44px var(--bt-space-5);
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  padding: 35px 42px 30px;
+  border: 1px solid var(--bt-line);
+  border-radius: 10px;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-join);
+  text-align: center;
+  color: var(--bt-ink);
+}
+
+/* 시안 .bf-join-icon: 47px, 모서리 13 */
+.icon {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 47px;
+  margin: 0 auto 22px;
+  border: 1px solid var(--bt-map-avatar-line);
+  border-radius: 13px;
+  background: var(--bt-map-avatar-bg);
+  color: var(--bt-map-avatar-text);
+}
+
+.icon svg {
+  width: 23px;
+  height: 23px;
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: var(--bt-space-3);
+  font-size: var(--bt-size-3xs);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+  color: var(--bt-accent-text);
+}
+
+.title {
+  margin-bottom: 23px;
+  font-size: 27px;
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.55;
+  letter-spacing: -0.035em;
+  color: var(--bt-ink);
+  word-break: keep-all;
+}
+
+.body {
+  margin: 19px 0;
+  font-size: var(--bt-size-sm);
+  line-height: 1.9;
+  color: var(--bt-text-3);
+  word-break: keep-all;
+}
+
+/* 처음으로(시안 .bf-button) */
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 var(--bt-space-4);
+  border: 1px solid var(--bt-line-strong);
+  border-radius: 6px;
+  background: var(--bt-surface);
+  color: var(--bt-button-text);
+  font-size: var(--bt-size-base);
+}
+
+.link:hover {
+  background: var(--bt-hover);
+  color: var(--bt-ink);
+}
+
+.note {
+  margin-top: 22px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.8;
+  color: var(--bt-quiet-2);
+}

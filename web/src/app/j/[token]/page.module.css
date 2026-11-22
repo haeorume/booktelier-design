@@ -1,0 +1,88 @@
+/* 링크로 들어오기(시안 11.22 '#join', .bf-join · .bf-join-card) */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 44px var(--bt-space-5);
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  padding: 35px 42px 30px;
+  border: 1px solid var(--bt-line);
+  border-radius: 10px;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-join);
+  text-align: center;
+  color: var(--bt-ink);
+}
+
+/* 역할 동그라미(시안 .bf-invitation-seal) */
+.seal {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 21px;
+  border: 1px solid var(--bt-seal-author-line);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-seal-author-bg);
+  color: var(--bt-seal-author-text);
+  font-size: 19px;
+  font-weight: 550;
+  box-shadow: 0 0 0 7px var(--bt-seal-author-ring);
+}
+
+.card[data-role="designer"] .seal {
+  border-color: var(--bt-seal-designer-line);
+  background: var(--bt-seal-designer-bg);
+  color: var(--bt-seal-designer-text);
+  box-shadow: 0 0 0 7px var(--bt-seal-designer-ring);
+}
+
+.card[data-role="editor"] .seal {
+  border-color: var(--bt-map-avatar-line);
+  background: var(--bt-map-avatar-bg);
+  color: var(--bt-map-avatar-text);
+  box-shadow: 0 0 0 7px var(--bt-access-bg);
+}
+
+.eyebrow {
+  display: block;
+  margin-bottom: var(--bt-space-3);
+  font-size: var(--bt-size-3xs);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
+  letter-spacing: 0.16em;
+  color: var(--bt-accent-text);
+}
+
+.title {
+  margin-bottom: 23px;
+  font-size: 27px;
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.55;
+  letter-spacing: -0.035em;
+  color: var(--bt-ink);
+}
+
+/* 아래 안내(시안 .bf-local-note) */
+.note {
+  margin-top: 22px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.8;
+  color: var(--bt-quiet-2);
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 28px 20px 24px;
+  }
+}

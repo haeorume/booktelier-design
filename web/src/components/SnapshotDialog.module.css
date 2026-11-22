@@ -1,0 +1,112 @@
+/* 검토본 창(시안 .bf-snapshot-save · .bf-snapshot-list · .bf-snapshot-paper). 창 틀은 Dialog.module.css. */
+.save {
+  margin-bottom: 22px;
+}
+
+.list {
+  list-style: none;
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-3);
+  padding: 15px 0;
+  border: none;
+  border-top: 1px solid var(--bt-line);
+  background: var(--bt-surface);
+  color: var(--bt-text-3);
+  text-align: left;
+}
+
+.item:hover {
+  color: var(--bt-ink);
+}
+
+.item:hover strong {
+  color: var(--bt-accent-text);
+}
+
+.itemText {
+  display: grid;
+  grid-template-columns: 19px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 9px;
+  min-width: 0;
+}
+
+.itemIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.itemText strong {
+  font-size: var(--bt-size-md);
+  font-weight: 550;
+  color: var(--bt-ink);
+}
+
+.itemText small {
+  grid-column: 2;
+  margin-top: var(--bt-space-1);
+  font-size: var(--bt-size-2xs);
+  color: var(--bt-quiet-2);
+}
+
+/* 시안 .bf-simple-empty */
+.empty {
+  padding: 22px 0;
+  border-top: 1px solid var(--bt-line);
+  font-size: var(--bt-size-sm);
+  color: var(--bt-text-3);
+  text-align: center;
+}
+
+/* ── 열어 본 검토본 ── */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--bt-space-4);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-quiet-2);
+}
+
+.badge {
+  padding: 1px 6px;
+  border: 1px solid var(--bt-badge-editor-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-badge-editor-bg);
+  color: var(--bt-badge-editor-text);
+  font-size: var(--bt-size-2xs);
+}
+
+/* 종이는 테마와 상관없이 밝아요(미리보기와 같음, --bt-print-*) */
+.paper {
+  max-height: 52vh;
+  margin-bottom: var(--bt-space-5);
+  padding: 36px 42px;
+  overflow: auto;
+  border: 1px solid var(--bt-snapshot-line);
+  background: var(--bt-print-paper);
+}
+
+.paperLabel {
+  display: block;
+  margin-bottom: 25px;
+  font-size: var(--bt-size-xs);
+  color: var(--bt-snapshot-label);
+}
+
+.paperText {
+  font-family: var(--bt-font-serif);
+  font-size: var(--bt-size-lg);
+  line-height: 2;
+  color: var(--bt-snapshot-text);
+}
+
+.paperText p {
+  text-indent: 1em;
+}

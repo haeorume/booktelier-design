@@ -1,0 +1,158 @@
+/* 의견 남기기·수정 제안하기·보내기 창 안의 양식. 시안 .dialog-field, .br-dialog-original 값이에요. 토큰만 써요(R11). */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-size: var(--bt-size-md);
+  line-height: 1.7;
+}
+
+/* 고른 원문(시안 .br-dialog-original) */
+.quote {
+  padding: 12px 14px;
+  border: 1px solid var(--bt-rp-sep);
+  border-radius: 6px;
+  background: var(--bt-rp-well);
+  color: var(--bt-rp-original);
+  font-size: var(--bt-size-base);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.kind {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-rp-raised);
+  color: var(--bt-rp-reason);
+  font-size: var(--bt-size-xs);
+  font-weight: 650;
+  vertical-align: 1px;
+}
+
+.group {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.legend {
+  width: 100%;
+  margin-bottom: 7px;
+  padding: 0;
+  color: var(--bt-rp-muted);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-regular);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bt-rp-ink);
+  font-size: var(--bt-size-md);
+  cursor: pointer;
+}
+
+.radio input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--bt-brand);
+}
+
+.tag {
+  padding: 0 4px;
+  border: 1px solid var(--bt-rp-badge-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-rp-badge-bg);
+  color: var(--bt-rp-badge-text);
+  font-size: var(--bt-size-3xs);
+}
+
+/* 시안 .dialog-field: 11px 라벨, 7px 사이, 입력 칸 12px */
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--bt-rp-muted);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-regular);
+}
+
+.textarea,
+.input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-rp-list-bg);
+  color: var(--bt-rp-ink);
+  font: var(--bt-weight-regular) var(--bt-size-md) / 1.7 var(--bt-font-ui);
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: var(--bt-rp-faint);
+}
+
+.textarea:focus-visible,
+.input:focus-visible,
+.radio input:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: none;
+  box-shadow: var(--bt-focus);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bt-line);
+}
+
+.primary,
+.secondary {
+  min-height: 32px;
+  padding: 6px 13px;
+  border-radius: var(--bt-radius-md);
+  font: var(--bt-weight-bold) var(--bt-size-md) / 1.45 var(--bt-font-ui);
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
+}
+
+.primary:hover:not(:disabled) {
+  border-color: var(--bt-action-hover);
+  background: var(--bt-action-hover);
+}
+
+.primary:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.secondary {
+  border: 1px solid var(--bt-line-strong);
+  background: var(--bt-surface);
+  color: var(--bt-rp-reason);
+}
+
+.secondary:hover {
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
+}

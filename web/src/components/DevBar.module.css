@@ -1,0 +1,71 @@
+/* 개발용이라는 것이 한눈에 보이도록 줄무늬와 다른 색을 쓴다(FR-41 ④). */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.85rem;
+  color: var(--bt-ink);
+  background: repeating-linear-gradient(135deg, var(--bt-warning-soft), var(--bt-warning-soft) 12px, var(--bt-accent-line) 12px, var(--bt-accent-line) 24px);
+  border-bottom: 1px solid var(--bt-warning);
+}
+
+.tag {
+  font-weight: 700;
+  border: 1px dashed var(--bt-ink);
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.groupLabel {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.option {
+  font: inherit;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--bt-ink);
+  border-radius: 4px;
+  background: var(--bt-warning-soft);
+  color: var(--bt-ink);
+  cursor: pointer;
+}
+
+.option[aria-pressed="true"] {
+  background: var(--bt-ink);
+  color: var(--bt-warning-soft);
+}
+
+.option:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--bt-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.dialog {
+  background: var(--bt-surface);
+  color: var(--bt-text);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: var(--bt-shadow-lg);
+}

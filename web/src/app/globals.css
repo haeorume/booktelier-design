@@ -1,0 +1,67 @@
+/*
+ * 화면·본문 글꼴(DESIGN.md 2장, OFL). next/font는 글꼴 이름을 바꿔 붙여서, tokens.css·조판 값·미리보기(Paged.js)가
+ * 같은 이름("Noto Sans KR", "Noto Serif KR")으로 부를 수 있게 Google Fonts 스타일시트로 불러요.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;600&display=swap");
+/* 디자인 토큰(DESIGN.md 2장). 컴포넌트 CSS는 var(--bt-…)만 써요(불변 규칙 R11). */
+@import "../styles/tokens.css";
+/* 다크 테마(11.22): 같은 이름의 값을 덮어요. 미리보기 종이는 늘 밝아요(--bt-print-*). */
+@import "../styles/tokens-dark.css";
+
+html {
+  height: 100%;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--bt-ink);
+  background: var(--bt-bg);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-base);
+  line-height: var(--bt-leading-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 포커스는 주황 두 겹 띠(DESIGN.md 5장, --bt-focus). 비텍스트 대비 3:1을 넘어요. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--bt-focus);
+}

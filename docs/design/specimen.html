@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>Booktelier 디자인 견본 v0.1</title>
+<style>
+/*
+ * Booktelier 디자인 토큰 (v0.1, 2026.11.20)
+ * 넣을 자리: web/src/styles/tokens.css → web/src/app/globals.css 맨 위에서 @import
+ *
+ * 출처: 오름님 HTML 프로토타입(11.19 판)의 :root 변수와 컴포넌트 값.
+ * 바꾼 것: 글자색·버튼색은 WCAG 2.2 대비(글자 4.5:1, 테두리·아이콘 3:1)를 넘도록 진하게 했어요(UX PR-13).
+ *          오른쪽 숫자는 그 색을 그 배경에 놓았을 때의 대비예요.
+ * 규칙: 컴포넌트 CSS는 색·크기 값을 직접 쓰지 않고 이 변수만 써요(하네스 R11).
+ *       오름님 갱신 가이드가 오면 이 파일 값만 바꿔요. 이름은 바꾸지 않아요.
+ */
+
+:root {
+  /* ── 바탕과 면 ───────────────────────────── */
+  --bt-bg: #f5f7fa;            /* 작업 공간 바탕(책상). 시안 --bg */
+  --bt-surface: #ffffff;       /* 카드, 창, 상단 바 */
+  --bt-panel: #fafbfd;         /* 왼쪽·오른쪽 패널. 시안 --panel */
+  --bt-soft: #eef2f7;          /* 눌림, 선택 안 된 칩, 빈 상태 */
+  --bt-paper: #fffdf7;         /* 지면(종이). 시안 --br-paper */
+  --bt-overlay: rgba(36, 53, 75, 0.32); /* 창 뒤 어둡게 */
+
+  /* ── 선 ──────────────────────────────────── */
+  --bt-line: #e1e7ef;          /* 구분선(장식). 시안 --line */
+  --bt-line-strong: #dfe5ec;   /* 카드 테두리. 시안 --br-border */
+  --bt-line-control: #7d8898;  /* 입력 칸·체크박스 테두리 3.59:1 (시안 #e1e7ef는 1.24:1이라 바꿈) */
+
+  /* ── 글자 ────────────────────────────────── */
+  --bt-ink: #24354b;           /* 제목 12.46:1. 시안 --ink */
+  --bt-text: #27303d;          /* 본문 13.1:1. 시안 --body */
+  --bt-text-2: #5f6b7a;        /* 보조 글자 5.43:1. 시안 --br-secondary */
+  --bt-text-3: #667284;        /* 가장 흐린 글자 4.88:1 (시안 #8591a3·#a5afbd는 3:1 아래라 쓰지 않음) */
+  --bt-text-on-action: #ffffff;
+
+  /* ── 브랜드와 동작 ───────────────────────── */
+  --bt-brand: #ec661f;         /* 로고, 포커스 테두리, 선택 표시 선. 글자에는 쓰지 않음(흰 바탕 3.24:1) */
+  --bt-action: #b94a13;        /* 주요 버튼 바탕, 흰 글자 5.18:1. 시안 --br-action */
+  --bt-action-hover: #9f3f0f;  /* 6.58:1 */
+  --bt-accent-text: #ab4310;   /* 주황 글자(링크, 개수, 눈썹 글자) 5.93:1. 시안 --accent-dark */
+  --bt-accent-soft: #fff0e6;   /* 선택된 카드·편집자 표시 바탕. 시안 --accent-soft */
+  --bt-accent-wash: #fff9f3;   /* 선택된 템플릿 카드 바탕 */
+  --bt-accent-line: #f5c5a7;   /* 선택된 항목 테두리 */
+
+  /* ── 상태 ────────────────────────────────── */
+  --bt-success: #2f7a4d;       /* 저장됨, 통과 5.23:1 */
+  --bt-success-soft: #e9f5ee;
+  --bt-warning: #8a5a00;       /* 연결 끊김, 반영 중 5.83:1 */
+  --bt-warning-soft: #fff7e8;
+  --bt-danger: #a83a2c;        /* 저장 실패, 오류 6.35:1 */
+  --bt-danger-soft: #fdecea;
+
+  /* ── 역할 (배지·아바타. 색만으로 구분하지 않고 글자를 함께 씀) ── */
+  --bt-role-editor-bg: #fff0e6;
+  --bt-role-editor-line: #f5c5a7;
+  --bt-role-editor-text: #ab4310;   /* 5.32:1 */
+  --bt-role-author-bg: #edf4fc;
+  --bt-role-author-line: #cedef0;
+  --bt-role-author-text: #3f6593;   /* 5.42:1 (시안 #5378a9는 4.09:1이라 진하게) */
+  --bt-role-designer-bg: #f2eef9;
+  --bt-role-designer-line: #dfd6ed;
+  --bt-role-designer-text: #6f53a0; /* 5.37:1 (시안 #8065ac는 4.2:1이라 진하게) */
+
+  /* ── AI 제안 종류와 사람의 표시 (밑줄은 색 + 선 모양을 함께, UX CS-11) ── */
+  --bt-kind-spelling: #c8453b;      /* 맞춤법: 물결선 4.72:1 */
+  --bt-kind-spacing: #b45309;       /* 띄어쓰기: 겹선 4.94:1 */
+  --bt-kind-notation: #2563eb;      /* 표기 통일: 굵은 점선 5.08:1 */
+  --bt-kind-polish: #0f766e;        /* 윤문: 엷은 띠 + 아래 3px 선 5.38:1 */
+  --bt-kind-polish-wash: rgba(15, 118, 110, 0.14);
+  --bt-edit: #7c4dcc;               /* 사람이 보낸 수정 제안: 지운 글자 취소선, 더한 글자 파선 5.45:1 */
+  --bt-edit-soft: #f5f0fc;
+  --bt-comment: #a16207;            /* 의견이 달린 자리: 엷은 칠 + 점선 아래선 4.84:1 */
+  --bt-comment-wash: rgba(161, 98, 7, 0.12);
+
+  /* ── 글꼴 ────────────────────────────────── */
+  --bt-font-ui: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  --bt-font-serif: Georgia, "Noto Serif KR", "Batang", serif;  /* 명조 템플릿 본문 */
+  --bt-font-sans: "Noto Sans KR", "Malgun Gothic", sans-serif;  /* 고딕 템플릿 본문 */
+
+  /* 글자 크기: 화면 글자는 12px 아래로 쓰지 않음(시안의 7~11px를 올림, UX PR-13) */
+  --bt-size-xs: 12px;   /* 눈썹 글자, 메타, 개수 */
+  --bt-size-sm: 13px;   /* 버튼, 칩, 패널 본문 */
+  --bt-size-md: 14px;   /* 기본 화면 글자 */
+  --bt-size-lg: 16px;   /* 패널·창 제목, 카드 제목 */
+  --bt-size-xl: 20px;   /* 화면 부제목 */
+  --bt-size-2xl: 28px;  /* 화면 제목(편집자 홈, 새 책 만들기) */
+  --bt-weight-regular: 400;
+  --bt-weight-medium: 500;
+  --bt-weight-bold: 600;      /* 시안의 650·700은 600으로 맞춤 */
+  --bt-leading-ui: 1.5;
+  --bt-leading-tight: 1.3;
+  --bt-tracking-eyebrow: 0.16em;
+
+  /* ── 간격 (4px 단위) ─────────────────────── */
+  --bt-space-1: 4px;
+  --bt-space-2: 8px;
+  --bt-space-3: 12px;
+  --bt-space-4: 16px;
+  --bt-space-5: 20px;
+  --bt-space-6: 24px;
+  --bt-space-8: 32px;
+  --bt-space-12: 48px;
+
+  /* ── 모서리 ──────────────────────────────── */
+  --bt-radius-sm: 4px;   /* 칩, 배지 */
+  --bt-radius-md: 6px;   /* 버튼, 입력 칸 */
+  --bt-radius-lg: 8px;   /* 카드 */
+  --bt-radius-xl: 12px;  /* 창, 큰 카드 */
+  --bt-radius-full: 999px;
+
+  /* ── 그림자 (시안 값) ────────────────────── */
+  --bt-shadow-sm: 0 2px 4px #1e324510;
+  --bt-shadow-md: 0 4px 12px #20334c14;
+  --bt-shadow-lg: 0 14px 42px #27303d1a, 0 3px 12px #27303d0c;   /* 창, 팝오버 */
+  --bt-shadow-paper: 0 2px 7px #263a5410, 0 0 0 1px #e8ecf2;     /* 지면 */
+
+  /* ── 배치 (1440px 기준, 1280px에서도 겹치지 않게) ── */
+  --bt-topbar-h: 56px;
+  --bt-tabbar-h: 40px;          /* 장 탭 줄 */
+  --bt-nav-w: 224px;            /* 왼쪽 원고 구조. 시안 --nav-width */
+  --bt-review-w: 340px;         /* 오른쪽 검토 패널. 시안 332~374px의 가운데 */
+  --bt-layout-panel-w: 260px;   /* 조판 설정 패널. 시안 --bp-palette-width 236~270px */
+  --bt-desk-gutter: 40px;       /* 지면 둘레 책상 여백 */
+
+  /* ── 포커스와 움직임 ─────────────────────── */
+  --bt-focus: 0 0 0 2px var(--bt-surface), 0 0 0 4px var(--bt-brand); /* 3.24:1, 비텍스트 3:1 넘음 */
+  --bt-duration: 160ms;         /* 시안 520ms 스프링은 줄임 */
+  --bt-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --bt-duration: 0ms;
+  }
+}
+
+/*
+ * 지면(종이책 판형) 값은 여기 두지 않아요.
+ * 판형·여백·제본 여백·행간·글꼴·크기는 책마다 조판 설정에서 오고(FR-10, FR-16, FR-45),
+ * web/src/domain/layout.ts가 mm 값을 CSS 변수(--page-width, --page-margin-inside …)로 바꿔 지면에 넣어요.
+ * 템플릿 3종의 값은 오름님(요구사항 Q-24). 그 전 잠정값은 DESIGN.md 4장.
+ */
+
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--bt-font-ui);font-size:var(--bt-size-md);line-height:var(--bt-leading-ui);color:var(--bt-text);background:var(--bt-bg)}
+.top{height:var(--bt-topbar-h);display:flex;align-items:center;gap:var(--bt-space-4);padding:0 var(--bt-space-5);background:var(--bt-surface);border-bottom:1px solid var(--bt-line)}
+.logo{font-weight:var(--bt-weight-bold);letter-spacing:.02em;color:var(--bt-ink);font-size:18px;display:flex;align-items:center;gap:8px}
+.logo i{width:18px;height:18px;border-radius:50%;background:var(--bt-brand);display:inline-block}
+.crumb{color:var(--bt-text-2);font-size:var(--bt-size-sm)} .crumb b{color:var(--bt-ink);font-weight:var(--bt-weight-medium)}
+.sp{flex:1}
+.badge{white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 8px;border-radius:var(--bt-radius-sm);font-size:var(--bt-size-xs);font-weight:var(--bt-weight-medium);border:1px solid}
+.r-editor{background:var(--bt-role-editor-bg);border-color:var(--bt-role-editor-line);color:var(--bt-role-editor-text)}
+.r-author{background:var(--bt-role-author-bg);border-color:var(--bt-role-author-line);color:var(--bt-role-author-text)}
+.r-designer{background:var(--bt-role-designer-bg);border-color:var(--bt-role-designer-line);color:var(--bt-role-designer-text)}
+.st{background:var(--bt-accent-soft);border-color:var(--bt-accent-line);color:var(--bt-accent-text)} .st:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bt-brand)}
+.av{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:var(--bt-size-xs);font-weight:var(--bt-weight-bold);border:1px solid}
+.save{font-size:var(--bt-size-xs);color:var(--bt-success);display:flex;align-items:center;gap:6px}.save:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bt-success)}
+.btn{height:34px;padding:0 var(--bt-space-3);border-radius:var(--bt-radius-md);border:1px solid var(--bt-line-strong);background:var(--bt-surface);color:var(--bt-text);font:inherit;font-size:var(--bt-size-sm)}
+.btn.primary{background:var(--bt-action);border-color:var(--bt-action);color:var(--bt-text-on-action);font-weight:var(--bt-weight-bold)}
+.btn:focus-visible{outline:none;box-shadow:var(--bt-focus)}
+.tabs{height:var(--bt-tabbar-h);display:flex;align-items:flex-end;gap:2px;padding:0 var(--bt-space-4);background:var(--bt-panel);border-bottom:1px solid var(--bt-line)}
+.ctab{height:32px;padding:0 var(--bt-space-3);display:flex;align-items:center;gap:8px;font-size:var(--bt-size-sm);color:var(--bt-text-2);border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0}
+.ctab.on{background:var(--bt-surface);border-color:var(--bt-line);color:var(--bt-ink);box-shadow:inset 0 2px 0 var(--bt-brand)}
+.ws{display:grid;grid-template-columns:var(--bt-nav-w) 1fr var(--bt-review-w);height:calc(100vh - var(--bt-topbar-h) - var(--bt-tabbar-h))}
+.nav{background:var(--bt-panel);border-right:1px solid var(--bt-line);padding:var(--bt-space-4)}
+.eyebrow{font-size:var(--bt-size-xs);letter-spacing:var(--bt-tracking-eyebrow);color:var(--bt-text-3);font-weight:var(--bt-weight-medium);margin:var(--bt-space-2) 0}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--bt-radius-md);font-size:var(--bt-size-sm);color:var(--bt-text)}
+.ch.on{background:var(--bt-accent-soft);color:var(--bt-ink);box-shadow:inset 3px 0 0 var(--bt-brand)}
+.ch .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.add{color:var(--bt-accent-text);font-size:var(--bt-size-sm);padding:8px 10px}
+.main{display:flex;flex-direction:column;min-width:0}
+.tool{height:36px;display:flex;align-items:center;gap:var(--bt-space-2);padding:0 var(--bt-space-4);border-bottom:1px solid var(--bt-line);background:var(--bt-surface);font-size:var(--bt-size-xs);color:var(--bt-text-2)}
+.tg{height:24px;padding:0 8px;border-radius:var(--bt-radius-sm);border:1px solid var(--bt-line-strong);display:inline-flex;align-items:center;gap:4px}.tg.on{background:var(--bt-accent-soft);border-color:var(--bt-accent-line);color:var(--bt-accent-text)}
+.desk{flex:1;overflow:auto;padding:var(--bt-desk-gutter);display:flex;justify-content:center}
+.paper{width:127mm;min-height:188mm;background:var(--bt-paper);box-shadow:var(--bt-shadow-paper);padding:18mm 14mm 20mm 17mm;font-family:var(--bt-font-serif);font-size:10pt;line-height:1.75;color:var(--bt-text);position:relative}
+.rh{display:flex;justify-content:space-between;font-family:var(--bt-font-ui);font-size:var(--bt-size-xs);color:var(--bt-text-3);position:absolute;top:8mm;left:17mm;right:14mm}
+.ce{font-family:var(--bt-font-ui);font-size:var(--bt-size-xs);letter-spacing:var(--bt-tracking-eyebrow);color:var(--bt-accent-text)}
+.ct{font-size:16pt;margin:6px 0 10px;color:var(--bt-ink);font-weight:var(--bt-weight-bold)} .rule{width:24px;height:1px;background:var(--bt-brand);margin-bottom:18px}
+.paper p{margin-bottom:.6em}
+.u-sp{text-decoration:underline wavy var(--bt-kind-spelling);text-underline-offset:3px}
+.u-sa{text-decoration:underline double var(--bt-kind-spacing);text-underline-offset:3px}
+.u-no{text-decoration:underline dotted var(--bt-kind-notation);text-decoration-thickness:3px;text-underline-offset:3px}
+.u-po{background:var(--bt-kind-polish-wash);box-shadow:inset 0 -3px 0 var(--bt-kind-polish)}
+.e-del{text-decoration:line-through var(--bt-edit) 2px;color:var(--bt-text-3)} .e-ins{text-decoration:underline dashed var(--bt-edit) 2px;text-underline-offset:4px;color:var(--bt-edit)}
+.cm{background:var(--bt-comment-wash);border-bottom:1px dotted var(--bt-comment)}
+.pb{border-top:1px dashed var(--bt-line-control);margin:14px -14mm 0 -17mm;position:relative}.pb span{position:absolute;right:14mm;top:-20px;font-family:var(--bt-font-ui);font-size:var(--bt-size-xs);color:var(--bt-text-3)}
+.rv{background:var(--bt-panel);border-left:1px solid var(--bt-line);display:flex;flex-direction:column}
+.rtabs{display:flex;border-bottom:1px solid var(--bt-line);background:var(--bt-surface)}
+.rt{flex:1;text-align:center;padding:12px 0;font-size:var(--bt-size-md);color:var(--bt-text-2);font-weight:var(--bt-weight-medium)}.rt.on{color:var(--bt-ink);box-shadow:inset 0 -2px 0 var(--bt-brand)}
+.n{font-size:var(--bt-size-xs);color:var(--bt-accent-text);margin-left:4px}
+.rbody{padding:var(--bt-space-4);display:flex;flex-direction:column;gap:var(--bt-space-3);overflow:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{height:28px;padding:0 10px;border-radius:var(--bt-radius-sm);border:1px solid var(--bt-line-strong);background:var(--bt-surface);font-size:var(--bt-size-sm);display:inline-flex;align-items:center;gap:6px;color:var(--bt-text)}
+.chip i{width:3px;height:14px;border-radius:2px;display:inline-block}.chip.on{background:var(--bt-accent-soft);border-color:var(--bt-accent-line)}
+.mine{font-size:var(--bt-size-xs);color:var(--bt-text-3)}
+.card{background:var(--bt-surface);border:1px solid var(--bt-line-strong);border-radius:var(--bt-radius-lg);padding:var(--bt-space-3) var(--bt-space-4);box-shadow:inset 3px 0 0 var(--k)}
+.card .k{font-size:var(--bt-size-xs);color:var(--k);font-weight:var(--bt-weight-bold)}
+.card .o{color:var(--bt-text-3);text-decoration:line-through;font-size:var(--bt-size-sm)} .card .s{font-weight:var(--bt-weight-bold);color:var(--bt-ink)}
+.card .why{font-size:var(--bt-size-sm);color:var(--bt-text-2);margin:6px 0 10px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:8px;font-size:var(--bt-size-xs);color:var(--bt-text-2);margin-bottom:6px}
+</style></head><body>
+<header class="top"><span class="logo"><i></i>BOOKTELIER</span>
+<span class="crumb">편집자 홈 › 우리가 남겨 둔 문장들 › <b>1장 아주 작은 시작</b></span><span class="badge r-editor">편집자</span>
+<span class="badge st">검토 요청</span><button class="btn">검토 완료</button><span class="sp"></span>
+<span class="av r-author" title="작가 · 1장">김</span><span class="av r-designer" title="디자이너 · 1장">윤</span><span class="save">저장됨</span>
+<button class="btn">미리보기</button><button class="btn">검토본</button><button class="btn">초대</button><button class="btn">조판 설정</button></header>
+<nav class="tabs"><span class="ctab on">1장 아주 작은 시작 ×</span><span class="ctab">2장 여백에 남은 마음 ×</span></nav>
+<div class="ws">
+<aside class="nav"><div class="eyebrow">원고 구조</div>
+<div class="ch on"><span class="t">1장 아주 작은 시작</span> <span class="badge st">검토 요청</span></div>
+<div class="ch"><span class="t">2장 여백에 남은 마음</span> <span class="badge" style="border-color:var(--bt-line-strong);color:var(--bt-text-2)">수정 중</span></div>
+<div class="add">+ 장 추가</div></aside>
+<section class="main"><div class="tool">보기 <span class="tg on">의견</span><span class="tg on">AI 밑줄</span><span class="tg on">수정 제안</span><span class="tg">여백 안내선</span></div>
+<div class="desk"><article class="paper"><div class="rh"><span>우리가 남겨 둔 문장들</span><span>1장 아주 작은 시작</span></div>
+<div class="ce">CHAPTER 01</div><div class="ct">아주 작은 시작</div><div class="rule"></div>
+<p>그날 나는 노트북을 <span class="u-sa">닫지않았다</span>. 흩어진 마음을 글로 <span class="u-sp">적기 시작햇다</span>.</p>
+<p>작은 기록들이 모여 한 권에 <span class="cm">책이 되었다</span>. <span class="u-no">컨텐츠</span>라는 말 대신 이야기라고 불렀다.</p>
+<p><span class="u-po">하루가 끝나면 랩탑을 펼쳤다.</span> 서툰 문장도 <span class="e-del">누군가는</span><span class="e-ins">누군가에게는</span> 이해할 수 있을 거라 믿었다.</p>
+<div class="pb"><span>7</span></div></article></div></section>
+<aside class="rv"><div class="rtabs"><div class="rt on">내 AI 제안<span class="n">4</span></div><div class="rt">함께 봄<span class="n">2</span></div><div class="rt">AI 대화</div></div>
+<div class="rbody"><div class="row"><button class="btn primary">장 검토</button><span class="mine" style="align-self:center">나만 보임</span></div>
+<div class="chips"><span class="chip on">전체 <b class="n">4</b></span><span class="chip"><i style="background:var(--bt-kind-spelling)"></i>맞춤법 <b class="n">1</b></span><span class="chip"><i style="background:var(--bt-kind-spacing)"></i>띄어쓰기 <b class="n">1</b></span><span class="chip"><i style="background:var(--bt-kind-notation)"></i>표기 통일 <b class="n">1</b></span><span class="chip"><i style="background:var(--bt-kind-polish)"></i>윤문 <b class="n">1</b></span></div>
+<div class="card" style="--k:var(--bt-kind-spelling)"><div class="k">맞춤법</div><div><span class="o">시작햇다</span> → <span class="s">시작했다</span></div><div class="why">과거를 나타내는 '-었-'이 들어가 '했다'로 적어요.</div><div class="row"><button class="btn primary">적용</button><button class="btn">무시</button><button class="btn">이 표현 유지</button></div></div>
+<div class="card" style="--k:var(--bt-edit)"><div class="who"><span class="av r-editor" style="width:22px;height:22px">나</span>편집자 · 수정 제안 · 윤문</div><div><span class="o">누군가는</span> → <span class="s">누군가에게는</span></div><div class="why">이해의 주체를 분명히 해요.</div><div class="row"><button class="btn">수락</button><button class="btn">거절</button></div></div>
+</div></aside></div>
+</body></html>

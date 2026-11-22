@@ -1,0 +1,143 @@
+/* 작업 공간은 화면 높이에 고정하고 지면(desk)과 패널이 각자 스크롤해요. 상단 바가 늘 보여요.
+   flex: 1이면 긴 원고에서 페이지 전체가 늘어나 상단 바가 함께 올라갔어요(11.22, D-40 미리보기에서 발견). */
+.workspace {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100vh;
+}
+
+/* 배치에는 끼지 않고 inert만 묶어요(D-40) */
+.workspaceInner {
+  display: contents;
+}
+
+/* 상단 바 아래: 원고 구조 | (장 탭 줄 / 가운데 작업 열 + 오른쪽 패널). 시안 11.22 배치 */
+.columns {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.stage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.row {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* 가운데 열(시안 .main): 메뉴 막대 · 작업 머리 · 서식 막대 · 책상 · 상태 줄 */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bt-bg);
+}
+
+/* 책상(시안 .canvas-viewport): 눈금자 + 지면 + 아래 글귀 */
+.desk {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 var(--bt-desk-gutter);
+  background: var(--bt-canvas);
+}
+
+.headerReveal {
+  position: sticky;
+  top: 6px;
+  z-index: 2;
+  float: right;
+  margin: 6px -12px 0 0;
+  padding: 3px 8px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-3);
+}
+
+/* 시안 .canvas-caption: 지면 아래 가운데 9px 글귀와 양쪽 짧은 선 */
+.caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: -14px 0 24px;
+  font-size: var(--bt-size-2xs);
+  color: var(--bt-ruler-text);
+}
+
+.caption > i {
+  width: 20px;
+  height: 1px;
+  background: var(--bt-caption-line);
+}
+
+.reviewSlot {
+  display: flex;
+  min-height: 0;
+}
+
+/* 하나씩 배치에서 조판 설정을 열면 검토 패널은 숨기기만 한다. display: flex가 hidden을 덮지 않게 한다. */
+.reviewSlot[hidden] {
+  display: none;
+}
+
+/* 원고 저장 상태(L-42). 저장 실패·연결 끊김이면 '다시 시도'가 붙는다(NFR-06). */
+.saveState {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--bt-size-xs);
+  color: var(--bt-save-text);
+  white-space: nowrap;
+}
+
+/* 저장 상태(DESIGN.md 5장): 점 6px + 글자. 저장됨 초록, 저장 중 주황, 실패 빨강, 연결 끊김 노랑. 낱말을 늘 같이 써요. */
+.saveState::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-success);
+}
+
+.saveState[data-state="saving"]::before {
+  background: var(--bt-brand);
+}
+
+.saveState[data-state="failed"]::before {
+  background: var(--bt-danger);
+}
+
+.saveState[data-state="offline"]::before {
+  background: var(--bt-warning);
+}
+
+.saveState[data-state="failed"],
+.saveState[data-state="offline"] {
+  color: var(--bt-danger-text);
+}
+
+.saveState button {
+  height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-xs);
+  cursor: pointer;
+}

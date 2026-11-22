@@ -1,0 +1,44 @@
+/* 시안 .bf-status: 점 4px + 낱말. 작은 것은 작업 머리(8px, 1px 5px), 큰 것은 홈 책 카드(10px, 2px 7px). */
+.badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--bt-status-idle-line);
+  background: var(--bt-status-idle-bg);
+  color: var(--bt-status-idle-text);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-3xs);
+  font-weight: var(--bt-weight-medium);
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.badge[data-size="lg"] {
+  padding: 2px 7px;
+  font-size: var(--bt-size-xs);
+  line-height: 16px;
+}
+
+.badge::before {
+  content: "";
+  flex: none;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--bt-radius-full);
+  background: currentColor;
+}
+
+.badge[data-status="review_requested"] {
+  background: var(--bt-status-review-bg);
+  border-color: var(--bt-status-review-line);
+  color: var(--bt-status-review-text);
+}
+
+.badge[data-status="reviewed"] {
+  background: var(--bt-status-done-bg);
+  border-color: var(--bt-status-done-line);
+  color: var(--bt-status-done-text);
+}

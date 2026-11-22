@@ -1,0 +1,275 @@
+/* 지면(시안 11.22 #paper): 종이색 바탕, 얇은 테두리 그림자, 책상 위아래 여백 24·38px */
+.page {
+  position: relative;
+  width: var(--page-width);
+  min-height: var(--page-min-height); /* 쪽 수를 재면 그 높이로 늘어나요(PageGuides) */
+  padding: var(--page-margin);
+  font-family: var(--page-font);
+  font-size: var(--page-font-size, 1rem);
+  line-height: var(--page-line-height);
+  background: var(--bt-paper);
+  color: var(--bt-text);
+  box-shadow: var(--bt-shadow-paper);
+  margin: 24px auto 38px;
+  isolation: isolate; /* 쪽 경계 층(z-index -1)이 종이 바탕 위, 글자 아래에 오게 */
+  transition: box-shadow var(--bt-duration) var(--bt-ease);
+}
+
+/* 시안 .running-title: 위 여백 가운데 높이에 8px 흐린 글자. 왼쪽 책 제목, 오른쪽 BOOKTELIER */
+.runningTitle {
+  position: absolute;
+  top: calc(var(--page-margin-top, 18mm) / 2);
+  left: var(--page-margin-left);
+  right: var(--page-margin-right);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--bt-space-3);
+  transform: translateY(-50%);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-3xs);
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  color: var(--bt-paper-meta);
+  text-indent: 0;
+  pointer-events: none;
+}
+
+.runningTitle > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 시안 .page-guides: 본문 단 둘레 엷은 주황 선 + 네 모서리 6px 네모 */
+.marginGuides {
+  position: absolute;
+  top: var(--page-margin-top, 18mm);
+  right: var(--page-margin-right);
+  bottom: var(--page-margin-bottom, 20mm);
+  left: var(--page-margin-left);
+  z-index: -1;
+  border: 1px solid var(--bt-guide-line);
+  pointer-events: none;
+}
+
+.marginGuides > i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--bt-guide-corner);
+  background: var(--bt-surface);
+}
+
+.marginGuides > i:nth-child(1) {
+  top: -3px;
+  left: -3px;
+}
+
+.marginGuides > i:nth-child(2) {
+  top: -3px;
+  right: -3px;
+}
+
+.marginGuides > i:nth-child(3) {
+  bottom: -3px;
+  left: -3px;
+}
+
+.marginGuides > i:nth-child(4) {
+  bottom: -3px;
+  right: -3px;
+}
+
+/* 장 머리(시안 .chapter-kicker · .chapter-title · .title-rule): CHAPTER 01 9px → 제목 28px 600 → 28×2 주황 선 */
+.chapterHead {
+  margin-bottom: 29px;
+  text-indent: 0;
+}
+
+.eyebrow {
+  margin: 10px 0 17px;
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-2xs);
+  font-weight: var(--bt-weight-regular);
+  letter-spacing: 0.2em;
+  line-height: 1.3;
+  color: var(--bt-paper-kicker);
+}
+
+.chapterTitle {
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-2xl);
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--bt-paper-title);
+}
+
+.rule {
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin-top: 25px;
+  background: var(--bt-accent-rule);
+}
+
+/* '반영 중'(L-43): 쪽 경계를 다시 계산하는 동안 지면 오른쪽 위에 작게. 높이 0인 줄이 책상 스크롤을 따라와서
+   아래쪽을 고칠 때도 보여요. */
+.reflowRow {
+  position: sticky;
+  top: var(--bt-space-2);
+  height: 0;
+  z-index: 1;
+  text-align: right;
+  text-indent: 0;
+}
+
+.reflowing {
+  display: inline-block;
+  transform: translateX(calc(var(--page-margin-right) - var(--bt-space-2)));
+  padding: 2px var(--bt-space-2);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-warning-soft);
+  color: var(--bt-warning);
+  font-family: var(--bt-font-ui);
+  font-size: var(--bt-size-xs);
+  line-height: 1.4;
+}
+
+.prose {
+  outline: none;
+  box-shadow: none;
+  word-break: keep-all;
+}
+
+.prose :global(p) {
+  text-indent: var(--page-text-indent, 1em);
+  text-align: var(--page-text-align, left); /* 본문 정렬(D-41) */
+  margin-bottom: 0.6em;
+  min-height: 1em;
+}
+
+/* 지면 전체에는 포커스 띠 대신 엷은 파선만(종이 둘레에 주황 띠가 생기지 않게) */
+.prose:focus-visible {
+  box-shadow: none;
+}
+
+.page[data-editable="true"] .prose:focus-visible {
+  outline: 1px dashed var(--bt-line-control);
+  outline-offset: 6px;
+}
+
+/*
+ * 밑줄(CS-11). 종류마다 색과 선 모양이 모두 다르다(FR-25, 색만으로 구분하지 않음).
+ * 맞춤법 빨간 물결선 · 띄어쓰기 주황 이중선 · 표기 통일 파란 점선 · 윤문 청록 띠. 종이색 위 대비 3:1 이상.
+ */
+.page :global(.ai-underline) {
+  cursor: pointer;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-skip-ink: none;
+  border-radius: 2px;
+}
+
+.page :global(.ai-underline:hover) {
+  background-color: var(--bt-accent-wash);
+}
+
+.page :global(.ai-underline:focus-visible) {
+  outline: 2px solid var(--bt-brand);
+  outline-offset: 1px;
+}
+
+.page :global(.ai-underline--spelling) {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--bt-kind-spelling);
+}
+
+.page :global(.ai-underline--spacing) {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-color: var(--bt-kind-spacing);
+}
+
+.page :global(.ai-underline--notation) {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--bt-kind-notation);
+  text-decoration-thickness: 3px;
+}
+
+.page :global(.ai-underline--polish) {
+  background-color: var(--bt-kind-polish-wash);
+  box-shadow: inset 0 -3px 0 var(--bt-kind-polish);
+}
+
+.page :global(.ai-underline.is-selected) {
+  background-color: var(--bt-accent-soft);
+  outline: 2px solid var(--bt-brand);
+  outline-offset: 1px;
+}
+
+/* 수정 제안(CS-11 보라 파선). 지운 글자는 취소선, 더한 글자는 파선 밑줄. 색과 모양을 함께 쓴다. */
+.page :global(.edit-delete) {
+  text-decoration-line: line-through;
+  text-decoration-color: var(--bt-edit);
+  text-decoration-thickness: 2px;
+  color: var(--bt-text-3);
+  cursor: pointer;
+}
+
+.page :global(.edit-insert) {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--bt-edit);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  color: var(--bt-edit);
+  cursor: pointer;
+  margin-left: 0.1em;
+}
+
+.page :global(.edit-delete.is-selected),
+.page :global(.edit-insert.is-selected),
+.page :global(.comment-mark.is-selected) {
+  outline: 2px solid var(--bt-brand);
+  outline-offset: 1px;
+}
+
+/* 의견이 달린 자리. 엷은 칠과 점선 테두리 아래선. */
+.page :global(.comment-mark) {
+  background-color: var(--bt-comment-wash);
+  border-bottom: 1px dotted var(--bt-comment);
+  cursor: pointer;
+}
+
+.selectionMenu {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: 8px;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-lg);
+  font-family: var(--bt-font-ui);
+  line-height: 1.2;
+  text-indent: 0;
+}
+
+.selectionMenu button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--bt-text);
+  cursor: pointer;
+}
+
+.selectionMenu button:hover {
+  background: var(--bt-panel);
+}

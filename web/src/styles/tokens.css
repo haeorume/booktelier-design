@@ -1,0 +1,489 @@
+/*
+ * Booktelier 디자인 토큰 (v0.2, 2026.11.22)
+ * 넣을 자리: web/src/styles/tokens.css → web/src/app/globals.css 맨 위에서 @import
+ *
+ * 출처: 오름님 HTML 시안 11.22 판(1122bookend-studio-night-layout.html)의 :root 변수와 화면에서 잰 값.
+ * 11.22 결정(오름님): 시안 값을 그대로 써요. v0.1에서 대비 때문에 진하게 바꾼 글자색·버튼색과
+ *   12px 아래 글자를 올린 것을 되돌렸어요(DESIGN.md 0장).
+ * 규칙: 컴포넌트 CSS는 색 값을 직접 쓰지 않고 이 변수만 써요(하네스 R11).
+ *       오름님 시안이 바뀌면 이 파일 값만 바꿔요. 이름은 바꾸지 않아요.
+ */
+
+:root {
+  /* ── 바탕과 면 ───────────────────────────── */
+  --bt-bg: #f5f7fa;            /* 앱 바탕. 시안 --bg */
+  --bt-canvas: #f1f4f8;        /* 지면 둘레 책상, 장 탭 줄. 시안 --be-canvas */
+  --bt-surface: #ffffff;       /* 카드, 창, 검토 패널 */
+  --bt-topbar: #fdfefe;        /* 상단 바. 시안 .topbar */
+  --bt-panel: #fafbfd;         /* 작업 머리, 상태 줄. 시안 --panel */
+  --bt-nav: #f8fafd;           /* 왼쪽 원고 구조. 시안 --be-shell-nav */
+  --bt-menubar: #fbfcfe;       /* 메뉴 막대. 시안 .menubar */
+  --bt-toolbar-2: #fcfdff;     /* 서식 막대 둘째 줄 */
+  --bt-soft: #eef2f7;          /* 눌림, 선택 안 된 칩, 빈 상태. 시안 --soft */
+  --bt-hover: #edf1f7;         /* 아이콘 버튼 올려놓음. 시안 .icon-btn:hover */
+  --bt-tab-idle: #eef2f7;      /* 고르지 않은 장 탭 */
+  --bt-chip: #edf1f6;          /* 개수 칩 */
+  --bt-paper: #fffdf7;         /* 지면(종이). 시안 #paper */
+  --bt-overlay: rgba(36, 53, 75, 0.32); /* 창 뒤 어둡게 */
+
+  /* ── 선 ──────────────────────────────────── */
+  --bt-line: #e1e7ef;          /* 구분선. 시안 --line */
+  --bt-line-soft: #e6ebf1;     /* 도구 묶음 사이 선 */
+  --bt-line-strong: #d9e1eb;   /* 버튼·카드 테두리. 시안 --be-line-strong */
+  --bt-line-control: #d9e1eb;  /* 입력 칸 테두리. 시안 .button 테두리 */
+  --bt-line-hover: #b9c6d6;    /* 버튼 올려놓음 테두리 */
+
+  /* ── 글자 ────────────────────────────────── */
+  --bt-ink: #24354b;           /* 제목. 시안 --ink */
+  --bt-text: #27303d;          /* 본문. 시안 --body */
+  --bt-text-strong: #3b4a60;   /* 책 이름, 고른 탭 */
+  --bt-text-2: #6c7b8e;        /* 보조 글자(원고 구조 항목) */
+  --bt-text-3: #8591a3;        /* 흐린 글자. 시안 --muted */
+  --bt-text-4: #9aa5b4;        /* 가장 흐린 글자(눈썹, 개수). 시안 .section-label */
+  --bt-icon: #647186;          /* 아이콘 버튼. 시안 .icon-btn */
+  --bt-text-on-action: #ffffff;
+
+  /* ── 브랜드와 동작 ───────────────────────── */
+  --bt-brand: #ec661f;         /* 로고, 포커스, 선택 선. 시안 --accent */
+  --bt-action: #ec661f;        /* 주요 버튼 바탕. 시안 .button.primary */
+  --bt-action-hover: #da5714;  /* 시안 .button.primary:hover */
+  --bt-action-deep: #ab4310;   /* 짙은 주요 버튼(장 검토, 서점). 시안 --br-action */
+  --bt-action-deep-hover: #9a3d0f;
+  --bt-accent-text: #ab4310;   /* 주황 글자. 시안 --accent-dark */
+  --bt-accent-soft: #fff0e6;   /* 선택 바탕. 시안 --accent-soft */
+  --bt-accent-select: #ffefe3; /* 지금 장. 시안 --be-shell-nav-selected */
+  --bt-accent-wash: #fff5ee;   /* 선택된 템플릿 카드 바탕 */
+  --bt-accent-line: #f7c5a8;   /* 선택 테두리 */
+  --bt-accent-rule: #edb28f;   /* 장 제목 아래 짧은 선 */
+
+  /* ── 상태 ────────────────────────────────── */
+  --bt-success: #85a58d;       /* 저장됨 점. 시안 .status-dot */
+  --bt-success-text: #4f7a5c;
+  --bt-success-soft: #eef6f0;
+  --bt-success-line: #cfe2d4;
+  --bt-warning: #b7842a;
+  --bt-warning-soft: #fff7e8;
+  --bt-danger: #bd5d4d;        /* 시안 .save-state.error */
+  --bt-danger-text: #af594d;
+  --bt-danger-soft: #fdecea;
+
+  /* ── 역할 (배지·아바타. 시안 값) ── */
+  --bt-role-editor-bg: #fff0e6;
+  --bt-role-editor-line: #f7c5a8;
+  --bt-role-editor-text: #ab4310;
+  --bt-role-author-bg: #edf4fc;
+  --bt-role-author-line: #cedef0;
+  --bt-role-author-text: #5378a9;
+  --bt-role-designer-bg: #f2eef9;
+  --bt-role-designer-line: #dfd6ed;
+  --bt-role-designer-text: #8065ac;
+
+  /* ── AI 제안 종류와 사람의 표시 (시안 --br-*, --bi-*) ── */
+  --bt-kind-spelling: #c8453b;      /* 맞춤법: 물결선 */
+  --bt-kind-spacing: #b45309;       /* 띄어쓰기: 겹선 */
+  --bt-kind-notation: #2563eb;      /* 표기 통일: 굵은 점선 */
+  --bt-kind-polish: #0f766e;        /* 윤문: 엷은 띠 + 아래 선 */
+  --bt-kind-polish-wash: rgba(15, 118, 110, 0.14);
+  --bt-edit: #7c4dcc;               /* 사람이 보낸 수정 제안. 시안 --bi-human */
+  --bt-edit-soft: #f5f0fc;
+  --bt-edit-line: #ddcff0;
+  --bt-comment: #a16207;            /* 의견이 달린 자리 */
+  --bt-comment-wash: rgba(161, 98, 7, 0.12);
+
+  /* ── 글꼴 (시안 --ui-font 그대로) ───────────── */
+  --bt-font-ui: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --bt-font-serif: "Noto Serif KR", "Source Han Serif K", "Batang", Georgia, serif;  /* 명조 본문. 시안 --be-serif */
+  --bt-font-sans: "Noto Sans KR", "Malgun Gothic", sans-serif;  /* 고딕 본문 */
+
+  /* 글자 크기: 시안의 크기 그대로(앱 기본 13px) */
+  --bt-size-3xs: 8px;   /* 머리말, 상태 칩, 눈썹 */
+  --bt-size-2xs: 9px;   /* 구역 이름(CHAPTERS), 작은 버튼 */
+  --bt-size-xs: 10px;   /* 저장 상태, 장 탭, 상태 줄 */
+  --bt-size-sm: 11px;   /* 원고 구조 항목, 경로, 칩 */
+  --bt-size-md: 12px;   /* 버튼, 패널 본문 */
+  --bt-size-base: 13px; /* 앱 기본 */
+  --bt-size-lg: 14px;   /* 카드 제목 */
+  --bt-size-xl: 18px;   /* 창 제목 */
+  --bt-size-2xl: 28px;  /* 화면 제목, 장 제목 */
+  --bt-size-3xl: 34px;  /* 홈 큰 제목 */
+  --bt-weight-regular: 400;
+  --bt-weight-medium: 500;
+  --bt-weight-bold: 600;
+  --bt-weight-heavy: 700;
+  --bt-leading-ui: 1.5;
+  --bt-leading-tight: 1.3;
+  --bt-tracking-eyebrow: 0.1em;
+  --bt-tracking-wide: 0.16em;
+
+  /* ── 간격 (4px 단위, 시안의 3·5·7px는 반 칸) ── */
+  --bt-space-1: 4px;
+  --bt-space-2: 8px;
+  --bt-space-3: 12px;
+  --bt-space-4: 16px;
+  --bt-space-5: 20px;
+  --bt-space-6: 24px;
+  --bt-space-8: 32px;
+  --bt-space-12: 48px;
+
+  /* ── 모서리 (시안 값) ───────────────────── */
+  --bt-radius-xs: 3px;   /* 메뉴, 도구 버튼 */
+  --bt-radius-sm: 4px;   /* 버튼, 칩, 배지 */
+  --bt-radius-md: 5px;   /* 입력 칸, 검색 */
+  --bt-radius-lg: 8px;   /* 카드 */
+  --bt-radius-xl: 12px;  /* 창, 큰 카드 */
+  --bt-radius-2xl: 16px; /* 홈 큰 상자 */
+  --bt-radius-full: 999px;
+
+  /* ── 그림자 (시안 값) ────────────────────── */
+  --bt-shadow-sm: 0 2px 4px #1e324510;
+  --bt-shadow-md: 0 8px 26px rgba(39, 53, 71, 0.055);   /* 시안 --be-shadow */
+  --bt-shadow-lg: 0 14px 42px rgba(39, 53, 71, 0.13);   /* 창, 팝오버. 시안 --be-shadow-popover */
+  --bt-shadow-paper: 0 0 0 1px #e0e5eb, 0 8px 22px rgba(49, 70, 96, 0.08); /* 지면 */
+  --bt-shadow-tab: 0 -2px 6px rgba(50, 48, 45, 0.016);
+
+  /* ── 배치 (1440px 기준. 시안에서 잰 값) ── */
+  --bt-topbar-h: 56px;
+  --bt-tabbar-h: 40px;          /* 장 탭 줄 */
+  --bt-menubar-h: 35px;         /* 메뉴 막대 */
+  --bt-header-h: 64px;          /* 작업 머리(EDIT WORKSPACE) */
+  --bt-toolrow-h: 44px;         /* 서식 막대 한 줄 */
+  --bt-ruler-h: 21px;
+  --bt-statusbar-h: 29px;
+  --bt-nav-w: 214px;            /* 왼쪽 원고 구조. 시안 --bp-nav-width */
+  --bt-review-w: 350px;         /* 오른쪽 검토 패널. 시안 --bp-review-width */
+  --bt-layout-panel-w: 250px;   /* 조판 설정 패널. 시안 --bp-palette-width */
+  --bt-desk-gutter: 27px;       /* 지면 둘레 책상 여백. 시안 .page-space */
+
+  /* ── 포커스와 움직임 ─────────────────────── */
+  --bt-focus: 0 0 0 2px var(--bt-surface), 0 0 0 4px var(--bt-brand);
+  --bt-duration: 180ms;
+  --bt-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --bt-spring: cubic-bezier(0.2, 0.8, 0.2, 1.18); /* 시안 --spring */
+
+  /* ── 작업 공간 틀 ── */
+  --bt-theme-switch-bg: #eef2f6;
+  --bt-theme-switch-line: #d6dee8;
+  --bt-theme-switch-thumb: #ffffff;
+  --bt-theme-switch-shadow: 0 1px 3px rgba(31, 48, 70, 0.16);
+  --bt-theme-sun: #a9672c;
+  --bt-theme-moon: #8995a5;
+  --bt-panel-dot-off: #c7d1dc;
+  --bt-permission-bg: #eff3f8;
+  --bt-permission-text: #6e8099;
+  --bt-share-bg: #fff4ed;
+  --bt-share-line: #efc6ac;
+  --bt-utility-text: #64758b;
+  --bt-subtle: #f7f9fc;
+  --bt-panel-toggle-bg: #fff2e8;
+  --bt-panel-toggle-line: #edbba0;
+  --bt-avatar-ring: #c9cdd4;
+  --bt-nav-avatar-bg: #f2f5f9;
+  --bt-nav-avatar-line: #dce4ee;
+  --bt-nav-avatar-text: #71839c;
+  --bt-nav-icon: #91a0b1;
+  --bt-nav-search-line: #e4e9f1;
+  --bt-nav-search-icon: #a0abba;
+  --bt-nav-tree-line: #e1e6ee;
+  --bt-nav-add: #98a5b4;
+  --bt-paper-meta: #aab3bf;
+  --bt-paper-kicker: #b65a33;
+  --bt-paper-title: #303b48;
+  --bt-guide-line: #efc5ae;
+  --bt-guide-corner: #d0a37f;
+  /* ── 오른쪽 패널 ── */
+  --bt-rp-switch-bg: #ffffff; /* 검토 패널/조판 설정 스위치. 시안 .br-mode-switch */
+  --bt-rp-switch-line: #d4dce7;
+  --bt-rp-switch-divider: #e1e7ef;
+  --bt-rp-switch-text: #738095;
+  --bt-rp-switch-hover: #f1f4f8;
+  --bt-rp-switch-on: #27303d;
+  --bt-rp-switch-on-text: #ffffff;
+  --bt-rp-ink: #27303d; /* 고른 탭, 수정안. 시안 --br-dock-ink */
+  --bt-rp-tab-line: #dce3ec;
+  --bt-rp-tab-text: #7b8798;
+  --bt-rp-tab-hover: #4c5a6d;
+  --bt-rp-count-bg: #f0f3f7; /* 탭 개수(시안 다크에서도 밝은 칩 그대로) */
+  --bt-rp-count-text: #8591a3;
+  --bt-rp-count-on-bg: #fff0e6;
+  --bt-rp-count-on-text: #ab4310;
+  --bt-rp-brand: #344660; /* 북틀리에 머리 */
+  --bt-rp-brand-icon: #cf6f32;
+  --bt-rp-badge-warm-bg: #fffaf6;
+  --bt-rp-badge-warm-line: #f0dfd0;
+  --bt-rp-badge-warm-text: #b79a83;
+  --bt-rp-muted: #8591a3; /* 패널 보조 글자 */
+  --bt-rp-faint: #a2adbb; /* 가장 흐린 글자(나만 보임, 빈 상태 설명) */
+  --bt-rp-well: #f6f8fb; /* 장 이름 줄, 상태 줄 */
+  --bt-rp-well-line: #e4e9f1;
+  --bt-rp-bar: #ffffff; /* 본문 자동 제안 줄 */
+  --bt-rp-meta-bg: #fbfcfe;
+  --bt-rp-sep: #eaf0f6; /* 패널 안 가로 구분선 */
+  --bt-rp-status-text: #8f9bad;
+  --bt-rp-list-bg: #fafbfd; /* 카드 목록 바탕 */
+  --bt-rp-chip-line: #e5eaf1;
+  --bt-rp-chip-hover: #f4f6fa;
+  --bt-rp-raised: #edf1f6; /* 종류 칩 개수, 배지 */
+  --bt-rp-card-line: #d8e0ea;
+  --bt-rp-card-hover-line: #bdcbdc;
+  --bt-rp-card-selected-bg: #fffdfa;
+  --bt-rp-card-selected-line: #edc7aa;
+  --bt-rp-card-done-bg: #f5f7fa;
+  --bt-rp-card-done-line: #a6b1bf;
+  --bt-rp-badge-bg: #f2f5fa;
+  --bt-rp-badge-line: #e4eaf2;
+  --bt-rp-badge-text: #9aa6b7;
+  --bt-rp-field-label: #98a3b1;
+  --bt-rp-original: #7b8798;
+  --bt-rp-original-strike: #8f9bad;
+  --bt-rp-reason: #64758b;
+  --bt-rp-position: #a9b3c0;
+  --bt-rp-empty-icon: #c59b7d;
+  --bt-rp-empty-title: #6e7c90;
+  --bt-kind-spelling-soft: #fff6f3; /* 종류 배지 바탕. 시안 --kind-wash(다크는 종류 색 12%) */
+  --bt-kind-spacing-soft: #fff3e3;
+  --bt-kind-notation-soft: #f2f6ff;
+  --bt-kind-polish-soft: #f1faf7;
+  --bt-rp-human-wash: #faf6ff; /* 함께 봄(사람) 카드 라일락 계열. 시안 .br-origin, .br-member-* */
+  --bt-rp-human-line: #e7dbf2;
+  --bt-rp-human-text: #88709b;
+  --bt-rp-human-sep: #eee8f5;
+  --bt-rp-human-ink: #5b4c6c;
+  --bt-rp-human-muted: #8a7b98;
+  --bt-rp-human-strike: #85718f;
+  --bt-rp-human-ins: #7950aa;
+  --bt-rp-human-ins-bg: #f8f4fd;
+  --bt-rp-human-ins-line: #e8ddf3;
+  --bt-rp-human-button-bg: #f7f2fc;
+  --bt-rp-human-button-line: #dfd4ed;
+  --bt-rp-human-button-text: #7b59a1;
+  --bt-rp-human-input-line: #ded4e9;
+  --bt-rp-human-primary: #7c4dcc;
+  --bt-rp-human-primary-hover: #683cb3;
+  --bt-rp-thread-bg: #fffeff; /* 의견 스레드. 시안 .br-comment-thread */
+  --bt-rp-thread-line: #e3daed;
+  --bt-rp-thread-accent: #a18ab8;
+  --bt-rp-thread-text: #5e526a;
+  --bt-rp-quote-bg: #f8f5fc;
+  --bt-rp-quote-line: #d2c3e0;
+  --bt-rp-quote-text: #8b7b98;
+  --bt-rp-avatar-bg: #f5ebf2; /* 의견·제안 쓴 사람 동그라미 */
+  --bt-rp-avatar-line: #e1d4ee;
+  --bt-rp-avatar-text: #9a3d80;
+  --bt-lp-title: #66768b; /* 조판 설정 패널. 시안 .properties-panel */
+  --bt-lp-label: #8e9aab;
+  --bt-lp-value: #9eabbb;
+  --bt-lp-note: #b2bdca;
+  --bt-lp-sep: #edf1f6;
+  --bt-lp-seg-bg: #f4f6f9;
+  --bt-lp-seg-line: #e8edf3;
+  --bt-lp-seg-text: #9ba6b5;
+  --bt-lp-seg-on-bg: #ffffff;
+  --bt-lp-seg-on-line: #e3e9f0;
+  --bt-lp-seg-on-text: #637790;
+  --bt-lp-seg-on-shadow: 0 1px 3px rgba(41, 56, 75, 0.03);
+  --bt-lp-field-bg: #ffffff;
+  --bt-lp-field-line: #e2e8f0;
+  --bt-lp-field-text: #8190a3;
+  --bt-lp-scope-bg: #f3f6fa;
+  --bt-lp-scope-line: #e6ecf3;
+  --bt-lp-scope-text: #9ba8b8;
+  --bt-tab-text: #7b8799;
+  --bt-menu-text: #8591a2;
+  --bt-menu-line: #dfe5ee;
+  --bt-menu-item: #748298;
+  --bt-shadow-menu: 0 12px 35px rgba(39, 43, 49, 0.11);
+  --bt-header-text: #778498;
+  --bt-orb-text: #647286;
+  --bt-accent-tool: #b25a28;
+  --bt-select-text: #6d7b8d;
+  --bt-color-tool: #57606e;
+  --bt-highlight-tool: #fff3a8;
+  --bt-ruler-text: #7f8b9a;
+  --bt-ruler-tick: #c3ccd8;
+  --bt-statusbar: #fafcfe;
+  --bt-status-text: #a0acbc;
+  --bt-status-mode: #9b6c4e;
+  --bt-status-mode-dot: #d2a181;
+  --bt-status-button: #93a1b4;
+
+  /* ── 홈·창·미리보기 ── */
+  --bt-hero-1: #ede4dc;
+  --bt-hero-2: #e6ece7;
+  --bt-hero-3: #e2eaf0;
+  --bt-hero-4: #eee6df;
+  --bt-hero-glow: rgba(255, 255, 255, 0.34);
+  --bt-hero-text: #526175;
+  --bt-hero-credit: #596575;
+  --bt-hero-ghost-bg: rgba(255, 255, 255, 0.65);
+  --bt-hero-ghost-line: rgba(70, 82, 100, 0.26);
+  --bt-hero-control-bg: rgba(255, 255, 255, 0.84);
+  --bt-hero-control-line: rgba(70, 82, 100, 0.23);
+  --bt-hero-dot: #8b929b;
+  --bt-hero-book-shadow: 15px 15px 13px rgba(45, 43, 40, 0.17);
+  --bt-hero-book-fold: rgba(45, 43, 40, 0.08);
+  --bt-shadow-hero: 0 10px 30px rgba(36, 53, 75, 0.067);
+  --bt-shadow-action: 0 3px 9px rgba(195, 108, 45, 0.08);
+  --bt-shadow-card: 0 3px 9px rgba(50, 70, 93, 0.016);
+  --bt-shadow-card-hover: 0 3px 9px rgba(50, 70, 93, 0.016);
+  --bt-shadow-intro: 0 8px 26px rgba(49, 70, 91, 0.024);
+  --bt-shadow-guest: 0 6px 18px rgba(42, 60, 79, 0.03);
+  --bt-shadow-map-editor: 0 9px 19px rgba(167, 121, 82, 0.04);
+  --bt-shadow-cover: 3px 5px 8px rgba(74, 83, 106, 0.07);
+  --bt-shadow-modal: 0 24px 85px rgba(41, 62, 88, 0.15);
+  --bt-shadow-join: 0 12px 38px rgba(49, 70, 91, 0.055);
+  --bt-shadow-mini: 2px 4px 7px rgba(49, 70, 91, 0.047);
+  --bt-modal-overlay: rgba(36, 53, 75, 0.18);
+  --bt-modal-head: #fbfcfe;
+  --bt-modal-line: #dfe5ee;
+  --bt-input-bg: #ffffff;
+  --bt-input-line: #dfe5ed;
+  --bt-input-text: #64758b;
+  --bt-button-text: #24354b;
+  --bt-field-label: #6d7b8d;
+  --bt-required: #b18460;
+  --bt-caption: #a6afbc;
+  --bt-quiet: #a2adbb;
+  --bt-quiet-2: #98a2b0;
+  --bt-faint: #a3adba;
+  --bt-chip-text: #96a1b1;
+  --bt-task-text: #7f91a7;
+  --bt-note-icon: #658261;
+  --bt-well: #f6f8fb;
+  --bt-well-line: #eaf0f6;
+  --bt-card-hover-line: #f4bb97;
+  --bt-new-card-line: #dfe5ec;
+  --bt-new-card-icon: #8190a3;
+  --bt-new-card-title: #6e7c90;
+  --bt-new-card-hover: #fffaf6;
+  --bt-sch-hover: #fffaf6;
+  --bt-sch-hover-line: #edc7aa;
+  --bt-intro-from: #fff9f4;
+  --bt-intro-to: #ffffff;
+  --bt-intro-line: #e1e7ef;
+  --bt-intro-arrow: #9a927f;
+  --bt-map-editor-bg: #fffaf6;
+  --bt-map-editor-line: #f3ddcc;
+  --bt-map-editor-name: #344660;
+  --bt-map-avatar-bg: #fff0e4;
+  --bt-map-avatar-text: #cf6f32;
+  --bt-map-avatar-line: #f3ddcc;
+  --bt-map-tag-bg: #ffffff;
+  --bt-map-tag-text: #b79a83;
+  --bt-map-tag-line: #f0dfd0;
+  --bt-map-note: #a3adba;
+  --bt-guest-author-bg: #edf4f1;
+  --bt-guest-author-text: #5b7b6b;
+  --bt-guest-author-line: #d3e3db;
+  --bt-guest-author-rule: #b5c8c0;
+  --bt-guest-designer-bg: #f1eef7;
+  --bt-guest-designer-text: #7b6b96;
+  --bt-guest-designer-line: #dfd9e9;
+  --bt-guest-designer-rule: #c4bdd5;
+  --bt-guest-editor-bg: #fff2e8;
+  --bt-guest-editor-text: #ab4310;
+  --bt-guest-editor-line: #efcbb1;
+  --bt-status-idle-bg: #f2f5fa;
+  --bt-status-idle-text: #9aa6b7;
+  --bt-status-idle-line: #e4eaf2;
+  --bt-status-review-bg: #fff0e6;
+  --bt-status-review-text: #ab4310;
+  --bt-status-review-line: #f7c5a8;
+  --bt-status-done-bg: #eef5f1;
+  --bt-status-done-text: #577c68;
+  --bt-status-done-line: #cfdfd6;
+  --bt-cover-1-bg: #ecdfd1;
+  --bt-cover-1-text: #7b624d;
+  --bt-cover-1-spine: #d0b79f;
+  --bt-cover-2-bg: #e3e3ed;
+  --bt-cover-2-text: #69657d;
+  --bt-cover-2-spine: #c4c2d5;
+  --bt-cover-3-bg: #dce7e3;
+  --bt-cover-3-text: #536f64;
+  --bt-cover-3-spine: #b7cac2;
+  --bt-cover-4-bg: #e8e7de;
+  --bt-cover-4-text: #777059;
+  --bt-cover-4-spine: #cbc7b7;
+  --bt-template-line: #e3e8ef;
+  --bt-template-hover: #fafbfd;
+  --bt-template-selected-bg: #fff5ee;
+  --bt-template-selected-line: #f0c0a1;
+  --bt-template-selected-ring: rgba(233, 169, 122, 0.07);
+  --bt-radio-bg: #f2f5fa;
+  --bt-radio-line: #e4eaf2;
+  --bt-step-line: #e6b998;
+  --bt-mini-paper: #fffefb;
+  --bt-mini-paper-line: #e1e5e9;
+  --bt-mini-title: #4b5a6e;
+  --bt-mini-rule: #e2b896;
+  --bt-mini-text: #dfe5ed;
+  --bt-mini-folio: #8e9cad;
+  --bt-mini-desk: #f1f4f8;
+  --bt-mini-chrome: #fdfefe;
+  --bt-mini-dot: #bdc8d6;
+  --bt-mini-nav: #8d99aa;
+  --bt-mini-heading: #738399;
+  --bt-mini-line: #d9e1eb;
+  --bt-mini-tool: #b4c1d0;
+  --bt-mini-layout-line: #c9bdd9;
+  --bt-mini-layout-block: #c4b9d2;
+  --bt-mini-layout-text: #e0dce9;
+  --bt-mini-layout-tool: #a7b9b1;
+  --bt-mini-layout-tool-2: #cbd2de;
+  --bt-choice-author-bg: #f3f8f5;
+  --bt-choice-author-line: #a5c0b3;
+  --bt-choice-author-ring: rgba(125, 159, 142, 0.07);
+  --bt-choice-author-check: #719180;
+  --bt-choice-designer-bg: #f7f5fa;
+  --bt-choice-designer-line: #bdb0d1;
+  --bt-choice-designer-ring: rgba(149, 130, 176, 0.07);
+  --bt-choice-designer-check: #8a79a6;
+  --bt-access-bg: #fffaf6;
+  --bt-access-line: #f3ddcc;
+  --bt-access-name: #af6b3f;
+  --bt-access-note: #b18460;
+  --bt-access-tag-bg: #fff0e6;
+  --bt-access-tag-text: #ab4310;
+  --bt-access-tag-line: #f7c5a8;
+  --bt-ready-text: #5f806f;
+  --bt-callout-bg: #f5f8f6;
+  --bt-callout-line: #dce6e0;
+  --bt-callout-title: #5a7866;
+  --bt-callout-text: #748679;
+  --bt-seal-author-bg: #eef5f1;
+  --bt-seal-author-line: #cadfd3;
+  --bt-seal-author-text: #658975;
+  --bt-seal-author-ring: #f6faf7;
+  --bt-seal-designer-bg: #f3f0f8;
+  --bt-seal-designer-line: #dcd1e8;
+  --bt-seal-designer-text: #857299;
+  --bt-seal-designer-ring: #faf8fc;
+  --bt-badge-author-bg: #edf5f1;
+  --bt-badge-author-line: #d0e2d8;
+  --bt-badge-author-text: #608371;
+  --bt-badge-designer-bg: #f3eff8;
+  --bt-badge-designer-line: #ded3e9;
+  --bt-badge-designer-text: #846f9b;
+  --bt-badge-editor-bg: #fff0e6;
+  --bt-badge-editor-line: #edcbb3;
+  --bt-badge-editor-text: #ab4310;
+  --bt-snapshot-line: #e0e5ec;
+  --bt-snapshot-label: #8a99ad;
+  --bt-snapshot-text: #556579;
+  --bt-prototype-line: #e0e6ed;
+  --bt-prototype-text: #8b96a4;
+  --bt-caption-line: #dce3ec;
+  --bt-save-text: #8390a0;
+  --bt-logo-ink: #111111;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --bt-duration: 0ms;
+  }
+}
+
+/*
+ * 지면(종이책 판형) 값은 여기 두지 않아요.
+ * 판형·여백·제본 여백·행간·글꼴·크기는 책마다 조판 설정에서 오고(FR-10, FR-16, FR-45),
+ * web/src/domain/layout.ts가 mm 값을 CSS 변수(--page-width, --page-margin-inside …)로 바꿔 지면에 넣어요.
+ */
