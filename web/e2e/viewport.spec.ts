@@ -1,6 +1,6 @@
 // 1280px·1440px에서 지면과 패널이 겹치거나 잘리지 않는다(QA-49, NFR-14).
 import { expect, test, type Page } from "@playwright/test";
-import { createBookAndCopyLinks } from "./helpers";
+import { createBookAndCopyLinks, revealDevBar } from "./helpers";
 
 type Box = { left: number; right: number; top: number; bottom: number };
 
@@ -43,7 +43,7 @@ for (const width of [1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await createBookAndCopyLinks(page, `폭 ${width}`);
     // 데모 화면처럼 참여자 셋이 상단 바에 있게 한다
-    const bar = page.getByTestId("dev-bar");
+    const bar = await revealDevBar(page);
     for (const [role, name] of [["작가", "작가 A"], ["디자이너", "디자이너 C"]] as const) {
       await bar.getByRole("button", { name: role }).click();
       const ask = page.getByRole("dialog", { name: "이름 넣기" });

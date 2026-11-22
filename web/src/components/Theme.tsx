@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { getClientSession, type ThemeChoice } from "@/data";
 import styles from "./Theme.module.css";
 
@@ -62,7 +62,9 @@ function MoonIcon() {
 export function ThemeToggle() {
   const choice = useThemeChoice();
   const systemDark = useSystemDark();
-  const dark = choice === "dark" || (choice === "system" && systemDark);
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+  const dark = ready && (choice === "dark" || (choice === "system" && systemDark));
   const label = dark ? "밝은 테마로 바꾸기" : "어두운 테마로 바꾸기";
   return (
     <button
@@ -73,6 +75,7 @@ export function ThemeToggle() {
       aria-pressed={dark}
       data-dark={dark ? "true" : "false"}
       data-testid="theme-toggle"
+      suppressHydrationWarning
       onClick={() => getClientSession().setTheme(dark ? "light" : "dark")}
     >
       <span className={styles.thumb} aria-hidden="true" />

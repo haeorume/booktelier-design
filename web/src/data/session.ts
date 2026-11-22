@@ -19,6 +19,9 @@ export interface ClientSession {
   setPanelLayout(layout: PanelLayout): void;
   getTheme(): ThemeChoice;
   setTheme(theme: ThemeChoice): void;
+  /** 사용법 투어를 한 번 봤거나 건너뛰었는지(이 브라우저만). */
+  isTourDone(): boolean;
+  markTourDone(): void;
   /** 값이 바뀌면 부른다. 돌려준 함수로 구독을 끊는다. */
   subscribe(listener: () => void): () => void;
   /** 바뀔 때마다 달라지는 값. useSyncExternalStore에 쓴다. */
@@ -35,6 +38,7 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
   const currentKey = (projectId: Uuid) => `${STORAGE_PREFIX}current:${projectId}`;
   const PANEL = `${STORAGE_PREFIX}panel_layout`;
   const THEME = `${STORAGE_PREFIX}theme`;
+  const TOUR = `${STORAGE_PREFIX}tour_done`;
   const seenKey = (projectId: Uuid) => `${STORAGE_PREFIX}seen_comments:${projectId}`;
   function readSeen(projectId: Uuid): Set<Uuid> {
     try {
@@ -75,6 +79,14 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
     },
     setTheme(theme) {
       storage.setItem(THEME, theme);
+      notify();
+    },
+    isTourDone() {
+      return storage.getItem(TOUR) === "1";
+    },
+    markTourDone() {
+      if (storage.getItem(TOUR) === "1") return;
+      storage.setItem(TOUR, "1");
       notify();
     },
     subscribe(listener) {

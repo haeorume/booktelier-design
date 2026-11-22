@@ -48,6 +48,7 @@
     --bt-chip: #35373d;
     --bt-paper: #25272a;
     --bt-overlay: rgba(0, 0, 0, 0.55);
+    --bt-tour-dim: rgba(0, 0, 0, 0.62);
     --bt-line: #3c4149;
     --bt-line-soft: #3a3d43;
     --bt-line-strong: #565d68;
@@ -399,6 +400,7 @@
   --bt-chip: #35373d;
   --bt-paper: #25272a;
   --bt-overlay: rgba(0, 0, 0, 0.55);
+  --bt-tour-dim: rgba(0, 0, 0, 0.62);
   --bt-line: #3c4149;
   --bt-line-soft: #3a3d43;
   --bt-line-strong: #565d68;

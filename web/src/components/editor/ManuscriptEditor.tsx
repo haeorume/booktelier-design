@@ -9,10 +9,12 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type ReactNode, type Ref, type RefObject } from "react";
 import { changedParagraphIndexes } from "@/domain/live";
 import { pageCount, pageGeometry, pageMarks, sheetHeight, type PageMark } from "@/domain/pages";
+import type { EmphasisMark } from "@/domain/text-marks";
 import { pageStyleVars } from "@/domain/templates";
 import type { UnderlineSpan } from "@/domain/underlines";
 import { changedParagraphs, paragraphTexts } from "@/workspace/suggestions";
 import { parseChapterDoc, type ChapterDoc, type Layout, type TemplateId } from "@/types";
+import { EMPHASIS_EXTENSIONS, readEmphasis } from "./emphasis";
 import { PageGuides } from "./PageGuides";
 import { ParagraphWithId } from "./paragraph-id";
 import { selectionToAnchor, type PickedText } from "./selection";
@@ -38,6 +40,9 @@ export interface EditorHandle {
   /** 메뉴·서식 막대의 실행 취소·다시 실행(작가만, 편집기 되돌리기 기록) */
   undo(): boolean;
   redo(): boolean;
+  /** 고른 글자의 굵게·기울임·밑줄(FR-51). 작가만. */
+  toggleEmphasis(mark: EmphasisMark): boolean;
+  clearEmphasis(): boolean;
 }
 
 export type MarkClick = { kind: "suggestion"; ids: string[] } | { kind: "edit"; id: string } | { kind: "comment"; id: string };
@@ -65,6 +70,8 @@ interface Props {
   selectionMenu?: ReactNode;
   /** Ctrl/Cmd+Z. 직전 AI 제안 적용을 되돌렸으면 true(G-11). false면 편집기의 되돌리기가 돈다. */
   onUndoShortcut: () => boolean;
+  /** 커서·선택에 따라 서식 막대 켜짐 표시를 맞춘다. */
+  onEmphasisChange?: (active: Record<EmphasisMark, boolean>) => void;
   /** 여백 안내선(시안 .page-guides). 본문 단의 둘레를 엷은 주황 선과 네 모서리로 보여 줘요. */
   guides?: boolean;
   /** 지면 배율(책상 폭에 맞춤 × 상태 줄의 %). 1이면 실제 크기 */
@@ -75,7 +82,7 @@ const PROGRAM = "booktelier-program-change";
 
 /**
  * 지면 편집기(WS-30, WS-32). 템플릿 CSS 변수를 입힌 책 모양 지면이 곧 편집 화면이다.
- * 글자 서식 도구는 없다(D-13). 작가가 아니면 읽기 전용이다(FR-09 ④). 읽기 전용이어도 글자는 고를 수 있다(의견).
+ * 작가는 굵게·기울임·밑줄을 쓴다(FR-51). 작가가 아니면 읽기 전용이다(FR-09 ④). 읽기 전용이어도 글자는 고를 수 있다(의견).
  */
 export function ManuscriptEditor(props: Props) {
   const { ref, initialDoc, editable, templateId, layout, chapterTitle, chapterOrder, bookTitle, spans, edits, comments, selected, selectionMenu, guides = false, zoom = 1 } = props;
@@ -90,7 +97,7 @@ export function ManuscriptEditor(props: Props) {
   });
 
   const editor = useEditor({
-    extensions: [Document, ParagraphWithId, Text, UndoRedo, AiUnderlines],
+    extensions: [Document, ParagraphWithId, Text, UndoRedo, ...EMPHASIS_EXTENSIONS, AiUnderlines],
     content: initialDoc,
     editable,
     immediatelyRender: false,
@@ -117,6 +124,10 @@ export function ManuscriptEditor(props: Props) {
       handlers.current.onDocChange(doc, changed, transaction.getMeta(PROGRAM) ? "program" : "typing");
       // 원고가 바뀌면 고른 글자도 바뀌었을 수 있다. 옛 선택 메뉴로 없는 글자에 의견을 달지 않게 다시 읽는다.
       reread.current();
+      handlers.current.onEmphasisChange?.(readEmphasis((name) => e.isActive(name)));
+    },
+    onSelectionUpdate: ({ editor: e }) => {
+      handlers.current.onEmphasisChange?.(readEmphasis((name) => e.isActive(name)));
     },
   });
 
@@ -213,6 +224,14 @@ export function ManuscriptEditor(props: Props) {
       redo() {
         if (!editor || !editable) return false;
         return editor.chain().focus().redo().run();
+      },
+      toggleEmphasis(mark) {
+        if (!editor || !editable) return false;
+        return editor.chain().focus().toggleMark(mark).run();
+      },
+      clearEmphasis() {
+        if (!editor || !editable) return false;
+        return editor.chain().focus().unsetAllMarks().run();
       },
     }),
     [editor, editable],

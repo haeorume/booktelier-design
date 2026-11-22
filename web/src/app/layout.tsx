@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DevBar } from "@/components/DevBar";
 import { ThemeApplier } from "@/components/Theme";
+import { Tour } from "@/components/Tour";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body>
         <ThemeApplier />
         {/* 막대는 주소(usePathname)를 읽어 브라우저에서만 그린다. */}
@@ -19,6 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <DevBar />
         </Suspense>
         {children}
+        <Suspense fallback={null}>
+          <Tour />
+        </Suspense>
       </body>
     </html>
   );

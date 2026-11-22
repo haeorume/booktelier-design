@@ -1,0 +1,221 @@
+/* 검토 패널 AI 대화(시안 .br-chat-*). 색은 토큰만(R11). */
+
+.pane {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.log {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 17px 15px 12px;
+}
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 24px 8px;
+  text-align: center;
+}
+
+.welcomeIcon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 14px;
+  color: var(--bt-rp-brand-icon);
+}
+
+.welcome h3 {
+  margin: 0 0 8px;
+  color: var(--bt-rp-ink);
+  font-size: var(--bt-size-lg);
+  font-weight: var(--bt-weight-bold);
+  letter-spacing: -0.03em;
+}
+
+.welcome p {
+  margin: 0;
+  color: var(--bt-rp-muted);
+  font-size: var(--bt-size-md);
+  line-height: 1.9;
+}
+
+.welcome small {
+  display: block;
+  margin-top: 14px;
+  padding: 6px 9px;
+  border: 1px solid var(--bt-rp-well-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-rp-well);
+  color: var(--bt-rp-faint);
+  font-size: var(--bt-size-2xs);
+  line-height: 1.65;
+}
+
+.user,
+.assistant {
+  margin: 0 0 16px;
+  font-size: var(--bt-size-base);
+  line-height: 1.8;
+}
+
+.user {
+  margin-left: auto;
+  max-width: 94%;
+  padding: 10px 12px;
+  border: 1px solid var(--bt-accent-line);
+  border-radius: 8px 8px 2px 8px;
+  background: var(--bt-accent-soft);
+  color: var(--bt-text);
+}
+
+.assistant {
+  color: var(--bt-rp-ink);
+}
+
+.label {
+  display: flex;
+  margin-bottom: 6px;
+  font-size: var(--bt-size-2xs);
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-accent-text);
+}
+
+.user .label {
+  color: var(--bt-role-editor-text);
+}
+
+.user p,
+.assistant p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.jump {
+  margin-top: 8px;
+  padding: 5px 8px;
+  border: 1px solid var(--bt-line-control);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  color: var(--bt-accent-text);
+  font-size: var(--bt-size-sm);
+}
+
+.jump:hover {
+  background: var(--bt-accent-wash);
+}
+
+.pending {
+  margin: 0 0 8px;
+  color: var(--bt-rp-muted);
+  font-size: var(--bt-size-sm);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 8px 13px 9px;
+}
+
+.chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 5px 8px;
+  border: 1px solid var(--bt-rp-chip-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-rp-well);
+  color: var(--bt-rp-muted);
+  font-size: var(--bt-size-md);
+}
+
+.chips button:hover:not(:disabled) {
+  color: var(--bt-accent-text);
+  background: var(--bt-accent-wash);
+  border-color: var(--bt-accent-line);
+}
+
+.form {
+  position: relative;
+  flex-shrink: 0;
+  margin: 0 13px 5px;
+  border: 1px solid var(--bt-line-control);
+  border-radius: 7px;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-sm);
+}
+
+.form:focus-within {
+  border-color: var(--bt-accent-rule);
+}
+
+.form textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  max-height: 160px;
+  resize: vertical;
+  border: 0;
+  padding: 11px 48px 14px 11px;
+  background: transparent;
+  color: var(--bt-text);
+  font: inherit;
+  font-size: var(--bt-size-base);
+  line-height: 1.7;
+}
+
+.form textarea::placeholder {
+  color: var(--bt-rp-faint);
+}
+
+.send {
+  position: absolute;
+  right: 8px;
+  bottom: 9px;
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border: 1px solid var(--bt-action);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
+}
+
+.send:hover:not(:disabled) {
+  background: var(--bt-action-hover);
+  border-color: var(--bt-action-hover);
+}
+
+.send:disabled {
+  opacity: 0.4;
+}
+
+.foot {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 3px 14px 11px;
+  color: var(--bt-rp-faint);
+  font-size: var(--bt-size-2xs);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

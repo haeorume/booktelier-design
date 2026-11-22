@@ -36,7 +36,7 @@ export function placeSuggestions(doc: ChapterDoc, suggestions: AiSuggestion[]): 
   return { placed, lost };
 }
 
-/** 문단 한 곳의 글자를 바꾼 새 문서. 문단은 서식 없는 글자 하나로 합친다(D-13: 글자 서식 없음). */
+/** 문단 한 곳의 글자를 바꾼 새 문서. 그 문단의 강조 표시는 새 글자로 갈음한다. */
 export function replaceInDoc(doc: ChapterDoc, anchor: Anchor, text: string): ChapterDoc {
   return {
     ...doc,

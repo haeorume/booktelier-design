@@ -7,6 +7,7 @@ import type { Chapter } from "@/types";
 import styles from "./ChapterList.module.css";
 import { Icon } from "./Icon";
 import { StatusBadge } from "./StatusBadge";
+import { requestTour } from "./tour-start";
 
 interface Props {
   projectId: string;
@@ -22,15 +23,13 @@ interface Props {
   onOpenRules?: () => void;
   /** 원고 구조 접기(시안 .sidebar-heading 오른쪽 단추) */
   onCollapse?: () => void;
-  /** 저장 자리 안내(시안 .local-storage-label) */
-  storageLabel: string;
 }
 
 /**
  * 원고 구조(WS-20, 시안 11.22 .sidebar). 장 제목과 장 상태, 지금 보는 장 표시(FR-11, FR-12), 장 추가(FR-15).
  * 시안의 원고 찾기는 장 제목 거르기로, REVIEW 묶음은 검토 패널의 탭 열기로 이어요. '자료' 탭은 시안 모양만 있어요.
  */
-export function ChapterList({ projectId, chapters, currentId, onAdd, addRequest = 0, sharedCount = 0, onOpenShared, onOpenRules, onCollapse, storageLabel }: Props) {
+export function ChapterList({ projectId, chapters, currentId, onAdd, addRequest = 0, sharedCount = 0, onOpenShared, onOpenRules, onCollapse }: Props) {
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,7 +81,7 @@ export function ChapterList({ projectId, chapters, currentId, onAdd, addRequest 
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="원고 찾기" aria-label="장 제목 찾기" />
         <kbd aria-hidden="true">⌕</kbd>
       </label>
-      <div className={styles.stage}>
+      <div className={styles.stage} data-tour="chapters">
         <div className={styles.tabs} role="tablist" aria-label="원고와 자료">
           <button type="button" role="tab" aria-selected={tab === "manuscript"} className={styles.tab} onClick={() => setTab("manuscript")}>
             원고
@@ -158,14 +157,12 @@ export function ChapterList({ projectId, chapters, currentId, onAdd, addRequest 
         )}
       </div>
       <div className={styles.footer}>
-        <a className={styles.navItem} href="https://github.com/heo-aio/booktelier#readme" target="_blank" rel="noreferrer">
-          <Icon name="info" size="sm" />
-          <span>워크스페이스 가이드</span>
-        </a>
-        <p className={styles.storage}>
-          <i aria-hidden="true" />
-          {storageLabel}
-        </p>
+        <button type="button" className={styles.tour} onClick={() => requestTour()} aria-label="북틀리에 사용법">
+          북틀리에 사용법
+          <span className={styles.tourDot} aria-hidden="true">
+            <Icon name="info" size="sm" />
+          </span>
+        </button>
       </div>
     </nav>
   );

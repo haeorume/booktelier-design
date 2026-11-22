@@ -149,6 +149,18 @@
   min-height: 1em;
 }
 
+.prose :global(strong) {
+  font-weight: 700;
+}
+
+.prose :global(em) {
+  font-style: italic;
+}
+
+.prose :global(u) {
+  text-decoration: underline;
+}
+
 /* 지면 전체에는 포커스 띠 대신 엷은 파선만(종이 둘레에 주황 띠가 생기지 않게) */
 .prose:focus-visible {
   box-shadow: none;

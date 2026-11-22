@@ -325,25 +325,38 @@
   border-left: 0;
 }
 
-/* 시안 .sidebar-footer */
+/* 시안 .sidebar-footer: 사용법 투어를 왼쪽 아래에 둔다 */
 .footer {
   padding: 10px 10px 13px;
   border-top: 1px solid var(--bt-line);
   background: var(--bt-nav);
 }
 
-.storage {
+.tour {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 8px;
-  font-size: var(--bt-size-2xs);
-  color: var(--bt-text-3);
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 8px 0 14px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-surface);
+  color: var(--bt-text);
+  font-size: var(--bt-size-sm);
 }
 
-.storage i {
-  width: 4px;
-  height: 4px;
+.tour:hover {
+  border-color: var(--bt-line-hover);
+}
+
+.tourDot {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   border-radius: var(--bt-radius-full);
-  background: var(--bt-success);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
 }

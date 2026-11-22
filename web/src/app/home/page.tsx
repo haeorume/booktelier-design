@@ -10,6 +10,7 @@ import { TEMPLATES } from "@/domain/templates";
 import type { ProjectCard, Role } from "@/types";
 import { HomeHero } from "./HomeHero";
 import { ServiceHeader } from "./ServiceHeader";
+import { StartGuide } from "./StartGuide";
 import styles from "./page.module.css";
 
 function formatTs(iso: string): string {
@@ -45,6 +46,8 @@ export default function EditorHome() {
   }, []);
 
   const todo = (cards ?? []).reduce((n, c) => n + c.todo_count, 0);
+  const first = (cards ?? []).find((c) => c.first_chapter_id);
+  const workspaceHref = first?.first_chapter_id ? `/p/${first.id}/c/${first.first_chapter_id}` : null;
 
   return (
     <div className={styles.page}>
@@ -61,12 +64,12 @@ export default function EditorHome() {
             </h1>
             <p className={styles.lead}>여러 작가와 디자이너의 작업을, 책 한 권씩 이어갑니다</p>
           </div>
-          <Link className={styles.primary} href="/?new=1">
+          <Link className={styles.primary} href="/?new=1" data-tour="new-book">
             <Icon name="plus" className={styles.buttonIcon} />새 책 만들기
           </Link>
         </div>
 
-        <section id="home-intro" className={styles.intro} aria-labelledby="home-intro-title">
+        <section id="home-intro" className={styles.intro} aria-labelledby="home-intro-title" data-tour="home-flow">
           <div className={styles.introCopy}>
             <span className={styles.eyebrowSm}>A BLANK PAGE, A SHARED START</span>
             <h2 id="home-intro-title">
@@ -132,6 +135,8 @@ export default function EditorHome() {
             </div>
           </div>
         </section>
+
+        <StartGuide workspaceHref={workspaceHref} />
 
         <section id="home-shelf" className={styles.shelfHead} aria-labelledby="home-shelf-title">
           <div className={styles.shelfTitle}>
@@ -238,8 +243,8 @@ export default function EditorHome() {
         <footer className={styles.footer}>
           <span className={styles.saved}>{server ? "서버에 저장" : "이 브라우저에 저장"}</span>
           <span>{server ? "다른 브라우저에서는 편집자 링크로 들어와요." : "다른 브라우저에서는 이 목록이 보이지 않습니다."}</span>
-          <a className={styles.footLink} href="#home-intro">
-            사용 흐름
+          <a className={styles.footLink} href="#home-guide">
+            사용법 설명
           </a>
           <Link className={styles.footLink} href="/dev/events">
             시연 기록

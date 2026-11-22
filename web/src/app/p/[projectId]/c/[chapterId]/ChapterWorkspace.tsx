@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChapterActions, ChapterStatus } from "@/components/ChapterHead";
 import { FormatToolbar, MenuBar, Ruler, StatusBar, WorkHeader, type Density, type Menu } from "@/components/workspace/Chrome";
+import { EMPTY_EMPHASIS } from "@/components/editor/emphasis";
 import { ManuscriptEditor, type ChangeSource, type EditorHandle, type MarkClick } from "@/components/editor/ManuscriptEditor";
 import type { PickedText } from "@/components/editor/selection";
 import { ComposeDialog, type ComposeKind } from "@/components/review/ComposeDialog";
@@ -13,6 +14,7 @@ import { SharedTab } from "@/components/review/SharedTab";
 import { StyleRulesTab } from "@/components/review/StyleRulesTab";
 import { usePanelLayout } from "@/components/hooks";
 import { LayoutPanel } from "@/components/LayoutPanel";
+import { requestTour } from "@/components/tour-start";
 import { SnapshotDialog } from "@/components/SnapshotDialog";
 import { bookDeps, getClientSession, hasProjectEvent, type ChapterInfo, type Ctx, type PresentPerson } from "@/data";
 import type { LayoutChange } from "@/domain/layout";
@@ -97,6 +99,7 @@ export function ChapterWorkspace(props: Props) {
   const [composing, setComposing] = useState<{ kind: ComposeKind; picked: PickedText } | null>(null);
   const [chapterBusy, setChapterBusy] = useState(false);
   const [previewLayout, setPreviewLayout] = useState<Layout | null>(null);
+  const [emphasis, setEmphasis] = useState(EMPTY_EMPHASIS);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const editor = useRef<EditorHandle>(null);
   /* 시안 둘레의 화면 상태(이 브라우저에서만, 저장하지 않음) */
@@ -364,6 +367,10 @@ export function ChapterWorkspace(props: Props) {
     {
       label: "보기",
       items: [
+        { kind: "caption", label: "작업 화면" },
+        { kind: "check", label: "원고 편집 화면", checked: !layoutOpen, onToggle: () => onLayoutOpenChange(false) },
+        { kind: "check", label: "조판 화면", checked: layoutOpen, onToggle: () => onLayoutOpenChange(true) },
+        { kind: "line" },
         { kind: "caption", label: "패널 표시" },
         { kind: "check", label: "왼쪽 탐색 패널", checked: navOpen, onToggle: () => onNavOpenChange(!navOpen) },
         { kind: "check", label: "상단 작업 도구", checked: toolsOpen, onToggle: () => onToolsOpenChange(!toolsOpen) },
@@ -386,6 +393,7 @@ export function ChapterWorkspace(props: Props) {
     {
       label: "도움말",
       items: [
+        { kind: "action", label: "북틀리에 사용법", icon: "info", onSelect: () => requestTour() },
         { kind: "action", label: "되돌리기 Ctrl Z · 다시 하기 Ctrl Shift Z", icon: "info" },
         { kind: "action", label: "글을 고르면 의견·수정 제안 메뉴가 떠요", icon: "comment" },
       ],
@@ -449,6 +457,7 @@ export function ChapterWorkspace(props: Props) {
           <FormatToolbar
             density={density}
             canEdit={canEdit}
+            layoutMode={layoutOpen}
             onUndo={undo}
             onRedo={() => editor.current?.redo()}
             onSuggest={pickEdit}
@@ -457,6 +466,9 @@ export function ChapterWorkspace(props: Props) {
             guides={guides}
             onGuides={() => setGuides((g) => !g)}
             onCompare={can(me.role, "view_snapshots") ? onSnapshotsOpen : undefined}
+            emphasis={emphasis}
+            onEmphasis={(mark) => editor.current?.toggleEmphasis(mark)}
+            onClearFormat={() => editor.current?.clearEmphasis()}
           />
         )}
         <div className={styles.desk} ref={desk} data-testid="desk">
@@ -501,6 +513,7 @@ export function ChapterWorkspace(props: Props) {
               </>
             )
           }
+          onEmphasisChange={setEmphasis}
           onUndoShortcut={() => {
             // 적용 직후면 Ctrl/Cmd+Z가 원고와 제안을 함께 되돌린다(G-11). 아니면 편집기 되돌리기.
             if (!ai.lastAppliedRef.current) return false;
@@ -514,7 +527,7 @@ export function ChapterWorkspace(props: Props) {
             <i />
           </p>
         </div>
-        <StatusBar mode={me.role === "designer" ? "Layout" : "Edit"} chars={chars} zoom={zoom} onZoom={setZoom} onPreview={onPreview} />
+        <StatusBar mode={layoutOpen ? "Layout" : "Edit"} chars={chars} zoom={zoom} onZoom={setZoom} onPreview={onPreview} />
       </div>
       {/*
         오른쪽 패널(D-10, N-15). 하나씩(A안, 기본): 조판 설정을 열면 검토 패널이 닫힌다.

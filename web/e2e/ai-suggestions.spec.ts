@@ -1,6 +1,6 @@
 // AI 제안 카드 동작과 역할별로 보이는 것(W3).
 import { expect, test, type Page } from "@playwright/test";
-import { aiCards, card, enterAsAuthor, events, expectEvent, paragraph, switchRole, typeAtEnd } from "./helpers";
+import { aiCards, card, enterAsAuthor, events, expectEvent, paragraph, revealDevBar, switchRole, typeAtEnd } from "./helpers";
 
 async function liveCheckOnPara02(page: Page) {
   await enterAsAuthor(page);
@@ -135,7 +135,7 @@ test("밑줄을 누르면 그 카드가 선택된다", async ({ page }) => {
 
 test("역할을 바꾸면 작가의 AI 제안이 보이지 않고, 편집자·디자이너는 원고를 고칠 수 없다(QA-20, QA-38, FR-42)", async ({ page }) => {
   await liveCheckOnPara02(page);
-  const bar = page.getByTestId("dev-bar");
+  const bar = await revealDevBar(page);
 
   await bar.getByRole("button", { name: "편집자" }).click();
   await expect(page.getByTestId("role-badge")).toHaveText("편집자");
@@ -156,6 +156,48 @@ test("역할을 바꾸면 작가의 AI 제안이 보이지 않고, 편집자·�
   await bar.getByRole("button", { name: "작가" }).click();
   await expect(aiCards(page)).toHaveCount(2);
   await expect(paragraph(page, "para_02")).toContainText("오래도록.");
+});
+
+test("AI 대화 탭에서 준비된 예시 응답이 뜬다", async ({ page }) => {
+  await enterAsAuthor(page);
+  await page.getByRole("tab", { name: "AI 대화" }).click();
+  const chat = page.getByTestId("ai-chat");
+  await expect(chat).toBeVisible();
+  await expect(chat).toContainText("원고를 함께 살펴볼까요?");
+  await page.getByRole("button", { name: "교정·교열" }).click();
+  await expect(chat).toContainText("맞춤법");
+  await expect(page.getByText("준비된 예시 응답 · 실제 AI API 연결 전")).toBeVisible();
+});
+
+test("편집자는 원고 편집이 기본이고 조판을 눌러야 조판 설정이 열린다", async ({ page }) => {
+  await enterAsAuthor(page);
+  await switchRole(page, "편집자");
+  const mode = page.getByTestId("work-mode");
+  await expect(mode.getByRole("button", { name: "원고 편집", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(mode.getByRole("button", { name: "조판", exact: true })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByTestId("layout-panel")).toHaveCount(0);
+  await expect(page.getByRole("toolbar", { name: "서식 막대" })).toBeVisible();
+  await mode.getByRole("button", { name: "조판", exact: true }).click();
+  await expect(page.getByTestId("layout-panel")).toBeVisible();
+  await expect(page.getByRole("toolbar", { name: "조판 막대" })).toBeVisible();
+  await mode.getByRole("button", { name: "원고 편집", exact: true }).click();
+  await expect(page.getByTestId("layout-panel")).toHaveCount(0);
+  await expect(page.getByRole("toolbar", { name: "서식 막대" })).toBeVisible();
+});
+
+test("작가는 고른 글을 굵게 할 수 있다", async ({ page }) => {
+  await enterAsAuthor(page);
+  const p = paragraph(page, "para_01");
+  await p.click();
+  await p.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  await page.getByRole("button", { name: "굵게" }).click();
+  await expect(p.locator("strong")).toBeVisible();
 });
 
 test("first_edit는 이 책에서 한 번만 남는다", async ({ page }) => {

@@ -78,7 +78,7 @@ export function NewBook() {
             편집자 홈
           </Link>
         )}
-        <div className={styles.head}>
+        <div className={styles.head} data-tour="new-book">
           <span className={styles.eyebrow}>START A NEW STORY</span>
           <h1 className={styles.title}>
             <span className={styles.srOnly}>새 책 만들기 · </span>첫 장부터, 함께 시작해요.

@@ -1,5 +1,5 @@
 // 예시 JSON(나중에는 서버 응답)을 타입으로 읽어 들이는 곳. 확정 값이 아니면 여기서 멈춘다.
-import type { AiSuggestion, Anchor, ChapterDoc, ChapterReviewResult, LiveCheckResult, ParagraphNode } from "./entities";
+import type { AiSuggestion, Anchor, ChapterDoc, ChapterReviewResult, LiveCheckResult, ParagraphNode, TextNode } from "./entities";
 import {
   AI_SUGGESTION_KINDS,
   AI_SUGGESTION_SOURCES,
@@ -106,6 +106,21 @@ export function parseChapterReviewResult(raw: unknown): ChapterReviewResult {
   };
 }
 
+function parseTextMarks(raw: unknown, where: string): TextNode["marks"] {
+  if (raw === undefined) return undefined;
+  if (!Array.isArray(raw)) throw new ContractError(where, "배열이 아니에요");
+  if (raw.length === 0) return undefined;
+  return raw.map((item, i) => {
+    const mw = `${where}[${i}]`;
+    const mo = obj(item, mw);
+    const mark: { type: string; attrs?: Record<string, unknown> } = { type: str(mo, "type", mw) };
+    if (mo.attrs === undefined) return mark;
+    const attrs = obj(mo.attrs, `${mw}.attrs`);
+    mark.attrs = attrs;
+    return mark;
+  });
+}
+
 export function parseChapterDoc(raw: unknown, where = "doc"): ChapterDoc {
   const o = obj(raw, where);
   if (o.type !== "doc" || !Array.isArray(o.content)) throw new ContractError(where, "doc 문서가 아니에요");
@@ -120,9 +135,13 @@ export function parseChapterDoc(raw: unknown, where = "doc"): ChapterDoc {
       type: "paragraph",
       attrs: { id },
       content: texts.map((t, j) => {
-        const to = obj(t, `${pw}.content[${j}]`);
-        if (to.type !== "text") throw new ContractError(`${pw}.content[${j}]`, "글자 노드가 아니에요");
-        return { type: "text" as const, text: str(to, "text", `${pw}.content[${j}]`) };
+        const tw = `${pw}.content[${j}]`;
+        const to = obj(t, tw);
+        if (to.type !== "text") throw new ContractError(tw, "글자 노드가 아니에요");
+        const node: TextNode = { type: "text", text: str(to, "text", tw) };
+        const marks = parseTextMarks(to.marks, `${tw}.marks`);
+        if (marks) node.marks = marks;
+        return node;
       }),
     };
   });

@@ -10,8 +10,8 @@ import styles from "./Chrome.module.css";
 
 /*
  * 작업 공간 둘레(시안 11.22): 장 탭 줄 · 메뉴 막대 · 작업 머리 · 서식 막대 · 눈금자 · 상태 줄.
- * 앱에 있는 기능(미리보기, 검토본, 실행 취소, 패널 보기, 안내선, 장 검토 …)에 이어 붙이고,
- * 1차에 없는 글자 서식(D-13)은 시안 모양만 두어 누를 수 없게(tabIndex -1, aria-disabled) 했어요.
+ * 앱에 있는 기능(미리보기, 검토본, 실행 취소, 패널 보기, 안내선, 장 검토, 작가 강조 …)에 이어 붙이고,
+ * 원고 구조에 없는 것(제목 블록·목록·이미지·링크·각주)은 시안 모양만 두어 누를 수 없게 했어요.
  */
 
 /* ── 장 탭 줄(시안 .bf-project-tabs) ───────────────────────── */
@@ -144,6 +144,20 @@ const ROLE_WORK: Record<Role, string> = {
 
 export type Density = "simple" | "basic" | "detail";
 
+/** 작업 머리의 원고 편집/조판 전환. 고르기 전에는 원고 편집이에요. */
+function WorkModeSwitch({ mode, onMode }: { mode: "edit" | "layout"; onMode: (mode: "edit" | "layout") => void }) {
+  return (
+    <div className={styles.modeSwitch} role="group" aria-label="작업 전환" data-testid="work-mode">
+      <button type="button" className={styles.orb} aria-pressed={mode === "edit"} onClick={() => onMode("edit")}>
+        원고 편집
+      </button>
+      <button type="button" className={styles.orb} aria-pressed={mode === "layout"} onClick={() => onMode("layout")}>
+        조판
+      </button>
+    </div>
+  );
+}
+
 export function WorkHeader(props: {
   role: Role;
   chapterOrder: number;
@@ -171,17 +185,7 @@ export function WorkHeader(props: {
           </span>
         </div>
       </div>
-      {/* 시안 .mode-switch: 원고 편집 · 조판. 조판을 고르면 조판 설정이 열려요. */}
-      <div className={styles.modeSwitch} role="group" aria-label="작업 전환">
-        <button type="button" className={styles.orb} aria-pressed={!layoutOpen} onClick={() => onMode("edit")}>
-          <strong>원고 편집</strong>
-          <small>{ROLE_LABEL[role]}</small>
-        </button>
-        <button type="button" className={styles.orb} aria-pressed={layoutOpen} onClick={() => onMode("layout")}>
-          <strong>조판</strong>
-          <small>{ROLE_LABEL[role]}</small>
-        </button>
-      </div>
+      <WorkModeSwitch mode={layoutOpen ? "layout" : "edit"} onMode={onMode} />
       <div className={styles.options}>
         <div className={styles.actions}>{actions}</div>
         <label className={styles.density}>
@@ -202,15 +206,35 @@ export function WorkHeader(props: {
 
 /* ── 서식 막대(시안 .toolbar-stage) ─────────────────────────── */
 
-function Tool({ icon, label, onClick, accent, text }: { icon: IconName; label: string; onClick?: () => void; accent?: boolean; text?: string }) {
+function Tool({
+  icon,
+  label,
+  onClick,
+  accent,
+  text,
+  pressed,
+  hint,
+}: {
+  icon: IconName;
+  label: string;
+  onClick?: () => void;
+  accent?: boolean;
+  text?: string;
+  pressed?: boolean;
+  hint?: string;
+}) {
   return (
     <button
       type="button"
       className={`${styles.tool} ${accent ? styles.accentTool : ""} ${text ? styles.labeled : ""}`}
       aria-label={label}
-      title={onClick ? label : `${label} (시안 기능, 아직 쓸 수 없어요)`}
+      title={onClick ? label : (hint ?? `${label} (이 버전에서는 아직 쓸 수 없어요)`)}
+      aria-pressed={pressed}
       aria-disabled={!onClick}
       tabIndex={onClick ? undefined : -1}
+      onMouseDown={(e) => {
+        if (onClick) e.preventDefault();
+      }}
       onClick={onClick}
     >
       <Icon name={icon} size={text ? "sm" : "md"} />
@@ -219,51 +243,93 @@ function Tool({ icon, label, onClick, accent, text }: { icon: IconName; label: s
   );
 }
 
-function FakeSelect({ value, width }: { value: string; width: number }) {
+function FakeSelect({ value, width, title }: { value: string; width: number; title: string }) {
   return (
-    <span className={styles.fakeSelect} style={{ width }} aria-hidden="true">
+    <span className={styles.fakeSelect} style={{ width }} title={title} aria-hidden="true">
       {value}
       <Icon name="down" size="xs" />
     </span>
   );
 }
 
-export function FormatToolbar(props: { density: Density; canEdit: boolean; onUndo: () => void; onRedo: () => void; onSuggest?: () => void; onComment?: () => void; onAi?: () => void; guides: boolean; onGuides: () => void; onCompare?: () => void }) {
-  const { density, canEdit, onUndo, onRedo, onSuggest, onComment, onAi, guides, onGuides, onCompare } = props;
+export function FormatToolbar(props: {
+  density: Density;
+  canEdit: boolean;
+  layoutMode: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  onSuggest?: () => void;
+  onComment?: () => void;
+  onAi?: () => void;
+  guides: boolean;
+  onGuides: () => void;
+  onCompare?: () => void;
+  emphasis?: { bold: boolean; italic: boolean; underline: boolean };
+  onEmphasis?: (mark: "bold" | "italic" | "underline") => void;
+  onClearFormat?: () => void;
+}) {
+  const { density, canEdit, layoutMode, onUndo, onRedo, onSuggest, onComment, onAi, guides, onGuides, onCompare, emphasis, onEmphasis, onClearFormat } = props;
+  const authorHint = "작가만 원고를 고칠 수 있어요";
+  const mark = (name: "bold" | "italic" | "underline", label: string) => (
+    <Tool icon={name} label={label} pressed={emphasis?.[name]} onClick={canEdit && onEmphasis ? () => onEmphasis(name) : undefined} hint={authorHint} />
+  );
   if (density === "simple") return null;
   return (
-    <div className={styles.toolbarStage} role="toolbar" aria-label="서식 막대">
+    <div className={styles.toolbarStage} role="toolbar" aria-label={layoutMode ? "조판 막대" : "서식 막대"}>
       <div className={styles.toolRow}>
-        <div className={styles.toolGroup}>
-          <Tool icon="undo" label="되돌리기" onClick={canEdit ? onUndo : undefined} />
-          <Tool icon="redo" label="다시 하기" onClick={canEdit ? onRedo : undefined} />
-        </div>
-        <div className={styles.toolGroup}>
-          <FakeSelect value="본문" width={65} />
-        </div>
-        <div className={styles.toolGroup}>
-          <FakeSelect value="명조" width={82} />
-          <FakeSelect value="16" width={39} />
-        </div>
-        <div className={styles.toolGroup}>
-          <Tool icon="bold" label="굵게" />
-          <Tool icon="italic" label="기울임" />
-          <Tool icon="underline" label="밑줄" />
-        </div>
-        <div className={styles.toolGroup}>
-          <Tool icon="align-left" label="왼쪽 정렬" />
-          <Tool icon="align-center" label="가운데 정렬" />
-        </div>
-        <div className={styles.toolGroup}>
-          <Tool icon="image" label="이미지" />
-        </div>
-        <div className={`${styles.toolGroup} ${styles.lastGroup}`}>
-          <Tool icon="track" label="고른 글 고쳐 쓰기" text="수정 제안" onClick={onSuggest} />
-          <Tool icon="comment" label="고른 글에 의견" onClick={onComment} />
-          <Tool icon="spark" label="북틀리에 AI 검토" onClick={onAi} accent />
-        </div>
+        {layoutMode ? (
+          <>
+            <div className={styles.toolGroup}>
+              <Tool icon="pointer" label="선택" />
+              <Tool icon="crop" label="자르기" />
+            </div>
+            <div className={styles.toolGroup}>
+              <Tool icon="columns" label="단 나누기" />
+              <Tool icon="ruler" label="여백" />
+              <Tool icon="layout" label="여백 안내선" onClick={onGuides} />
+            </div>
+            <div className={styles.toolGroup}>
+              <Tool icon="image" label="이미지" />
+            </div>
+            <div className={`${styles.toolGroup} ${styles.lastGroup}`}>
+              <Tool icon="comment" label="고른 글에 의견" onClick={onComment} />
+              <Tool icon="spark" label="북틀리에 AI 검토" onClick={onAi} accent />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles.toolGroup}>
+              <Tool icon="undo" label="되돌리기" onClick={canEdit ? onUndo : undefined} />
+              <Tool icon="redo" label="다시 하기" onClick={canEdit ? onRedo : undefined} />
+            </div>
+            <div className={styles.toolGroup}>
+              <FakeSelect value="본문" width={65} title="문단만 있어요. 장 제목은 위쪽 장 이름에서 고쳐요" />
+            </div>
+            <div className={styles.toolGroup}>
+              <FakeSelect value="명조" width={82} title="본문 글꼴은 조판 설정에서 바꿔요" />
+              <FakeSelect value="16" width={39} title="본문 글자 크기는 조판 설정에서 바꿔요" />
+            </div>
+            <div className={styles.toolGroup}>
+              {mark("bold", "굵게")}
+              {mark("italic", "기울임")}
+              {mark("underline", "밑줄")}
+            </div>
+            <div className={styles.toolGroup}>
+              <Tool icon="align-left" label="왼쪽 정렬" hint="본문 정렬은 조판 설정에서 바꿔요" />
+              <Tool icon="align-center" label="가운데 정렬" hint="본문 정렬은 조판 설정에서 바꿔요" />
+            </div>
+            <div className={styles.toolGroup}>
+              <Tool icon="image" label="이미지" hint="이미지는 이 버전 원고에 없어요" />
+            </div>
+            <div className={`${styles.toolGroup} ${styles.lastGroup}`}>
+              <Tool icon="track" label="고른 글 고쳐 쓰기" text="수정 제안" onClick={onSuggest} />
+              <Tool icon="comment" label="고른 글에 의견" onClick={onComment} />
+              <Tool icon="spark" label="북틀리에 AI 검토" onClick={onAi} accent />
+            </div>
+          </>
+        )}
       </div>
-      {density === "detail" && (
+      {density === "detail" && !layoutMode && (
         <div className={`${styles.toolRow} ${styles.toolRow2}`}>
           <div className={styles.toolGroup}>
             <span className={styles.colorTool} aria-hidden="true">
@@ -275,20 +341,20 @@ export function FormatToolbar(props: { density: Density; canEdit: boolean; onUnd
             </span>
           </div>
           <div className={styles.toolGroup}>
-            <Tool icon="list" label="글머리 목록" />
-            <Tool icon="number-list" label="번호 목록" />
-            <Tool icon="indent" label="들여쓰기" />
-            <Tool icon="outdent" label="내어쓰기" />
+            <Tool icon="list" label="글머리 목록" hint="목록은 이 버전 원고 구조에 없어요" />
+            <Tool icon="number-list" label="번호 목록" hint="목록은 이 버전 원고 구조에 없어요" />
+            <Tool icon="indent" label="들여쓰기" hint="들여쓰기는 이 버전 원고 구조에 없어요" />
+            <Tool icon="outdent" label="내어쓰기" hint="들여쓰기는 이 버전 원고 구조에 없어요" />
           </div>
           <div className={styles.toolGroup}>
             <Icon name="leading" size="sm" />
-            <FakeSelect value="" width={50} />
+            <FakeSelect value="" width={50} title="행간은 조판 설정에서 바꿔요" />
           </div>
           <div className={styles.toolGroup}>
-            <Tool icon="link" label="링크" />
-            <Tool icon="note" label="각주" />
+            <Tool icon="link" label="링크" hint="링크는 이 버전 원고에 없어요" />
+            <Tool icon="note" label="각주" hint="각주는 이 버전 원고에 없어요" />
             <Tool icon="layout" label="여백 안내선" onClick={onGuides} />
-            <Tool icon="eraser" label="서식 지우기" />
+            <Tool icon="eraser" label="서식 지우기" onClick={canEdit ? onClearFormat : undefined} hint={authorHint} />
           </div>
           <div className={`${styles.toolGroup} ${styles.lastGroup}`}>
             <Tool icon="track" label="변경 비교" text="변경 비교" onClick={onCompare} />

@@ -27,6 +27,13 @@ describe("ClientSession", () => {
     expect(s.getSeenComments("b2").size).toBe(0);
   });
 
+  it("사용법 투어를 끝낸 기록을 남긴다", () => {
+    const storage = new MemoryStorage();
+    expect(createClientSession(storage).isTourDone()).toBe(false);
+    createClientSession(storage).markTourDone();
+    expect(createClientSession(storage).isTourDone()).toBe(true);
+  });
+
   it("바뀌면 구독자에게 알리고, 끊으면 알리지 않는다", () => {
     const s = createClientSession(new MemoryStorage());
     const listener = vi.fn();

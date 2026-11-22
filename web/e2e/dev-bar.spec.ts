@@ -1,10 +1,10 @@
 // 개발용 막대(DV-02, FR-41, QA-24)와 W2 화면의 주변 상태.
 import { expect, test } from "@playwright/test";
-import { createBookAndCopyLinks, events, expectEvent } from "./helpers";
+import { createBookAndCopyLinks, events, expectEvent, revealDevBar } from "./helpers";
 
 test("막대로 역할을 바꾸면 주소는 그대로이고 지금 참여자만 바뀐다(QA-24, FR-41 ②)", async ({ page }) => {
   const { workspaceUrl } = await createBookAndCopyLinks(page);
-  const bar = page.getByTestId("dev-bar");
+  const bar = await revealDevBar(page);
   await expect(bar).toContainText("개발용");
   await expect(bar.getByRole("button", { name: "편집자" })).toHaveAttribute("aria-pressed", "true");
 
@@ -30,7 +30,8 @@ test("막대로 역할을 바꾸면 주소는 그대로이고 지금 참여자�
 
 test("패널 배치를 바꾸면 이후 이벤트의 panel_layout이 바뀐다(D-10)", async ({ page }) => {
   await createBookAndCopyLinks(page);
-  await page.getByTestId("dev-bar").getByRole("button", { name: "나란히" }).click();
+  const bar = await revealDevBar(page);
+  await bar.getByRole("button", { name: "나란히" }).click();
   await page.getByRole("button", { name: "초대", exact: true }).click();
   await page.getByTestId("share-author").getByRole("button", { name: "링크 복사" }).click();
   const layouts = async () => (await events(page)).filter((e) => e.name === "role_link_copied").map((e) => e.props.panel_layout);
@@ -116,4 +117,20 @@ test("이 브라우저에 역할이 없는 책의 작업 공간은 링크로 다
   const other = await context.newPage();
   await other.goto(workspaceUrl);
   await expect(other.getByRole("heading", { name: "받은 링크로 다시 들어와 주세요" })).toBeVisible();
+});
+
+test("개발용 막대는 평소 숨고 F1이나 화면 맨 위에 마우스를 두면 열린다", async ({ page }) => {
+  await page.goto("/home");
+  const bar = page.getByTestId("dev-bar");
+  await expect(bar).toBeHidden();
+  await page.mouse.move(240, 4);
+  await expect(bar).toBeVisible();
+  await page.mouse.move(240, 400);
+  await expect(bar).toBeHidden();
+  await page.keyboard.press("F1");
+  await expect(bar).toBeVisible();
+  await page.mouse.move(240, 400);
+  await expect(bar).toBeVisible();
+  await page.keyboard.press("F1");
+  await expect(bar).toBeHidden();
 });

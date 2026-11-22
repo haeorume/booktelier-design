@@ -2,6 +2,7 @@
 // 화면은 여기서 만든 글을 Paged.js에 넘겨 실제 쪽으로 나눠요. 작업 지면과 같은 조판 값을 써요.
 import type { ChapterDoc, Layout, TemplateId } from "@/types";
 import { pageSide } from "./layout";
+import { isEmphasisMark, wrapEmphasisHtml } from "./text-marks";
 import { pageStyleVars, parseTrim, TEMPLATES } from "./templates";
 
 /** 지면 위 표시 하나(보기 켜고 끄기, PV-04). 자리는 문단 id + 서식 뺀 글자 위치(D-19). */
@@ -51,11 +52,13 @@ export function paragraphHtml(text: string, marks: PreviewMark[], showInserts = 
     }
     const next = points[i + 1];
     if (next === undefined || next === at) continue;
-    const piece = escapeHtml(text.slice(at, next));
     const covering = valid.filter((m) => m.start <= at && m.end >= next && m.start !== m.end);
-    if (covering.length === 0) html += piece;
+    const formats = covering.map((m) => m.kind).filter(isEmphasisMark);
+    const preview = covering.filter((m) => !isEmphasisMark(m.kind));
+    let piece = wrapEmphasisHtml(escapeHtml(text.slice(at, next)), formats);
+    if (preview.length === 0) html += piece;
     else {
-      const cls = [...new Set(covering.map((m) => (m.kind === "edit" ? "bt-edit-del" : `bt-${m.kind}`)))].join(" ");
+      const cls = [...new Set(preview.map((m) => (m.kind === "edit" ? "bt-edit-del" : `bt-${m.kind}`)))].join(" ");
       html += `<span class="bt-mark ${cls}">${piece}</span>`;
     }
   }
@@ -72,10 +75,25 @@ export function chapterHtml(doc: ChapterDoc, chapter: { order: number; title: st
   const body = doc.content
     .map((p) => {
       const mine = marks.filter((m) => m.paragraph_id === p.attrs.id);
-      return `<p class="bt-p" data-paragraph-id="${escapeHtml(p.attrs.id)}">${paragraphHtml(paragraphText(p), mine, showInserts)}</p>`;
+      return `<p class="bt-p" data-paragraph-id="${escapeHtml(p.attrs.id)}">${paragraphHtml(paragraphText(p), [...emphasisMarks(p), ...mine], showInserts)}</p>`;
     })
     .join("");
   return head + body;
+}
+
+function emphasisMarks(p: ChapterDoc["content"][number]): PreviewMark[] {
+  const out: PreviewMark[] = [];
+  let start = 0;
+  for (const node of p.content ?? []) {
+    const end = start + node.text.length;
+    for (const mark of node.marks ?? []) {
+      if (isEmphasisMark(mark.type) && node.text.length > 0) {
+        out.push({ paragraph_id: p.attrs.id, start, end, kind: mark.type });
+      }
+    }
+    start = end;
+  }
+  return out;
 }
 
 function marginBox(pos: "bottom_outer" | "bottom_center" | "none", side: "left" | "right"): string | null {

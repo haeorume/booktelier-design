@@ -2,7 +2,7 @@
 import os from "node:os";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { enterAsAuthor, events, expectEvent, paragraph, switchRole, typeAtEnd } from "./helpers";
+import { enterAsAuthor, events, expectEvent, paragraph, revealDevBar, switchRole, typeAtEnd } from "./helpers";
 
 const lineHeight = (page: Page) =>
   page.getByTestId("page").evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) / parseFloat(getComputedStyle(el).fontSize));
@@ -13,14 +13,15 @@ test("하나씩이면 검토 패널과 조판 설정 중 하나만, 나란히면
   const review = page.getByRole("complementary", { name: "검토 패널" });
   const layout = page.getByTestId("layout-panel");
   // 처음 값은 하나씩
-  await expect(page.getByTestId("dev-bar").getByRole("button", { name: "하나씩" })).toHaveAttribute("aria-pressed", "true");
+  const bar = await revealDevBar(page);
+  await expect(bar.getByRole("button", { name: "하나씩" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "조판 설정", exact: true }).click();
   await expect(layout).toBeVisible();
   await expect(review).toBeHidden();
   await layout.getByRole("button", { name: "조판 설정 닫기" }).click();
   await expect(review).toBeVisible();
 
-  await page.getByTestId("dev-bar").getByRole("button", { name: "나란히" }).click();
+  await bar.getByRole("button", { name: "나란히" }).click();
   await page.getByRole("button", { name: "조판 설정", exact: true }).click();
   await expect(layout).toBeVisible();
   await expect(review).toBeVisible();
@@ -163,7 +164,8 @@ test("1440px에서 '나란히'로 연 화면을 캡처한다(QA-26, 사람이 �
   await expect(page.getByTestId("ai-card")).toHaveCount(2);
   await switchRole(page, "디자이너", "디자이너 C");
   await switchRole(page, "작가");
-  await page.getByTestId("dev-bar").getByRole("button", { name: "나란히" }).click();
+  const bar = await revealDevBar(page);
+  await bar.getByRole("button", { name: "나란히" }).click();
   await page.getByRole("button", { name: "조판 설정", exact: true }).click();
   await expect(page.getByTestId("layout-panel")).toBeVisible();
   const deskWidth = await page.locator("[data-testid=page]").evaluate((el) => el.parentElement!.getBoundingClientRect().width);

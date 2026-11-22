@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { isTourActive, TOUR_ACTIVITY_EVENT } from "@/components/tour-start";
 import styles from "./HomeHero.module.css";
 
 /**
@@ -20,12 +21,20 @@ const INTERVAL_MS = 6000;
 export function HomeHero() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [tourLock, setTourLock] = useState(false);
 
   useEffect(() => {
-    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const onTour = () => setTourLock(isTourActive());
+    onTour();
+    window.addEventListener(TOUR_ACTIVITY_EVENT, onTour);
+    return () => window.removeEventListener(TOUR_ACTIVITY_EVENT, onTour);
+  }, []);
+
+  useEffect(() => {
+    if (paused || tourLock || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [paused]);
+  }, [paused, tourLock]);
 
   const go = (n: number) => setIndex((n + SLIDES.length) % SLIDES.length);
   const slide = SLIDES[index];

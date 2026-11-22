@@ -108,7 +108,7 @@ export function TopBar(props: Props) {
           <i aria-hidden="true" />
         </button>
         {/* 시안의 '속성' 자리. 이름은 '조판 설정'(e2e·스크린리더가 찾는 이름) */}
-        <button type="button" className={styles.panelToggle} aria-pressed={layoutOpen} aria-label="조판 설정" onClick={onToggleLayout} title="조판 설정">
+        <button type="button" className={styles.panelToggle} aria-pressed={layoutOpen} aria-label="조판 설정" onClick={onToggleLayout} title="조판 설정" data-tour="layout">
           <Icon name="settings" size="sm" />
           <span aria-hidden="true">속성</span>
           <i aria-hidden="true" />
@@ -136,7 +136,7 @@ export function TopBar(props: Props) {
             <Icon name="comment" />
           </button>
           {can(role, "share_role_links") && (
-            <button type="button" className={styles.share} onClick={onShare}>
+            <button type="button" className={styles.share} onClick={onShare} data-tour="invite">
               <Icon name="link" />
               초대
             </button>

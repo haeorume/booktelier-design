@@ -124,8 +124,18 @@ export async function selectText(page: Page, id: string, start: number, end: num
   );
 }
 
+/** 평소 숨은 개발용 막대를 F1으로 연다(시안 상단 호버와 같음). */
+export async function revealDevBar(page: Page) {
+  const bar = page.getByTestId("dev-bar");
+  if (await bar.isVisible()) return bar;
+  await page.keyboard.press("F1");
+  await expect(bar).toBeVisible();
+  return bar;
+}
+
 export async function switchRole(page: Page, role: "편집자" | "작가" | "디자이너", name?: string) {
-  await page.getByTestId("dev-bar").getByRole("button", { name: role }).click();
+  const bar = await revealDevBar(page);
+  await bar.getByRole("button", { name: role }).click();
   if (name) {
     const ask = page.getByRole("dialog", { name: "이름 넣기" });
     await ask.getByLabel("이름").fill(name);

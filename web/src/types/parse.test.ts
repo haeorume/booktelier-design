@@ -20,6 +20,28 @@ describe("예시 JSON이 data-contract 타입에 맞는다", () => {
     const doc = parseChapterDoc(manuscript.chapter.doc);
     expect(doc.content.map((p) => p.attrs.id)).toEqual(["para_01", "para_02", "para_03", "para_04"]);
   });
+
+  it("글자 강조(bold)는 서버 계약처럼 그대로 둔다", () => {
+    const doc = parseChapterDoc({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          attrs: { id: "p1" },
+          content: [
+            { type: "text", text: "가" },
+            { type: "text", text: "나", marks: [{ type: "bold" }] },
+            { type: "text", text: "다", marks: [{ type: "italic" }, { type: "underline" }] },
+          ],
+        },
+      ],
+    });
+    expect(doc.content[0].content).toEqual([
+      { type: "text", text: "가" },
+      { type: "text", text: "나", marks: [{ type: "bold" }] },
+      { type: "text", text: "다", marks: [{ type: "italic" }, { type: "underline" }] },
+    ]);
+  });
 });
 
 describe("확정 값이 아니면 거절한다", () => {

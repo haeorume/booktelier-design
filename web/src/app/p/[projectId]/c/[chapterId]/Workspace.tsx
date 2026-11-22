@@ -266,7 +266,6 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
               onOpenShared={() => commands.current?.openShared()}
               onOpenRules={() => commands.current?.openRules()}
               onCollapse={() => setNavOpen(false)}
-              storageLabel={bookDeps().live ? "서버에 함께 저장" : "내 브라우저에 저장"}
             />
           )}
           <div className={styles.stage}>

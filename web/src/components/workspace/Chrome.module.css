@@ -323,51 +323,40 @@
   color: var(--bt-text-3);
 }
 
-/* 시안 .mode-switch: 가운데 두 글자 단추. 고른 쪽만 진하게 */
+/* 메뉴 막대와 같은 높이·글자의 원고 편집/조판 전환. 고른 칸만 흰 바탕으로 */
 .modeSwitch {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+  display: inline-flex;
+  align-items: stretch;
+  height: 28px;
+  padding: 2px;
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-soft);
 }
 
 .orb {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
-  min-width: 67px;
-  padding: 4px 6px;
+  justify-content: center;
+  min-width: 72px;
+  padding: 0 11px;
   border: 0;
-  border-radius: var(--bt-radius-lg);
+  border-radius: var(--bt-radius-xs);
   background: transparent;
-  color: var(--bt-orb-text);
-}
-
-.orb strong {
-  font-size: var(--bt-size-base);
-  font-weight: var(--bt-weight-bold);
-}
-
-.orb small {
-  font-size: var(--bt-size-xs);
+  color: var(--bt-menu-text);
+  font-size: var(--bt-size-md);
   font-weight: var(--bt-weight-medium);
+  white-space: nowrap;
 }
 
 .orb[aria-pressed="true"] {
+  background: var(--bt-surface);
   color: var(--bt-ink);
+  box-shadow: var(--bt-shadow-sm);
 }
 
-.orb[aria-pressed="true"] strong {
-  font-weight: 650;
-}
-
-.orb[aria-pressed="false"] {
-  opacity: 0.55;
-}
-
-.orb:hover {
-  opacity: 1;
-  background: var(--bt-hover);
+.orb[aria-pressed="false"]:hover {
+  color: var(--bt-ink);
 }
 
 .options {
@@ -408,14 +397,18 @@
 
 /* 가운데 열이 좁을 때(1280px·나란히): 덜 중요한 것부터 접어 겹치지 않게 */
 @container (max-width: 820px) {
-  .density,
-  .orb small {
+  .density {
     display: none;
   }
 
   .header {
     grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 8px;
+  }
+
+  .orb {
+    min-width: 0;
+    padding: 0 8px;
   }
 }
 
@@ -481,6 +474,12 @@
 
 .tool[aria-disabled="true"] {
   cursor: default;
+}
+
+.tool[aria-pressed="true"] {
+  border-color: var(--bt-line-strong);
+  background: var(--bt-soft);
+  color: var(--bt-ink);
 }
 
 .tool:hover:not([aria-disabled="true"]) {

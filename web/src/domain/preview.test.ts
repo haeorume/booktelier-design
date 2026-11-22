@@ -41,6 +41,24 @@ describe("원고 → 미리보기 HTML", () => {
     expect(html).toContain("3장 &lt;런던&gt;");
     expect(html).toContain('<p class="bt-p" data-paragraph-id="a">첫 문장</p>');
   });
+
+  it("굵게·기울임·밑줄은 미리보기 HTML에도 남는다", () => {
+    const doc: ChapterDoc = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          attrs: { id: "a" },
+          content: [
+            { type: "text", text: "가" },
+            { type: "text", text: "나", marks: [{ type: "bold" }] },
+            { type: "text", text: "다", marks: [{ type: "italic" }, { type: "underline" }] },
+          ],
+        },
+      ],
+    };
+    expect(chapterHtml(doc, { order: 1, title: "1장" }, [])).toContain('<p class="bt-p" data-paragraph-id="a">가<strong>나</strong><u><em>다</em></u></p>');
+  });
 });
 
 describe("조판 값 → @page CSS(FR-43 ②, FR-44)", () => {
