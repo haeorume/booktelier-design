@@ -4,6 +4,10 @@ import type { PanelLayout, Uuid } from "@/types";
 import { isOneOf, PANEL_LAYOUTS } from "@/types";
 import { STORAGE_PREFIX, type KeyValueStorage } from "./storage";
 
+/** 화면 테마(다크 테마, 11.22 결정). system이면 컴퓨터 설정을 따라요. */
+export type ThemeChoice = "system" | "light" | "dark";
+const THEMES: readonly ThemeChoice[] = ["system", "light", "dark"];
+
 export interface ClientSession {
   /** 이 책에서 지금 이 브라우저가 맡은 참여자. 없으면 null. */
   getCurrentParticipantId(projectId: Uuid): Uuid | null;
@@ -13,6 +17,8 @@ export interface ClientSession {
   markCommentSeen(projectId: Uuid, commentId: Uuid): void;
   getPanelLayout(): PanelLayout;
   setPanelLayout(layout: PanelLayout): void;
+  getTheme(): ThemeChoice;
+  setTheme(theme: ThemeChoice): void;
   /** 값이 바뀌면 부른다. 돌려준 함수로 구독을 끊는다. */
   subscribe(listener: () => void): () => void;
   /** 바뀔 때마다 달라지는 값. useSyncExternalStore에 쓴다. */
@@ -28,6 +34,7 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
   };
   const currentKey = (projectId: Uuid) => `${STORAGE_PREFIX}current:${projectId}`;
   const PANEL = `${STORAGE_PREFIX}panel_layout`;
+  const THEME = `${STORAGE_PREFIX}theme`;
   const seenKey = (projectId: Uuid) => `${STORAGE_PREFIX}seen_comments:${projectId}`;
   function readSeen(projectId: Uuid): Set<Uuid> {
     try {
@@ -60,6 +67,14 @@ export function createClientSession(storage: KeyValueStorage): ClientSession {
     },
     setPanelLayout(layout) {
       storage.setItem(PANEL, layout);
+      notify();
+    },
+    getTheme() {
+      const v = storage.getItem(THEME);
+      return isOneOf(THEMES, v) ? v : "system";
+    },
+    setTheme(theme) {
+      storage.setItem(THEME, theme);
       notify();
     },
     subscribe(listener) {

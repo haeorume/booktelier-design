@@ -5,6 +5,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400;600&display=swap");
 /* 디자인 토큰(DESIGN.md 2장). 컴포넌트 CSS는 var(--bt-…)만 써요(불변 규칙 R11). */
 @import "../styles/tokens.css";
+/* 다크 테마(11.22): 같은 이름의 값을 덮어요. 미리보기 종이는 늘 밝아요(--bt-print-*). */
+@import "../styles/tokens-dark.css";
 
 html {
   height: 100%;

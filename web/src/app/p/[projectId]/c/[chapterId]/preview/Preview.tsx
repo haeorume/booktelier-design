@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { MessageView, NOT_FOUND } from "@/components/MessageView";
+import { ThemeToggle } from "@/components/Theme";
 import { CHANGES_INTERVAL_MS, bookDeps, type Ctx } from "@/data";
 import { locate } from "@/domain/anchor";
 import { can } from "@/domain/permissions";
@@ -246,7 +247,13 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
         <Link className={styles.back} href={`/p/${project.id}/c/${chapter.id}`}>
           <span aria-hidden="true">← </span>돌아가기
         </Link>
-        <Logo />
+        {can(view.me.role, "open_editor_home") ? (
+          <Link href="/home" aria-label="BOOKTELIER 홈으로" data-testid="preview-logo-home">
+            <Logo />
+          </Link>
+        ) : (
+          <Logo />
+        )}
         <h1 className={styles.title}>
           미리보기 <span className={styles.chapter}>{chapter.title}</span>
           {pages > 0 && (
@@ -255,6 +262,7 @@ export function Preview({ projectId, chapterId }: { projectId: string; chapterId
             </span>
           )}
         </h1>
+        <ThemeToggle />
         <div className={styles.layers} role="group" aria-label="보기">
           <span className={styles.layersLabel}>보기</span>
           {LAYERS.map((l) => (

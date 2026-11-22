@@ -41,6 +41,10 @@ interface Props {
   jump: { paragraphId: string; n: number } | null;
   layoutOpen: boolean;
   onLayoutOpenChange: (open: boolean) => void;
+  /** 검토 패널을 접었는지. 접어도 숨기기만 해서 보던 탭과 거르기가 남아요. */
+  panelCollapsed: boolean;
+  /** 지면의 밑줄·의견을 누르면 접힌 패널을 다시 펴요 */
+  onPanelReveal: () => void;
   snapshotsOpen: boolean;
   onSnapshotsClose: () => void;
   /** 저장하려던 원고가 그사이 다른 곳에서 바뀌었다(409). 최신 원고로 다시 그린다(C-4). */
@@ -52,7 +56,7 @@ interface Props {
  * 함께 봄(useShared)을 이어 붙인다(리뷰 R-3). 보내기 전 AI 제안은 주인 것만 온다(FR-23, D-29).
  */
 export function ChapterWorkspace(props: Props) {
-  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, slots, layoutOpen, onLayoutOpenChange, snapshotsOpen, onSnapshotsClose, onConflict } = props;
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, slots, layoutOpen, onLayoutOpenChange, panelCollapsed, onPanelReveal, snapshotsOpen, onSnapshotsClose, onConflict } = props;
   const panelLayout = usePanelLayout();
   const deps = useMemo(() => bookDeps(), []);
   const ctx: Ctx = useMemo(
@@ -204,6 +208,7 @@ export function ChapterWorkspace(props: Props) {
   function onMarkClick(click: MarkClick) {
     // 하나씩 배치에서는 지면 표시를 누르면 검토 패널로 돌아온다(N-15 A안).
     if (panelLayout === "single") onLayoutOpenChange(false);
+    onPanelReveal(); // 접어 둔 검토 패널도 펴서 고른 카드를 보여 줘요
     if (click.kind === "suggestion") {
       panel.current?.reveal(click.ids); // AI 제안 탭을 열고 가리는 거르기를 푼다(N-07)
       setSelected(click.ids);
@@ -287,7 +292,7 @@ export function ChapterWorkspace(props: Props) {
         오른쪽 패널(D-10, N-15). 하나씩(A안, 기본): 조판 설정을 열면 검토 패널이 닫힌다.
         나란히(B안): 둘을 함께 연다. 하나씩일 때도 검토 패널은 숨기기만 해서 보던 탭과 거르기가 남는다.
       */}
-      <div className={styles.reviewSlot} hidden={layoutOpen && panelLayout === "single"} data-testid="review-slot">
+      <div className={styles.reviewSlot} hidden={panelCollapsed || (layoutOpen && panelLayout === "single")} data-testid="review-slot">
         <ReviewPanel
           ref={panel}
           role={me.role}

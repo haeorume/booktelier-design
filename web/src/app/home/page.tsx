@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { bookDeps } from "@/data";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ThemeToggle } from "@/components/Theme";
 import type { ProjectCard } from "@/types";
 import styles from "./page.module.css";
 import { Logo } from "@/components/Logo";
@@ -38,6 +39,7 @@ export default function EditorHome() {
         <Link className={styles.newBook} href="/?new=1">
           새 책 만들기
         </Link>
+        <ThemeToggle />
       </header>
       {cards === null ? null : cards.length === 0 ? (
         <section className={styles.empty} data-testid="home-empty">
