@@ -47,12 +47,13 @@ test("원고가 한 쪽을 넘으면 쪽 경계와 쪽 번호가 생기고, 다�
   await expect(page.getByTestId("running-head").first()).toHaveText("파리에서 보낸 한 달");
 });
 
-test("장 머리에 CHAPTER 01과 장 제목이 있고, 상단 바에 장 상태·검토 요청·저장 상태가 있다(DESIGN.md 3·4장)", async ({ page }) => {
+test("장 머리에 CHAPTER 01과 장 제목이 있고, 작업 머리에 장 상태·검토 요청, 상단 바에 저장 상태가 있다(DESIGN.md 3·4장, 시안 11.22)", async ({ page }) => {
   await enterAsAuthor(page);
   await expect(page.getByTestId("page")).toContainText("CHAPTER 01");
   const bar = page.getByRole("banner");
-  await expect(bar.getByTestId("chapter-head-status")).toHaveText("수정 중");
-  await expect(bar.getByRole("button", { name: "검토 요청" })).toBeVisible();
+  const head = page.getByTestId("work-header");
+  await expect(head.getByTestId("chapter-head-status")).toHaveText("수정 중");
+  await expect(head.getByRole("button", { name: "검토 요청" })).toBeVisible();
   await paragraph(page, "para_01").click();
   await page.keyboard.type("가");
   await expect(bar.getByTestId("save-state")).toHaveText("저장됨");

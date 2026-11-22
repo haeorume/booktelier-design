@@ -1,156 +1,384 @@
-/* 상단 바(WS-10, DESIGN.md 3장). 높이 56px, 흰 면 + 아래 구분선. */
+/* 상단 바(WS-10, 시안 11.22 .topbar). 높이 56px, 아래 구분선. 값은 시안에서 잰 그대로. */
 .bar {
+  position: relative;
+  z-index: 80;
   display: flex;
   align-items: center;
-  gap: var(--bt-space-4);
+  height: var(--bt-topbar-h);
   min-height: var(--bt-topbar-h);
-  padding: var(--bt-space-2) var(--bt-space-5);
   border-bottom: 1px solid var(--bt-line);
-  background: var(--bt-surface);
+  background: var(--bt-topbar);
+  font-size: var(--bt-size-base);
+  color: var(--bt-ink);
 }
 
-/* 글자 로고(PR-26, D-01). 오름님 SVG가 오기 전에는 Noto Sans KR 600(DESIGN.md 9장). */
-.logo {
+/* 시안 .brand-zone: 원고 구조와 같은 폭, 오른쪽 구분선 */
+.brand {
   flex: none;
-  padding-right: var(--bt-space-4);
+  display: flex;
+  align-items: center;
+  width: var(--bt-nav-w);
+  height: 100%;
+  padding: 0 17px;
   border-right: 1px solid var(--bt-line);
+  background: var(--bt-topbar);
 }
 
+/* 시안 .project-crumb: 아이콘 + 편집자 홈 › 책 이름 */
 .path {
   display: flex;
   align-items: center;
-  gap: var(--bt-space-2);
+  gap: 8px;
   min-width: 0;
+  padding: 0 9px 0 12px;
   font-size: var(--bt-size-sm);
-  color: var(--bt-text-2);
+  color: var(--bt-text-3);
 }
 
 .path > * {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: none;
 }
 
-.path a {
+.home {
+  color: var(--bt-text-3);
+  white-space: nowrap;
+}
+
+.home:hover {
   color: var(--bt-accent-text);
 }
 
-.path a:hover {
-  text-decoration: underline;
+.chapterSep {
+  opacity: 0.7;
 }
 
+.chapter {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--bt-size-sm);
+  color: var(--bt-text-3);
+}
+
+/* 시안 .project-name: 12px, 말줄임 */
 .book {
-  color: var(--bt-ink);
-  font-weight: var(--bt-weight-bold);
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--bt-size-md);
+  color: var(--bt-text-strong);
 }
 
-/* 편집자는 책 제목을 눌러 고쳐요(D-42). 올리면 밑줄로 누를 수 있음을 알려요. */
+/* 편집자는 책 제목을 눌러 고쳐요(D-42). 올리면 주황 글자로 누를 수 있음을 알려요. */
 .titleButton {
-  font: inherit;
-  font-weight: var(--bt-weight-bold);
   padding: 0;
   border: none;
   background: transparent;
   cursor: text;
-  max-width: 16em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: left;
 }
 
 .titleButton:hover {
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
+  color: var(--bt-accent-text);
 }
 
 .titleInput {
-  font: inherit;
-  font-weight: var(--bt-weight-bold);
   width: 14em;
+  height: 24px;
   padding: 0 var(--bt-space-1);
-  border: 1px solid var(--bt-line-control);
+  border: 1px solid var(--bt-accent-line);
   border-radius: var(--bt-radius-sm);
   background: var(--bt-surface);
+  font-size: var(--bt-size-md);
+  color: var(--bt-ink);
+  outline: none;
+}
+
+/* 시안 .bp-controls: 목차 · 도구 · 속성 + 모두 보기. 켜진 것은 주황 바탕과 주황 점 */
+.panelControls {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--bt-size-sm);
+}
+
+.panelToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  color: var(--bt-icon);
+  white-space: nowrap;
+}
+
+.panelToggle > i {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-panel-dot-off);
+}
+
+.panelToggle:hover {
+  border-color: var(--bt-line-hover);
   color: var(--bt-ink);
 }
 
-/* 역할 배지(WS-12): 역할 색 세 벌 + 글자. 색만으로 구분하지 않아요. */
-.badge {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 var(--bt-space-2);
-  border: 1px solid;
-  border-radius: var(--bt-radius-sm);
-  font-size: var(--bt-size-xs);
-  font-weight: var(--bt-weight-bold);
+.panelToggle[aria-pressed="true"] {
+  border-color: var(--bt-accent-line);
+  background: var(--bt-accent-soft);
+  color: var(--bt-accent-text);
 }
 
-.badge[data-role="editor"] {
+.panelToggle[aria-pressed="true"] > i {
+  background: var(--bt-brand);
+}
+
+.showAll {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: var(--bt-radius-md);
+  background: transparent;
+  color: var(--bt-text-3);
+}
+
+.showAll:hover {
+  background: var(--bt-hover);
+  color: var(--bt-ink);
+}
+
+/* 시안 .top-actions */
+.tools {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+}
+
+/* 시안 .bf-session-role: 역할 동그라미 + 역할 + 작은 설명, 오른쪽 구분선 */
+.session {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 9px;
+  border-right: 1px solid var(--bt-line);
+}
+
+.roleDot {
+  width: 25px;
+  height: 25px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid;
+  border-radius: var(--bt-radius-full);
+  font-size: var(--bt-size-2xs);
+  font-weight: var(--bt-weight-heavy);
+}
+
+.roleDot[data-role="editor"] {
   background: var(--bt-role-editor-bg);
   border-color: var(--bt-role-editor-line);
   color: var(--bt-role-editor-text);
 }
 
-.badge[data-role="author"] {
+.roleDot[data-role="author"] {
   background: var(--bt-role-author-bg);
   border-color: var(--bt-role-author-line);
   color: var(--bt-role-author-text);
 }
 
-.badge[data-role="designer"] {
+.roleDot[data-role="designer"] {
   background: var(--bt-role-designer-bg);
   border-color: var(--bt-role-designer-line);
   color: var(--bt-role-designer-text);
 }
 
-.tools {
-  margin-left: auto;
+.roleText {
   display: flex;
-  align-items: center;
-  gap: var(--bt-space-2);
+  flex-direction: column;
+  font-size: var(--bt-size-2xs);
+  line-height: 1.25;
+  color: var(--bt-text-3);
+  white-space: nowrap;
 }
 
-/* 보조 버튼(DESIGN.md 5장): 흰 바탕, 테두리, 높이 32px */
-.button {
+.roleText small {
+  font-size: 7px;
+  color: var(--bt-text-4);
+}
+
+/* 시안 .be-collab-mount: 참여자 · 권한 칩 · 의견 · 초대 */
+.collab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-left: 3px;
+}
+
+.permission {
+  padding: 4px 6px;
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-permission-bg);
+  font-size: var(--bt-size-2xs);
+  color: var(--bt-permission-text);
+  white-space: nowrap;
+}
+
+.iconButton {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 var(--bt-space-3);
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  padding: 5px;
+  border: 0;
+  border-radius: var(--bt-radius-sm);
+  background: transparent;
+  color: var(--bt-text-3);
+}
+
+.iconButton:hover {
+  background: var(--bt-hover);
+  color: var(--bt-ink);
+}
+
+/* 시안 .be-collab-share: 엷은 주황 */
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 29px;
+  padding: 0 10px;
+  border: 1px solid var(--bt-share-line);
   border-radius: var(--bt-radius-md);
-  border: 1px solid var(--bt-line-control);
+  background: var(--bt-share-bg);
+  font-size: var(--bt-size-sm);
+  color: var(--bt-accent-text);
+  white-space: nowrap;
+}
+
+.share:hover {
+  border-color: var(--bt-brand);
+}
+
+/* 시안 .be-utility-btn(일정 자리): 미리보기 */
+.utility {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 5px 9px;
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius-md);
   background: var(--bt-surface);
-  color: var(--bt-text);
   font-size: var(--bt-size-sm);
   font-weight: var(--bt-weight-medium);
-  cursor: pointer;
-  transition: background var(--bt-duration) var(--bt-ease);
+  color: var(--bt-utility-text);
+  white-space: nowrap;
 }
 
-.button:hover {
-  background: var(--bt-soft);
-}
-
-.button[aria-pressed="true"] {
-  border-color: var(--bt-brand);
-  background: var(--bt-accent-soft);
-  color: var(--bt-accent-text);
-}
-
-/* 작업 공간이 그려 넣는 자리: 장 상태·검토 요청 버튼(WS-31), 저장 상태(WS-14) */
-.chapterSlot {
-  flex: none;
-  display: flex;
-  align-items: center;
-}
-
-.chapterSlot:empty,
-.saveSlot:empty {
-  display: none;
+.utility:hover {
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
 }
 
 .saveSlot {
   display: flex;
   align-items: center;
+}
+
+.saveSlot:empty {
+  display: none;
+}
+
+/* 시안 .button.subtle: 파일 저장 */
+.fileButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 31px;
+  padding: 6px 10px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-subtle);
+  font-size: var(--bt-size-md);
+  color: var(--bt-ink);
+  white-space: nowrap;
+}
+
+.fileButton:hover {
+  border-color: var(--bt-line-hover);
+  background: var(--bt-hover);
+}
+
+/* 시안 .bt-panel-toggle: 검토 패널 접기. 펼쳐 있으면 엷은 주황 */
+.panelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 30px;
+  padding: 5px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: 6px;
+  background: var(--bt-surface);
+  color: var(--bt-icon);
+}
+
+.panelButton[aria-pressed="false"] {
+  border-color: var(--bt-panel-toggle-line);
+  background: var(--bt-panel-toggle-bg);
+  color: var(--bt-accent-text);
+}
+
+.panelButton:hover {
+  border-color: var(--bt-brand);
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 1280px 언저리: 상단 바가 넘치지 않게 덜 중요한 글자부터 접어요(QA-49) */
+@media (max-width: 1500px) {
+  .permission,
+  .chapterSep,
+  .chapter {
+    display: none;
+  }
+}
+
+@media (max-width: 1380px) {
+  .panelToggle > span,
+  .panelToggle > i,
+  .roleText small {
+    display: none;
+  }
+
+  .fileButton {
+    font-size: 0;
+    gap: 0;
+  }
 }

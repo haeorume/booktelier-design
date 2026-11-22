@@ -35,6 +35,9 @@ export interface EditorHandle {
   isComposing(): boolean;
   /** 그 문단으로 지면을 움직인다(작업 위치로 가기). 없으면 false. */
   scrollToParagraph(paragraphId: string): boolean;
+  /** 메뉴·서식 막대의 실행 취소·다시 실행(작가만, 편집기 되돌리기 기록) */
+  undo(): boolean;
+  redo(): boolean;
 }
 
 export type MarkClick = { kind: "suggestion"; ids: string[] } | { kind: "edit"; id: string } | { kind: "comment"; id: string };
@@ -62,6 +65,10 @@ interface Props {
   selectionMenu?: ReactNode;
   /** Ctrl/Cmd+Z. 직전 AI 제안 적용을 되돌렸으면 true(G-11). false면 편집기의 되돌리기가 돈다. */
   onUndoShortcut: () => boolean;
+  /** 여백 안내선(시안 .page-guides). 본문 단의 둘레를 엷은 주황 선과 네 모서리로 보여 줘요. */
+  guides?: boolean;
+  /** 지면 배율(책상 폭에 맞춤 × 상태 줄의 %). 1이면 실제 크기 */
+  zoom?: number;
 }
 
 const PROGRAM = "booktelier-program-change";
@@ -71,7 +78,7 @@ const PROGRAM = "booktelier-program-change";
  * 글자 서식 도구는 없다(D-13). 작가가 아니면 읽기 전용이다(FR-09 ④). 읽기 전용이어도 글자는 고를 수 있다(의견).
  */
 export function ManuscriptEditor(props: Props) {
-  const { ref, initialDoc, editable, templateId, layout, chapterTitle, chapterOrder, bookTitle, spans, edits, comments, selected, selectionMenu } = props;
+  const { ref, initialDoc, editable, templateId, layout, chapterTitle, chapterOrder, bookTitle, spans, edits, comments, selected, selectionMenu, guides = false, zoom = 1 } = props;
   const texts = useRef(paragraphTexts(initialDoc));
   const handlers = useRef(props);
   const page = useRef<HTMLElement>(null);
@@ -199,8 +206,16 @@ export function ManuscriptEditor(props: Props) {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
         return true;
       },
+      undo() {
+        if (!editor || !editable) return false;
+        return editor.chain().focus().undo().run();
+      },
+      redo() {
+        if (!editor || !editable) return false;
+        return editor.chain().focus().redo().run();
+      },
     }),
-    [editor],
+    [editor, editable],
   );
 
   function clickMark(target: EventTarget | null) {
@@ -228,7 +243,9 @@ export function ManuscriptEditor(props: Props) {
     if (picked && sel) {
       const rect = sel.getRangeAt(0).getBoundingClientRect();
       const base = page.current.getBoundingClientRect();
-      setMenuAt({ top: rect.bottom - base.top + 6, left: Math.max(0, rect.left - base.left) });
+      // 지면에 배율(zoom)이 걸려 있으면 화면 좌표를 지면 안 좌표로 되돌려요(시안 11.22 맞춤 배율).
+      const z = handlers.current.zoom ?? 1;
+      setMenuAt({ top: (rect.bottom - base.top) / z + 6, left: Math.max(0, (rect.left - base.left) / z) });
     } else setMenuAt(null);
     handlers.current.onPick(picked);
   }
@@ -240,7 +257,8 @@ export function ManuscriptEditor(props: Props) {
       data-testid="page"
       data-template={templateId}
       data-editable={editable}
-      style={{ ...(pageStyleVars(templateId, layout) as CSSProperties), minHeight: pages ? `${pages.sheet}px` : undefined }}
+      data-guides={guides}
+      style={{ ...(pageStyleVars(templateId, layout) as CSSProperties), minHeight: pages ? `${pages.sheet}px` : undefined, zoom: zoom === 1 ? undefined : zoom }}
       onClick={(e) => clickMark(e.target)}
       onMouseUp={readSelection}
       // 선택을 넓히거나 옮기는 키뿐 아니라 글자를 치거나 지우는 키에도 선택을 다시 읽는다.
@@ -256,6 +274,19 @@ export function ManuscriptEditor(props: Props) {
           </span>
         )}
       </div>
+      {/* 시안의 지면 머리(.running-title): 위 여백 안에 책 제목과 BOOKTELIER. 흐름 밖이라 쪽 나누기에 끼지 않아요. */}
+      <div className={styles.runningTitle} aria-hidden="true">
+        <span>{bookTitle}</span>
+        <span>BOOKTELIER</span>
+      </div>
+      {guides && (
+        <div className={styles.marginGuides} aria-hidden="true" data-testid="margin-guides">
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+      )}
       {/* 장 머리: 눈썹 글자 → 장 제목 → 짧은 주황 선(DESIGN.md 4장). 영문 눈썹 글자는 지면에만 써요. */}
       <header className={styles.chapterHead}>
         <p className={styles.eyebrow}>CHAPTER {String(chapterOrder).padStart(2, "0")}</p>

@@ -19,6 +19,7 @@ interface Props {
 }
 
 const EVIDENCE_SOURCE: Record<"norm" | "chapter", string> = { norm: "", chapter: "같은 책 " };
+const SOURCE_LABEL: Record<AiSuggestion["source"], string> = { live_check: "AI 제안 · 실시간 분석", chapter_review: "AI 제안 · 장 검토" };
 
 /**
  * 근거(F6 RAG, D-26). 장 검토 카드에만 둬요. 근거가 없으면 '근거 없음'(data-contract).
@@ -47,7 +48,7 @@ function EvidenceLine({ suggestion: s }: { suggestion: AiSuggestion }) {
 }
 
 /**
- * AI 제안 카드(WS-46, FR-24). 종류, 원문, 수정안 1개와 대안 최대 2개, 수정 이유.
+ * AI 제안 카드(WS-46, FR-24). 시안 .br-card: 종류 배지, 상태, 본문 위치, 원문, 수정안(대안 최대 2개), 수정 이유.
  * 버튼은 역할에 맞는 것만 보인다(D-15): 적용은 작가만, 보내기는 편집자만(FR-29 ④), 무시와 이 표현 유지는 작가·편집자.
  * 보낸 제안은 '보냄'(받은 사람이 수락하면 '반영됨')으로 남고 버튼이 없다(FR-29 ③).
  */
@@ -59,7 +60,7 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
 
   return (
     <li
-      className={`${styles.card} ${pending ? "" : styles.decided}`}
+      className={styles.card}
       data-testid="ai-card"
       data-suggestion-id={s.id}
       data-kind={s.kind}
@@ -72,39 +73,60 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
         if (e.key === "Enter" && e.target === e.currentTarget) onSelect();
       }}
     >
-      <div className={styles.cardHead}>
-        <span className={`${styles.kind} ${styles[`kind_${s.kind}`]}`}>{KIND_LABEL[s.kind]}</span>
-        {!pending && (
-          <span className={styles.statusChip} data-testid="ai-status-chip">
+      <div className={styles.cardTop}>
+        <span className={styles.kind} data-kind={s.kind}>
+          {KIND_LABEL[s.kind]}
+        </span>
+        {pending ? (
+          <span className={styles.badge}>{AI_STATUS_LABEL.pending}</span>
+        ) : (
+          <span className={styles.badge} data-testid="ai-status-chip">
             {AI_STATUS_LABEL[s.status]}
           </span>
         )}
+        <button
+          type="button"
+          className={styles.position}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+        >
+          본문 위치 ↗
+        </button>
       </div>
-      <p className={styles.original}>
+      <span className={styles.badge}>{SOURCE_LABEL[s.source]}</span>
+      <div className={styles.original}>
+        <span className={styles.fieldLabel}>원문</span>
         <del>{s.original}</del>
+      </div>
+      <div className={styles.replacement}>
+        <span className={styles.fieldLabel}>{options.length > 1 ? "수정안 · 대안" : "수정안"}</span>
+        {canApply && options.length > 1 ? (
+          <fieldset className={styles.options}>
+            <legend className={styles.srOnly}>바꿀 말</legend>
+            {options.map((text, i) => (
+              <label key={i} className={styles.option}>
+                <input type="radio" name={`opt-${s.id}`} checked={choice === i} onChange={() => setChoice(i)} />
+                <ins>{text}</ins>
+                {i > 0 && <span className={styles.altTag}>대안</span>}
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <ul className={styles.plainOptions}>
+            {options.map((text, i) => (
+              <li key={i}>
+                <ins>{text}</ins>
+                {i > 0 && <span className={styles.altTag}>대안</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <p className={styles.reason}>
+        <strong>수정 이유</strong> {s.reason}
       </p>
-      {canApply && options.length > 1 ? (
-        <fieldset className={styles.options}>
-          <legend className={styles.srOnly}>바꿀 말</legend>
-          {options.map((text, i) => (
-            <label key={i} className={styles.option}>
-              <input type="radio" name={`opt-${s.id}`} checked={choice === i} onChange={() => setChoice(i)} />
-              <span className={styles.replacement}>{text}</span>
-              {i > 0 && <span className={styles.altTag}>대안</span>}
-            </label>
-          ))}
-        </fieldset>
-      ) : (
-        <ul className={styles.plainOptions}>
-          {options.map((text, i) => (
-            <li key={i}>
-              <span className={styles.replacement}>{text}</span>
-              {i > 0 && <span className={styles.altTag}>대안</span>}
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className={styles.reason}>{s.reason}</p>
       <EvidenceLine suggestion={s} />
       {pending && (
         <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
@@ -124,7 +146,7 @@ export function AiSuggestionCard({ suggestion: s, role, selected, busy, onApply,
             </button>
           )}
           {can(role, "keep_ai_suggestion") && (
-            <button type="button" className={styles.button} disabled={busy} onClick={onKeep}>
+            <button type="button" className={styles.textButton} disabled={busy} onClick={onKeep}>
               이 표현 유지
             </button>
           )}

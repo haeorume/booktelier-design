@@ -1,27 +1,62 @@
+/* 시안 .brand-zone: 로고 132×19 + STUDIO 8px. 로고 그림 대신 주황 원 표시와 굵은 글자(D-01). */
 .logo {
   display: inline-flex;
-  align-items: baseline;
-  gap: var(--bt-space-2);
-  font-size: var(--bt-size-md);
-  font-weight: var(--bt-weight-bold);
-  letter-spacing: var(--bt-tracking-eyebrow);
+  align-items: center;
+  gap: 7px;
   color: var(--bt-ink);
   white-space: nowrap;
 }
 
-.logo[data-size="lg"] {
-  font-size: var(--bt-size-lg);
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
+/* 심볼: 글자 높이에 맞춘 비스듬한 막대(215:183) */
 .mark {
-  color: var(--bt-brand);
+  display: block;
+  width: 24px;
+  height: 20px;
+  flex: none;
+}
+
+.markOrange {
+  fill: var(--bt-brand);
+}
+
+.markInk {
+  fill: var(--bt-logo-ink);
+}
+
+.word {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--bt-logo-ink);
+}
+
+.logo[data-size="lg"] .word {
+  font-size: 24px;
+}
+
+.logo[data-size="lg"] .mark {
+  width: 29px;
+  height: 25px;
+}
+
+.studio {
+  margin-top: 3px;
+  font-size: var(--bt-size-3xs);
+  letter-spacing: var(--bt-tracking-eyebrow);
+  color: var(--bt-text-4);
 }
 
 .name {
-  font-size: var(--bt-size-xs);
+  font-size: var(--bt-size-sm);
   font-weight: var(--bt-weight-medium);
-  letter-spacing: normal;
-  color: var(--bt-text-2);
+  color: var(--bt-text-3);
 }
 
 .hidden {

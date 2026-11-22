@@ -1,154 +1,38 @@
+/*
+ * 조판 설정 패널(WS-04). 오름님 시안 오른쪽 독의 '조판 설정'(#assistant-panel .properties-panel) 값 그대로예요.
+ * 색은 토큰만 써요(R11). 패널 전용 색은 tokens.css '오른쪽 패널'(--bt-lp-*, --bt-rp-*) 묶음에 있어요.
+ */
+
+/* 나란히(D-10)일 때는 시안 팔레트 폭(--bt-layout-panel-w), 하나씩일 때는 검토 패널 자리를 그대로 써요(시안 통합 독). */
 .panel {
-  width: 18rem;
+  width: var(--bt-layout-panel-w);
   flex-shrink: 0;
-  border-left: 1px solid var(--bt-line-strong);
+  height: 100%;
+  border-left: 1px solid var(--bt-line);
   background: var(--bt-surface);
-  padding: 0.9rem;
+  color: var(--bt-ink);
+  font-size: var(--bt-size-base);
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.head {
-  display: flex;
-  align-items: center;
+:global([data-testid="review-slot"][hidden]) ~ .panel {
+  width: var(--bt-review-w);
 }
 
-.title {
-  font-size: 1rem;
+@media (min-width: 1600px) {
+  .panel {
+    width: 270px;
+  }
+
+  :global([data-testid="review-slot"][hidden]) ~ .panel {
+    width: 360px;
+  }
 }
 
-.close {
-  margin-left: auto;
-  font: inherit;
-  font-size: 0.85rem;
-  padding: 0.2rem 0.6rem;
-  border: 1px solid var(--bt-line-strong);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--bt-text);
-  cursor: pointer;
-}
-
-.lastChange {
-  font-size: 0.85rem;
-  color: var(--bt-text-2);
-}
-
-.values {
-  display: grid;
-  grid-template-columns: 4rem 1fr;
-  gap: 0.4rem 0.6rem;
-}
-
-.values dt {
-  color: var(--bt-text-2);
-}
-
-.values dd {
-  font-weight: 600;
-}
-
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.hint {
-  font-weight: 400;
-  font-size: 0.75rem;
-  color: var(--bt-text-2);
-}
-
-.templates {
-  border: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
-}
-
-/* 정렬은 넷이라 한 줄에 넷(D-41) */
-.aligns {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.templates legend {
-  margin-bottom: 0.35rem;
-}
-
-.template {
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 0.45rem 0.3rem;
-  border: 1px solid var(--bt-line-strong);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* 고른 템플릿은 테두리와 체크 표시를 함께 쓴다(CS-05, 색만으로 구분하지 않음). */
-.template[data-selected="true"] {
-  border: 2px solid var(--bt-brand);
-  font-weight: 600;
-}
-
-.template input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.template:has(input:focus-visible) {
-  box-shadow: var(--bt-focus);
-}
-
-.select,
-.number {
-  font: inherit;
-  font-weight: 400;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--bt-line-strong);
-  border-radius: 6px;
-  background: var(--bt-surface);
-  color: var(--bt-text);
-}
-
-.slider {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.sliderRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sliderRow input[type="range"] {
-  flex: 1;
-  min-width: 0;
-}
-
-.number {
-  width: 4.5rem;
-}
-
-.unit {
-  font-size: 0.85rem;
-  color: var(--bt-text-2);
-}
-
-/* 좁은 창에서는 패널을 줄여 지면 폭을 지킨다(QA-49). */
+/* 나란히일 때 좁은 창에서 지면 폭을 지켜요(QA-49). */
 @media (max-width: 1500px) {
   .panel {
     width: 16rem;
@@ -158,37 +42,311 @@
 @media (max-width: 1360px) {
   .panel {
     width: 13.5rem;
-    padding: 0.75rem;
   }
 }
 
-/* 쪽 공통 설정(FR-44) */
-.running {
-  border: none;
-  border-top: 1px solid var(--bt-line);
-  padding-top: var(--bt-space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--bt-space-3);
+@media (max-width: 1250px) {
+  :global([data-testid="review-slot"][hidden]) ~ .panel {
+    width: 316px;
+  }
 }
 
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bt-line-strong) transparent;
+}
+
+.panel button,
+.panel select,
+.panel input {
+  font-family: inherit;
+}
+
+.panel select:focus-visible,
+.panel input:focus-visible,
+.close:focus-visible {
+  outline: none;
+  box-shadow: var(--bt-focus);
+}
+
+/* 머리(시안 .panel-title): 12px 600, 오른쪽 범위 칩 */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 21px 18px 9px;
+}
+
+.title {
+  margin: 0;
+  color: var(--bt-lp-title);
+  font-size: var(--bt-size-md);
+  font-weight: var(--bt-weight-bold);
+}
+
+.scope {
+  margin-left: auto;
+  padding: 3px 5px;
+  border: 1px solid var(--bt-lp-scope-line);
+  border-radius: var(--bt-radius-xs);
+  background: var(--bt-lp-scope-bg);
+  color: var(--bt-lp-scope-text);
+  font-size: var(--bt-size-3xs);
+  line-height: 1.2;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--bt-radius-sm);
+  background: transparent;
+  color: var(--bt-lp-label);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--bt-hover);
+  border-color: var(--bt-line);
+  color: var(--bt-ink);
+}
+
+.lastChange {
+  margin: 0;
+  padding: 0 18px 9px;
+  color: var(--bt-lp-note);
+  font-size: var(--bt-size-2xs);
+  line-height: 1.7;
+}
+
+/* 구역(시안 .property-section): 17px 18px, 아래 선 */
+.section {
+  margin: 0;
+  min-width: 0;
+  padding: 17px 18px;
+  border: 0;
+  border-bottom: 1px solid var(--bt-lp-sep);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 이름(시안 .property-label): 10px, 아이콘 13px, 아래 12px */
+.label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  float: left;
+  color: var(--bt-lp-label);
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-regular);
+  line-height: 1.5;
+}
+
+.label > .labelIcon[data-size] {
+  width: 13px;
+  height: 13px;
+}
+
+.note {
+  margin: 9px 0 0;
+  color: var(--bt-lp-note);
+  font-size: var(--bt-size-2xs);
+  line-height: 1.7;
+}
+
+/* 고르기(시안 .segmented): 바탕 위에 고른 칸만 흰 바탕·테두리·그림자 */
+.segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--bt-lp-seg-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-lp-seg-bg);
+}
+
+.segment {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 3px;
+  border: 1px solid transparent;
+  border-radius: var(--bt-radius-xs);
+  color: var(--bt-lp-seg-text);
+  font-size: var(--bt-size-xs);
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment:hover {
+  color: var(--bt-lp-seg-on-text);
+}
+
+.segment[data-selected="true"] {
+  border-color: var(--bt-lp-seg-on-line);
+  background: var(--bt-lp-seg-on-bg);
+  color: var(--bt-lp-seg-on-text);
+  font-weight: var(--bt-weight-medium);
+  box-shadow: var(--bt-lp-seg-on-shadow);
+}
+
+.segment input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segment:has(input:focus-visible) {
+  box-shadow: var(--bt-focus);
+}
+
+/* 고르는 칸(시안 .field-select): 11px, 8px 9px, 모서리 4 */
+.select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--bt-lp-field-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-lp-field-bg);
+  color: var(--bt-lp-field-text);
+  font-size: var(--bt-size-sm);
+  line-height: 1.4;
+}
+
+/* 슬라이더(시안 input[type=range] + .range-labels) */
+.slider {
+  display: flex;
+  flex-direction: column;
+  margin-top: 17px;
+}
+
+.section > .label + .slider {
+  margin-top: 0;
+}
+
+.sliderHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--bt-lp-label);
+  font-size: var(--bt-size-xs);
+  line-height: 1.5;
+}
+
+.sliderLabel {
+  min-width: 0;
+}
+
+.value {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--bt-lp-value);
+  font-size: var(--bt-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.number {
+  width: 46px;
+  padding: 1px 3px;
+  border: 1px solid transparent;
+  border-radius: var(--bt-radius-xs);
+  background: transparent;
+  color: var(--bt-lp-value);
+  font-size: var(--bt-size-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.number:hover,
+.number:focus {
+  border-color: var(--bt-lp-field-line);
+  background: var(--bt-lp-field-bg);
+  color: var(--bt-lp-field-text);
+}
+
+.unit {
+  color: var(--bt-lp-value);
+}
+
+.range {
+  width: 100%;
+  height: 3px;
+  margin: 9px 0 7px;
+  accent-color: var(--bt-brand);
+  cursor: pointer;
+}
+
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--bt-lp-note);
+  font-size: var(--bt-size-3xs);
+  line-height: 1.4;
+}
+
+/* 작가가 보는 값(글자로만, D-15) */
+.values {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.valueRow {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.values dt {
+  color: var(--bt-lp-label);
+  font-size: var(--bt-size-xs);
+}
+
+.values dd {
+  margin: 0;
+  color: var(--bt-lp-seg-on-text);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
+  line-height: 1.6;
+}
+
+/* 쪽 공통 설정(FR-44) */
 .runningSide {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--bt-space-2);
+  gap: 8px;
+}
+
+.runningSide + .runningSide {
+  margin-top: 12px;
 }
 
 .sideName {
   grid-column: 1 / -1;
+  color: var(--bt-lp-title);
   font-size: var(--bt-size-xs);
   font-weight: var(--bt-weight-bold);
-  color: var(--bt-text-2);
 }
 
 .inline {
   display: flex;
   flex-direction: column;
-  gap: var(--bt-space-1);
-  font-size: var(--bt-size-xs);
-  color: var(--bt-text-2);
+  gap: 4px;
+  min-width: 0;
+  color: var(--bt-lp-label);
+  font-size: var(--bt-size-2xs);
 }

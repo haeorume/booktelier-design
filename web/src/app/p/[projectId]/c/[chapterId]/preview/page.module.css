@@ -1,49 +1,58 @@
-/* 미리보기(PV-01~05, DESIGN.md 4장): 위 막대 · 책상 위 펼침면 · 아래 쪽 넘기기 */
+/* 미리보기(PV-01~05, DESIGN.md 4장): 위 막대 · 책상 위 펼침면 · 아래 쪽 넘기기.
+   시안에는 미리보기 화면이 없어 작업 공간의 상단 바(.topbar)·책상(--be-canvas)·상태 줄 모양을 따라요. */
 .preview {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--bt-soft);
+  background: var(--bt-canvas);
+  color: var(--bt-ink);
 }
 
 /* 작업 공간 안에서 열 때(D-40): 주소는 그대로이고 지면 위를 덮어요. 닫으면 작업하던 자리가 그대로 있어요. */
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 45;
+  /* 작업 공간의 메뉴 막대(z 60)까지 덮어요. 창(Dialog, z 100)은 이 위에 떠요. */
+  z-index: 90;
   min-height: 0;
   overflow: auto;
 }
 
+/* 시안 .topbar: 높이 56, 아래 선 */
 .bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: var(--bt-space-4);
+  gap: 14px;
   min-height: var(--bt-topbar-h);
-  padding: var(--bt-space-2) var(--bt-space-5);
+  padding: var(--bt-space-2) var(--bt-space-4);
   border-bottom: 1px solid var(--bt-line);
-  background: var(--bt-surface);
+  background: var(--bt-topbar);
 }
 
-/* 돌아가기(PV-05): 위 왼쪽. 작업 공간 안에서는 버튼이라 글꼴·바탕을 링크와 맞춰요. */
+/* 돌아가기(PV-05): 위 왼쪽. 시안 상단 바 버튼(.button: 높이 31, 모서리 4, 12px) */
 .back {
-  font: inherit;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
+  flex: none;
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 var(--bt-space-3);
-  border: 1px solid var(--bt-line-control);
-  border-radius: var(--bt-radius-md);
-  font-size: var(--bt-size-sm);
-  font-weight: var(--bt-weight-medium);
+  gap: 6px;
+  height: 31px;
+  padding: 6px 10px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-panel);
+  color: var(--bt-ink);
+  font-size: var(--bt-size-md);
+  font-weight: var(--bt-weight-regular);
+  cursor: pointer;
 }
 
 .back:hover {
-  background: var(--bt-soft);
+  background: var(--bt-hover);
+  border-color: var(--bt-line-hover);
 }
 
 .title {
@@ -51,6 +60,8 @@
   align-items: baseline;
   gap: var(--bt-space-2);
   min-width: 0;
+  padding-left: 14px;
+  border-left: 1px solid var(--bt-line);
   font-size: var(--bt-size-md);
   font-weight: var(--bt-weight-bold);
   color: var(--bt-ink);
@@ -71,46 +82,57 @@
   white-space: nowrap;
 }
 
-/* 보기 켜고 끄기(PV-04): 칩. 켜짐은 체크 + 엷은 주황(색만으로 구분하지 않음) */
+/* 보기 켜고 끄기(PV-04): 시안 검토 패널 거르개 칩(높이 27, 모서리 5, 11px). 켜짐은 체크 + 엷은 주황(색만으로 구분하지 않음) */
 .layers {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: var(--bt-space-1);
+  gap: 5px;
 }
 
 .layersLabel {
-  font-size: var(--bt-size-xs);
-  color: var(--bt-text-2);
   margin-right: var(--bt-space-1);
+  font-size: var(--bt-size-xs);
+  color: var(--bt-text-3);
 }
 
 .chip {
-  height: 28px;
-  padding: 0 var(--bt-space-2);
-  border: 1px solid var(--bt-line-control);
-  border-radius: var(--bt-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bt-space-1);
+  height: 27px;
+  padding: var(--bt-space-1) var(--bt-space-2);
+  border: 1px solid var(--bt-line);
+  border-radius: 5px;
   background: var(--bt-surface);
+  color: var(--bt-text-2);
   font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
   cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
 }
 
 .chip[aria-pressed="true"] {
   border-color: var(--bt-accent-line);
   background: var(--bt-accent-soft);
   color: var(--bt-accent-text);
-  font-weight: var(--bt-weight-medium);
+  font-weight: var(--bt-weight-bold);
 }
 
 .chip[aria-pressed="true"]::before {
-  content: "✓ ";
+  content: "✓";
 }
 
 .desk {
   position: relative;
   flex: 1;
   overflow: auto;
-  padding: var(--bt-space-8) var(--bt-space-4);
+  /* 아래 쪽 넘기기 줄(40px)만큼 더 비워 둬요 */
+  padding: var(--bt-space-6) var(--bt-desk-gutter) 78px;
 }
 
 .reflowing {
@@ -118,9 +140,10 @@
   top: var(--bt-space-3);
   right: var(--bt-space-4);
   padding: 2px var(--bt-space-2);
-  border-radius: var(--bt-radius-sm);
-  background: var(--bt-warning-soft);
-  color: var(--bt-warning);
+  border: 1px solid var(--bt-accent-line);
+  border-radius: 5px;
+  background: var(--bt-accent-soft);
+  color: var(--bt-accent-text);
   font-size: var(--bt-size-xs);
 }
 
@@ -223,31 +246,44 @@
   box-shadow: inset 0 -3px 0 var(--bt-kind-polish);
 }
 
-/* 쪽 넘기기(PV-03): 아래 가운데 */
+/* 쪽 넘기기(PV-03): 아래 가운데. 시안 작업 공간 상태 줄(.statusbar: 10px, 엷은 바탕) 모양 */
+/* 늘 화면 아래에 붙여요. 바깥 문서(body)가 overflow-x: hidden이라 sticky가 듣지 않아서 fixed로 둬요. */
 .pager {
-  position: sticky;
+  position: fixed;
+  right: 0;
   bottom: 0;
+  left: 0;
+  z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: var(--bt-space-3);
-  padding: var(--bt-space-3);
+  min-height: 40px;
+  padding: 6px var(--bt-space-3);
   border-top: 1px solid var(--bt-line);
-  background: var(--bt-surface);
+  background: var(--bt-statusbar);
+  color: var(--bt-status-text);
 }
 
 .pageButton {
-  height: 32px;
-  padding: 0 var(--bt-space-3);
-  border: 1px solid var(--bt-line-control);
-  border-radius: var(--bt-radius-md);
+  height: 27px;
+  padding: 0 10px;
+  border: 1px solid var(--bt-line);
+  border-radius: 5px;
   background: var(--bt-surface);
+  color: var(--bt-utility-text);
   font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
   cursor: pointer;
 }
 
+.pageButton:hover:not(:disabled) {
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
+}
+
 .pageButton:disabled {
-  color: var(--bt-text-3);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -256,14 +292,16 @@
   align-items: center;
   gap: var(--bt-space-2);
   font-size: var(--bt-size-xs);
-  color: var(--bt-text-2);
+  color: var(--bt-status-text);
 }
 
 .jumpInput {
-  width: 64px;
-  height: 32px;
+  width: 60px;
+  height: 27px;
   padding: 0 var(--bt-space-2);
-  border: 1px solid var(--bt-line-control);
-  border-radius: var(--bt-radius-md);
-  background: var(--bt-surface);
+  border: 1px solid var(--bt-input-line);
+  border-radius: 5px;
+  background: var(--bt-input-bg);
+  color: var(--bt-input-text);
+  font-size: var(--bt-size-sm);
 }

@@ -1,0 +1,101 @@
+/* 시안 .bf-header: 높이 76, 좌우 72, 아래 선 */
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-4);
+  height: 76px;
+  padding: 0 72px;
+  background: var(--bt-topbar);
+  border-bottom: 1px solid var(--bt-line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--bt-radius-sm);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+}
+
+/* 시안 .bf-prototype */
+.prototype {
+  padding: 3px 7px;
+  border: 1px solid var(--bt-prototype-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  color: var(--bt-prototype-text);
+  font-size: var(--bt-size-xs);
+  line-height: 16px;
+  letter-spacing: 0.8px;
+}
+
+/* 시안 .bf-account: 동그라미 30 + 역할 이름 */
+.account {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--bt-size-md);
+  color: var(--bt-text-3);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--bt-radius-full);
+  border: 1px solid var(--bt-guest-editor-line);
+  background: var(--bt-guest-editor-bg);
+  color: var(--bt-guest-editor-text);
+  font-size: var(--bt-size-md);
+  font-weight: var(--bt-weight-heavy);
+}
+
+.account[data-role="author"] .avatar {
+  border-color: var(--bt-badge-author-line);
+  background: var(--bt-badge-author-bg);
+  color: var(--bt-badge-author-text);
+}
+
+.account[data-role="designer"] .avatar {
+  border-color: var(--bt-badge-designer-line);
+  background: var(--bt-badge-designer-bg);
+  color: var(--bt-badge-designer-text);
+}
+
+/* 시안 .be-utility-btn(일정) */
+.utility {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 5px 9px;
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius-md);
+  background: var(--bt-surface);
+  color: var(--bt-utility-text);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
+}
+
+.utility:hover {
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
+}
+
+@media (max-width: 720px) {
+  .header {
+    padding: 0 var(--bt-space-4);
+  }
+
+  .prototype,
+  .utility {
+    display: none;
+  }
+}

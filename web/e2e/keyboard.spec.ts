@@ -57,7 +57,8 @@ test("Tab으로 옮긴 곳에는 주황 포커스 띠가 보인다(QA-F29, DESIG
   await tabTo(page, "만들기", (el) => el.tag === "BUTTON" && el.text === "만들기");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(WORKSPACE, { timeout: NAVIGATE_MS });
-  for (const name of ["검토본", "조판 설정", "초대"]) {
+  // 시안 11.22 배치: 초대(상단 바) → 검토본(작업 머리) → 조판 설정(오른쪽 패널 전환)
+  for (const name of ["초대", "검토본", "조판 설정"]) {
     await tabTo(page, name, (el) => el.tag === "BUTTON" && el.text === name);
     const ring = await page.evaluate(() => getComputedStyle(document.activeElement as Element).boxShadow);
     expect(ring, `${name} 버튼의 포커스 띠`).toContain("rgb(236, 102, 31)"); // --bt-brand

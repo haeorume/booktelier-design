@@ -24,15 +24,21 @@ function nameOf(p: { role: Participant["role"]; display_name: string }): string 
 export function Participants({ participants, currentId, present, chapterTitles, onJump }: Props) {
   if (present === null) {
     return (
-      <ul className={styles.list} aria-label="참여자" data-testid="participants">
-        {participants.map((p) => (
-          <Person key={p.id} person={p} me={p.id === currentId} />
-        ))}
-      </ul>
+      <>
+        <ul className={styles.list} aria-label="참여자" data-testid="participants">
+          {participants.map((p) => (
+            <Person key={p.id} person={p} me={p.id === currentId} />
+          ))}
+        </ul>
+        <span className={styles.count} aria-hidden="true">
+          참여 {participants.length}명
+        </span>
+      </>
     );
   }
   const me = participants.find((p) => p.id === currentId);
   return (
+    <>
     <ul className={styles.list} aria-label="접속자" data-testid="participants">
       {me && <Person person={me} me />}
       {present.map((p) => {
@@ -68,6 +74,10 @@ export function Participants({ participants, currentId, present, chapterTitles, 
         );
       })}
     </ul>
+    <span className={styles.count} aria-hidden="true">
+      접속 {present.length + (me ? 1 : 0)}명
+    </span>
+    </>
   );
 }
 

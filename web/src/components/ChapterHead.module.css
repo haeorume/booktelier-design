@@ -1,36 +1,33 @@
-/* 장 머리(WS-31): 장 상태 배지와 검토 요청·검토 완료. 상단 바의 역할 배지 옆에 놓여요(DESIGN.md 3장). */
+/* 작업 머리 단추(시안 .bf-button.bf-small): 27px, 흰 바탕, 9px 굵은 글자 */
 .head {
   display: flex;
   align-items: center;
-  gap: var(--bt-space-2);
-  padding-left: var(--bt-space-3);
-  border-left: 1px solid var(--bt-line);
-  font-size: var(--bt-size-sm);
-  line-height: var(--bt-leading-tight);
+  gap: 4px;
 }
 
-/* 주요 버튼(DESIGN.md 5장): 높이 36px, --bt-action 바탕, 흰 글자 13px 600 */
 .button {
-  height: 32px;
-  padding: 0 var(--bt-space-4);
-  border-radius: var(--bt-radius-md);
-  border: 1px solid var(--bt-action);
-  background: var(--bt-action);
-  color: var(--bt-text-on-action);
-  font-size: var(--bt-size-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 27px;
+  padding: 0 7px;
+  border: 1px solid var(--bt-line-strong);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-surface);
+  font-size: var(--bt-size-2xs);
   font-weight: var(--bt-weight-bold);
-  cursor: pointer;
-  transition: background var(--bt-duration) var(--bt-ease);
+  color: var(--bt-ink);
+  white-space: nowrap;
+  transition: border-color var(--bt-duration) var(--bt-ease);
 }
 
 .button:hover:not(:disabled) {
-  background: var(--bt-action-hover);
+  border-color: var(--bt-line-hover);
+  background: var(--bt-hover);
 }
 
-/* 장 상태 때문에 누를 수 없을 때(권한이 아니라 숨기지 않음). 흐린 주황 대신 회색 바탕 + 보조 글자 */
+/* 장 상태 때문에 누를 수 없을 때(권한이 아니라 숨기지 않음) */
 .button:disabled {
-  border-color: var(--bt-line-strong);
-  background: var(--bt-soft);
-  color: var(--bt-text-3);
+  opacity: 0.45;
   cursor: not-allowed;
 }

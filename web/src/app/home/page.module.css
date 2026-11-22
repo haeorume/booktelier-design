@@ -1,84 +1,552 @@
-.main {
+/* 편집자 홈(시안 11.22 '#home', .bf-home). 값은 1440×900에서 잰 그대로예요. */
+.page {
   flex: 1;
-  width: min(100%, 64rem);
-  margin: 0 auto;
-  padding: var(--bt-space-12) var(--bt-space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--bt-space-8);
 }
 
-.header {
+.main {
+  width: 100%;
+  max-width: 1510px;
+  margin: 0 auto;
+  padding: 44px 72px 35px;
+  color: var(--bt-ink);
+  font-size: var(--bt-size-lg);
+  line-height: 1.6;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── EDITOR'S DESK 머리(시안 .bf-home-head) ── */
+.head {
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 36px;
 }
 
-.brand {
-  font-weight: 700;
+.eyebrow {
+  display: block;
+  margin-bottom: var(--bt-space-3);
+  font-size: var(--bt-size-xs);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 16px;
+  letter-spacing: 1.6px;
+  color: var(--bt-accent-text);
 }
 
 .title {
-  font-size: var(--bt-size-2xl);
-  font-weight: var(--bt-weight-bold);
+  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: -0.045em;
   color: var(--bt-ink);
 }
 
-/* 주요 버튼(화면에 하나) */
-.newBook {
-  margin-left: auto;
+.lead {
+  font-size: var(--bt-size-base);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+/* 주요 버튼(시안 .bf-button.bf-primary): 높이 40, 모서리 6 */
+.primary {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  height: 36px;
+  justify-content: center;
+  gap: var(--bt-space-2);
+  height: 40px;
   padding: 0 var(--bt-space-4);
-  border-radius: var(--bt-radius-md);
+  border: 1px solid var(--bt-action);
+  border-radius: 6px;
   background: var(--bt-action);
   color: var(--bt-text-on-action);
-  font-size: var(--bt-size-sm);
-  font-weight: var(--bt-weight-bold);
+  font-size: var(--bt-size-lg);
+  font-weight: var(--bt-weight-regular);
+  white-space: nowrap;
+  box-shadow: var(--bt-shadow-action);
+  transition: background var(--bt-duration) var(--bt-ease), border-color var(--bt-duration) var(--bt-ease);
 }
 
-.newBook:hover {
+.primary:hover {
   background: var(--bt-action-hover);
+  border-color: var(--bt-action-hover);
 }
 
-.empty {
+.primarySm {
+  height: 39px;
+  font-size: var(--bt-size-sm);
+}
+
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── 협업 일정(시안 #be-home-schedule) ── */
+.schedule {
+  margin-bottom: 30px;
+  padding: 19px 20px 20px;
+  border: 1px solid var(--bt-line);
+  border-radius: 11px;
+  background: var(--bt-surface);
+  scroll-margin-top: var(--bt-space-4);
+}
+
+.scheduleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.scheduleHead h2 {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.5;
+  letter-spacing: -0.025em;
+  color: var(--bt-ink);
+}
+
+.scheduleHead p {
+  margin-top: var(--bt-space-1);
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.scheduleActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.utility {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 31px;
+  padding: 6px 10px;
+  border: 1px solid var(--bt-line);
+  border-radius: 6px;
+  background: var(--bt-surface);
+  color: var(--bt-utility-text);
+  font-size: var(--bt-size-sm);
+  font-weight: var(--bt-weight-medium);
+  line-height: 1.4;
+  cursor: default;
+}
+
+.scheduleList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bt-space-3);
+  list-style: none;
+}
+
+.scheduleCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 10px;
+  padding: 14px 15px;
+  border: 1px solid var(--bt-line);
+  border-radius: var(--bt-radius-lg);
+  background: var(--bt-panel);
+  transition: background var(--bt-duration) var(--bt-ease), border-color var(--bt-duration) var(--bt-ease);
+}
+
+.scheduleCard:hover {
+  background: var(--bt-sch-hover);
+  border-color: var(--bt-sch-hover-line);
+}
+
+.roleChip {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border: 1px solid var(--bt-guest-author-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-guest-author-bg);
+  color: var(--bt-guest-author-text);
+  font-size: var(--bt-size-2xs);
+  font-weight: var(--bt-weight-medium);
+  line-height: 1.5;
+}
+
+.roleChip[data-role="designer"] {
+  border-color: var(--bt-guest-designer-line);
+  background: var(--bt-guest-designer-bg);
+  color: var(--bt-guest-designer-text);
+}
+
+.roleChip[data-role="editor"] {
+  border-color: var(--bt-guest-editor-line);
+  background: var(--bt-guest-editor-bg);
+  color: var(--bt-guest-editor-text);
+}
+
+.scheduleCard time {
+  align-self: center;
+  font-size: var(--bt-size-xs);
+  line-height: 1.5;
+  color: var(--bt-utility-text);
+}
+
+.scheduleCard strong {
+  grid-column: 1 / -1;
+  font-size: var(--bt-size-base);
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.65;
+  color: var(--bt-ink);
+}
+
+.scheduleCard small {
+  grid-column: 1 / -1;
+  font-size: var(--bt-size-xs);
+  line-height: 1.65;
+  color: var(--bt-text-3);
+}
+
+/* ── 빈 첫 장 안내(시안 .bf-demo-hero) ── */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 74fr) minmax(0, 100fr);
+  align-items: center;
+  gap: 35px;
+  margin-bottom: var(--bt-space-8);
+  padding: 26px 34px;
+  border: 1px solid var(--bt-intro-line);
+  border-radius: var(--bt-radius-lg);
+  background: linear-gradient(120deg, var(--bt-intro-from), var(--bt-intro-to));
+  box-shadow: var(--bt-shadow-intro);
+  scroll-margin-top: var(--bt-space-4);
+}
+
+.introCopy {
+  min-width: 0;
+}
+
+.eyebrowSm {
+  display: block;
+  margin-bottom: 9px;
+  font-size: var(--bt-size-3xs);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
+  letter-spacing: 1.8px;
+  color: var(--bt-accent-text);
+}
+
+.introCopy h2 {
+  margin-bottom: var(--bt-space-2);
+  font-size: 27px;
+  font-weight: 750;
+  line-height: 1.45;
+  letter-spacing: -0.045em;
+  color: var(--bt-ink);
+}
+
+.introCopy p {
+  margin-bottom: 19px;
+  font-size: var(--bt-size-md);
+  line-height: 1.9;
+  color: var(--bt-text-3);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 11px;
+  font-size: var(--bt-size-2xs);
+  line-height: 1.8;
+  color: var(--bt-text-3);
+}
+
+.steps i {
+  font-style: normal;
+  color: var(--bt-intro-arrow);
+}
+
+.roleMap {
+  display: grid;
+  grid-template-columns: minmax(0, 271fr) 42px minmax(0, 339fr);
+  align-items: center;
+  gap: 13px;
+}
+
+.mapEditor {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
-  color: var(--bt-text-2);
-  border: 1px dashed var(--bt-line-strong);
-  border-radius: 10px;
+  padding: 22px 15px;
+  border: 1px solid var(--bt-map-editor-line);
+  border-radius: 7px;
+  background: var(--bt-map-editor-bg);
+  box-shadow: var(--bt-shadow-map-editor);
+  transform: rotate(-2deg);
 }
 
-.empty .newBook {
-  margin-left: 0;
-}
-
-.cards {
-  list-style: none;
+.mapAvatar {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: var(--bt-space-4);
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--bt-map-avatar-line);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-map-avatar-bg);
+  color: var(--bt-map-avatar-text);
+  font-size: 15px;
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1;
 }
 
-/* 책 카드(HM-04): 왼쪽 표지 + 오른쪽 상태·참여자·확인할 일·최근 변경(DESIGN.md 6장) */
+.mapEditor strong {
+  margin: 9px 0 14px;
+  font-size: var(--bt-size-base);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
+  color: var(--bt-map-editor-name);
+}
+
+.mapTags {
+  display: flex;
+  gap: 6px;
+}
+
+.mapTags b {
+  display: flex;
+  align-items: center;
+  gap: var(--bt-space-1);
+  padding: 5px var(--bt-space-2);
+  border: 1px solid var(--bt-map-tag-line);
+  border-radius: var(--bt-radius-sm);
+  background: var(--bt-map-tag-bg);
+  color: var(--bt-map-tag-text);
+  font-size: var(--bt-size-2xs);
+  font-weight: 550;
+  line-height: 1.6;
+}
+
+.mapEditor small {
+  margin-top: 15px;
+  font-size: var(--bt-size-3xs);
+  line-height: 1.6;
+  color: var(--bt-map-note);
+}
+
+.mapArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--bt-faint);
+}
+
+.mapArrow span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px dashed var(--bt-line);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-surface);
+}
+
+.mapArrow small {
+  margin-top: 6px;
+  font-size: var(--bt-size-3xs);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.mapGuests {
+  display: grid;
+  gap: var(--bt-space-3);
+}
+
+.mapGuests > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 14px;
+  border: 1px solid var(--bt-line);
+  border-left: 3px solid var(--bt-guest-author-rule);
+  border-radius: 7px;
+  background: var(--bt-surface);
+  box-shadow: var(--bt-shadow-guest);
+}
+
+.mapGuests > div[data-role="designer"] {
+  border-left-color: var(--bt-guest-designer-rule);
+}
+
+.guestDot,
+.personDot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bt-guest-author-line);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-guest-author-bg);
+  color: var(--bt-guest-author-text);
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1;
+}
+
+.guestDot {
+  width: 28px;
+  height: 28px;
+  font-size: var(--bt-size-sm);
+}
+
+[data-role="designer"] > .guestDot,
+.personDot[data-role="designer"] {
+  border-color: var(--bt-guest-designer-line);
+  background: var(--bt-guest-designer-bg);
+  color: var(--bt-guest-designer-text);
+}
+
+.personDot[data-role="editor"] {
+  border-color: var(--bt-guest-editor-line);
+  background: var(--bt-guest-editor-bg);
+  color: var(--bt-guest-editor-text);
+}
+
+.guestText {
+  flex: 1;
+  min-width: 0;
+}
+
+.guestText strong {
+  display: block;
+  font-size: var(--bt-size-sm);
+  font-weight: 650;
+  line-height: 1.6;
+  color: var(--bt-ink);
+}
+
+.guestText small {
+  display: block;
+  margin-top: var(--bt-space-1);
+  font-size: var(--bt-size-3xs);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.mapGuests b {
+  font-size: var(--bt-size-2xs);
+  font-weight: 550;
+  color: var(--bt-text-3);
+}
+
+/* ── 내가 맡은 책(시안 .bf-shelf-heading · .bf-shelf-context) ── */
+.shelfHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-5);
+  margin-bottom: 13px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--bt-line);
+  scroll-margin-top: var(--bt-space-4);
+}
+
+.shelfTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.shelfTitle h2 {
+  font-size: 16px;
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
+  color: var(--bt-ink);
+}
+
+.shelfTitle span {
+  padding: 0 7px;
+  border-radius: 20px;
+  background: var(--bt-chip);
+  color: var(--bt-chip-text);
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+}
+
+.shelfHead p {
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+  color: var(--bt-text-3);
+}
+
+.shelfHead strong {
+  font-weight: var(--bt-weight-bold);
+  color: var(--bt-accent-text);
+}
+
+.context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-4);
+  margin-bottom: 18px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.7;
+  color: var(--bt-text-3);
+}
+
+.context span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── 책 카드(시안 .bf-book-card): 왼쪽 표지 + 오른쪽 정보 ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  list-style: none;
+}
+
+.cards > li {
+  min-width: 0;
+}
+
 .card {
   display: flex;
-  gap: var(--bt-space-4);
-  padding: var(--bt-space-4);
-  border: 1px solid var(--bt-line-strong);
+  gap: 22px;
+  height: 100%;
+  min-height: 275px;
+  padding: var(--bt-space-5);
+  border: 1px solid var(--bt-line);
   border-radius: var(--bt-radius-lg);
   background: var(--bt-surface);
-  box-shadow: var(--bt-shadow-sm);
+  color: var(--bt-ink);
+  box-shadow: var(--bt-shadow-card);
   transition: border-color var(--bt-duration) var(--bt-ease);
 }
 
 .card:hover {
-  border-color: var(--bt-brand);
+  border-color: var(--bt-card-hover-line);
+  box-shadow: var(--bt-shadow-card-hover);
+}
+
+.card:hover .arrow {
+  color: var(--bt-brand);
 }
 
 /* 카드 그림자가 전역 포커스 띠를 덮지 않게 포커스 때는 띠로 바꿔요(QA-F29, Codex 검수 11.21) */
@@ -88,41 +556,347 @@
 
 .cover {
   flex: none;
-  width: 72px;
-  height: 104px;
-  padding: var(--bt-space-2);
-  border-radius: var(--bt-radius-sm);
-  border: 1px solid var(--bt-accent-line);
-  border-left: 4px solid var(--bt-brand);
-  background: var(--bt-accent-wash);
-  font-family: var(--bt-font-serif);
-  font-size: var(--bt-size-xs);
-  font-weight: var(--bt-weight-bold);
-  line-height: var(--bt-leading-tight);
-  color: var(--bt-ink);
+  display: flex;
+  flex-direction: column;
+  width: 119px;
+  min-height: 192px;
+  padding: 18px 13px 16px 17px;
+  border-left: 5px solid var(--bt-cover-1-spine);
+  border-radius: 2px 5px 5px 2px;
+  background: var(--bt-cover-1-bg);
+  color: var(--bt-cover-1-text);
+  box-shadow: var(--bt-shadow-cover);
   overflow: hidden;
+}
+
+.cover[data-cover="2"] {
+  border-left-color: var(--bt-cover-2-spine);
+  background: var(--bt-cover-2-bg);
+  color: var(--bt-cover-2-text);
+}
+
+.cover[data-cover="3"] {
+  border-left-color: var(--bt-cover-3-spine);
+  background: var(--bt-cover-3-bg);
+  color: var(--bt-cover-3-text);
+}
+
+.cover[data-cover="4"] {
+  border-left-color: var(--bt-cover-4-spine);
+  background: var(--bt-cover-4-bg);
+  color: var(--bt-cover-4-text);
+}
+
+.coverBrand {
+  font-size: 7px;
+  line-height: 1.6;
+  letter-spacing: 1.4px;
+  opacity: 0.8;
+}
+
+.coverTitle {
+  display: -webkit-box;
+  margin: 24px 0 17px;
+  overflow: hidden;
+  font-family: var(--bt-font-serif);
+  font-size: 18px;
+  font-weight: var(--bt-weight-medium);
+  line-height: 1.7;
+  letter-spacing: -0.035em;
   word-break: keep-all;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.coverRule {
+  width: 22px;
+  height: 1px;
+  margin-top: auto;
+  margin-bottom: var(--bt-space-3);
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.coverKind {
+  font-size: var(--bt-size-3xs);
+  line-height: 1.6;
+  opacity: 0.8;
 }
 
 .info {
+  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--bt-space-1);
+  padding-top: 3px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-2);
+  margin-bottom: var(--bt-space-3);
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--bt-faint);
+  transition: color var(--bt-duration) var(--bt-ease);
+}
+
+.arrow svg {
+  width: 18px;
+  height: 18px;
 }
 
 .cardTitle {
-  font-size: var(--bt-size-lg);
-  font-weight: var(--bt-weight-bold);
+  margin-bottom: var(--bt-space-1);
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: var(--bt-weight-heavy);
+  line-height: 1.6;
   color: var(--bt-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.meta {
-  font-size: 0.85rem;
-  color: var(--bt-text-2);
+.cardMeta {
+  margin-bottom: 13px;
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+  color: var(--bt-text-3);
 }
 
-.meta strong {
-  color: var(--bt-text);
+.people {
+  display: block;
+  margin-bottom: 15px;
+  padding-top: 1px;
+}
+
+.peopleLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: var(--bt-space-2);
+  font-size: var(--bt-size-2xs);
+  line-height: 1.6;
+  color: var(--bt-quiet-2);
+}
+
+.peopleLabel b {
+  padding: 0 5px;
+  border-radius: var(--bt-radius-lg);
+  background: var(--bt-chip);
+  color: var(--bt-chip-text);
+  font-size: var(--bt-size-3xs);
+  font-weight: var(--bt-weight-medium);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bt-space-2) var(--bt-space-3);
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.4;
+  color: var(--bt-text-3);
+}
+
+.person small {
+  display: block;
+  margin-top: 1px;
+  font-size: var(--bt-size-3xs);
+  line-height: 1.4;
+  color: var(--bt-quiet-2);
+}
+
+.personDot {
+  width: 24px;
+  height: 24px;
+  font-size: var(--bt-size-2xs);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--bt-size-sm);
+  line-height: 1.6;
+  color: var(--bt-task-text);
+}
+
+.taskIcon {
+  width: 13px;
+  height: 13px;
+}
+
+.task b {
+  font-weight: 650;
+  color: var(--bt-accent-text);
+}
+
+.detail {
+  margin-top: var(--bt-space-1);
+  font-size: var(--bt-size-xs);
+  line-height: 1.6;
+  color: var(--bt-quiet);
+}
+
+.updated {
+  margin-top: auto;
+  padding-top: 13px;
+  font-size: var(--bt-size-2xs);
+  line-height: 1.6;
+  color: var(--bt-quiet);
+}
+
+/* 새 책 카드와 빈 책장(시안 .bf-new-card) */
+.newCard,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 275px;
+  padding: 27px;
+  border: 1px dashed var(--bt-new-card-line);
+  border-radius: var(--bt-radius-lg);
+  background: var(--bt-panel);
+  color: var(--bt-text-3);
+  text-align: center;
+  transition: background var(--bt-duration) var(--bt-ease), border-color var(--bt-duration) var(--bt-ease);
+}
+
+.newCard:hover {
+  background: var(--bt-new-card-hover);
+  border-color: var(--bt-card-hover-line);
+}
+
+.newIcon {
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  margin-bottom: 13px;
+  border: 1px solid var(--bt-new-card-line);
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-surface);
+  color: var(--bt-new-card-icon);
+}
+
+.newIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.newCard strong,
+.empty strong {
+  font-size: var(--bt-size-base);
+  font-weight: var(--bt-weight-bold);
+  line-height: 1.6;
+  color: var(--bt-new-card-title);
+}
+
+.newCard p,
+.empty p {
+  margin-top: var(--bt-space-2);
+  font-size: var(--bt-size-sm);
+  line-height: 1.8;
+  color: var(--bt-text-3);
+}
+
+.empty p {
+  margin-bottom: var(--bt-space-4);
+}
+
+/* ── 아래 줄(시안 .bf-home-footer) ── */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bt-space-3);
+  margin-top: 40px;
+  font-size: var(--bt-size-xs);
+  line-height: 1.6;
+  color: var(--bt-quiet);
+}
+
+.saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.saved::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-success);
+}
+
+.footLink {
+  color: var(--bt-accent-text);
+}
+
+.footLink:first-of-type {
+  margin-left: auto;
+}
+
+.footLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .main {
+    padding: var(--bt-space-6) var(--bt-space-4);
+  }
+
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scheduleList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .roleMap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mapArrow {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    flex-direction: column;
+  }
+
+  .cover {
+    width: 100%;
+  }
 }

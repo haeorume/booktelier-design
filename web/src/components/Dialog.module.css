@@ -1,25 +1,194 @@
+/* 창(시안 .bf-modal-backdrop · .bf-modal). 값은 시안 11.22에서 잰 그대로예요. */
 .backdrop {
   position: fixed;
   inset: 0;
-  background: var(--bt-overlay);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
+  /* 작업 공간의 메뉴 막대·펼침 메뉴(z 60)와 미리보기 덮개(z 90)보다 위 */
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--bt-space-6);
+  background: var(--bt-modal-overlay);
 }
 
 .dialog {
-  width: min(92vw, 32rem);
-  background: var(--bt-surface);
-  color: var(--bt-text);
-  border-radius: 10px;
-  padding: 1.4rem;
+  width: min(540px, 100%);
+  max-height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  box-shadow: var(--bt-shadow-lg);
+  overflow: hidden;
+  background: var(--bt-surface);
+  color: var(--bt-ink);
+  border: 1px solid var(--bt-modal-line);
+  border-radius: 10px;
+  box-shadow: var(--bt-shadow-modal);
+  font-size: var(--bt-size-base);
+  line-height: normal;
+}
+
+.dialog[data-wide] {
+  width: min(800px, 100%);
+}
+
+.head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bt-space-3);
+  padding: 21px var(--bt-space-6);
+  background: var(--bt-modal-head);
+  border-bottom: 1px solid var(--bt-line);
 }
 
 .title {
-  font-size: 1.15rem;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: var(--bt-weight-heavy);
+  color: var(--bt-ink);
+  line-height: normal;
+}
+
+.x {
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: var(--bt-space-1);
+  border: none;
+  border-radius: var(--bt-radius-sm);
+  background: transparent;
+  color: var(--bt-icon);
+}
+
+.x svg {
+  width: 18px;
+  height: 18px;
+}
+
+.x:hover {
+  background: var(--bt-hover);
+  color: var(--bt-ink);
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+  padding: 23px var(--bt-space-6);
+}
+
+/* ── 창 안에서 같이 쓰는 모양(시안 .bf-modal-intro, .bf-field-label, .bf-link-row, .bf-button) ── */
+
+/* 창 첫 줄 안내(시안 .bf-modal-intro) */
+.intro {
+  margin-bottom: var(--bt-space-5);
+  font-size: var(--bt-size-md);
+  line-height: 1.7;
+  color: var(--bt-text-3);
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--bt-space-2);
+  font-size: var(--bt-size-sm);
+  color: var(--bt-ink);
+}
+
+/* 입력 칸 + 버튼 한 줄(시안 .bf-link-row) */
+.row {
+  display: flex;
+  gap: var(--bt-space-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 39px;
+  padding: 0 11px;
+  border: 1px solid var(--bt-input-line);
+  border-radius: 6px;
+  background: var(--bt-input-bg);
+  color: var(--bt-input-text);
+  font-size: var(--bt-size-sm);
+}
+
+.input::placeholder {
+  color: var(--bt-quiet);
+}
+
+.input:hover {
+  border-color: var(--bt-line-hover);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--bt-space-2);
+  margin-top: var(--bt-space-5);
+}
+
+/* 버튼(시안 .bf-button / .bf-button.bf-primary): 높이 40, 모서리 6 */
+.primary,
+.secondary {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bt-space-2);
+  height: 40px;
+  padding: 0 var(--bt-space-4);
+  border-radius: 6px;
+  font-size: var(--bt-size-base);
+  font-weight: var(--bt-weight-regular);
+  white-space: nowrap;
+  transition: background var(--bt-duration) var(--bt-ease), border-color var(--bt-duration) var(--bt-ease);
+}
+
+.primary {
+  border: 1px solid var(--bt-action);
+  background: var(--bt-action);
+  color: var(--bt-text-on-action);
+  box-shadow: var(--bt-shadow-action);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--bt-action-hover);
+  border-color: var(--bt-action-hover);
+}
+
+.secondary {
+  border: 1px solid var(--bt-line-strong);
+  background: var(--bt-surface);
+  color: var(--bt-button-text);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--bt-hover);
+  border-color: var(--bt-line-hover);
+  color: var(--bt-ink);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.45;
+}
+
+/* 줄 안 버튼은 입력 칸과 같은 높이(시안 .bf-link-row .bf-button) */
+.row .primary,
+.row .secondary {
+  height: 39px;
+  font-size: var(--bt-size-sm);
+}
+
+.alert {
+  margin-top: var(--bt-space-2);
+  padding-left: var(--bt-space-2);
+  border-left: 3px solid var(--bt-danger);
+  font-size: var(--bt-size-sm);
+  color: var(--bt-text);
+}
+
+/* 확인 창 본문(ConfirmDialog) */
+.message {
+  font-size: var(--bt-size-md);
+  line-height: 1.7;
+  color: var(--bt-text-2);
 }

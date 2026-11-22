@@ -1,18 +1,50 @@
-/* 테마 전환 버튼: 아이콘 버튼(DESIGN.md 5장, 32×32, aria-label 필수) */
+/* 테마 스위치(시안 .be-theme-switch): 62×32 둥근 칸, 흰 동그라미 24px가 지금 테마 쪽에 있어요. */
 .toggle {
-  width: 32px;
+  position: relative;
+  width: 62px;
   height: 32px;
+  flex: none;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--bt-line-control);
-  border-radius: var(--bt-radius-md);
-  background: var(--bt-surface);
-  color: var(--bt-text);
-  font-size: var(--bt-size-md);
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 0 8px;
+  border: 1px solid var(--bt-theme-switch-line);
+  border-radius: 18px;
+  background: var(--bt-theme-switch-bg);
+  color: var(--bt-text-3);
+}
+
+.thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--bt-radius-full);
+  background: var(--bt-theme-switch-thumb);
+  box-shadow: var(--bt-theme-switch-shadow);
+  transition: transform var(--bt-duration) var(--bt-spring);
+}
+
+.toggle[data-dark="true"] .thumb {
+  transform: translateX(29px);
+}
+
+.sun,
+.moon {
+  position: relative;
+  display: inline-flex;
+  color: var(--bt-theme-moon);
+}
+
+.toggle[data-dark="false"] .sun {
+  color: var(--bt-theme-sun);
+}
+
+.toggle[data-dark="true"] .moon {
+  color: var(--bt-theme-moon);
 }
 
 .toggle:hover {
-  background: var(--bt-soft);
+  border-color: var(--bt-line-hover);
 }

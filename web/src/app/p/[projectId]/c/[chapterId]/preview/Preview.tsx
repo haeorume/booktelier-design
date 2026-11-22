@@ -275,7 +275,7 @@ export function Preview({ projectId, chapterId, embedded }: { projectId: string;
   }
   if (view.kind === "loading") return null;
   if (view.kind === "not_found") return <MessageView {...NOT_FOUND} />;
-  if (view.kind === "no_role") return <MessageView title="받은 링크로 다시 들어와 주세요" body="이 브라우저에는 이 책의 역할이 없어요." />;
+  if (view.kind === "no_role") return <MessageView eyebrow="INVITATION NEEDED" title="받은 링크로 다시 들어와 주세요" body="이 브라우저에는 이 책의 역할이 없어요." />;
 
   const { project, chapter } = view;
   const first = spread === 0 ? 1 : spread * 2;

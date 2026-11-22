@@ -55,7 +55,10 @@ function MoonIcon() {
   );
 }
 
-/** 해·달 전환 버튼. 지금 보이는 테마의 반대로 바꾸고 그 선택을 이 브라우저에 기억해요. */
+/**
+ * 해·달 전환 스위치(시안 .be-theme-switch). 둥근 칸 안에 해와 달이 늘 보이고, 흰 동그라미가 지금 테마 쪽에 놓여요.
+ * 누르면 지금 보이는 테마의 반대로 바꾸고 그 선택을 이 브라우저에 기억해요.
+ */
 export function ThemeToggle() {
   const choice = useThemeChoice();
   const systemDark = useSystemDark();
@@ -68,10 +71,17 @@ export function ThemeToggle() {
       aria-label={label}
       title={label}
       aria-pressed={dark}
+      data-dark={dark ? "true" : "false"}
       data-testid="theme-toggle"
       onClick={() => getClientSession().setTheme(dark ? "light" : "dark")}
     >
-      {dark ? <SunIcon /> : <MoonIcon />}
+      <span className={styles.thumb} aria-hidden="true" />
+      <span className={styles.sun}>
+        <SunIcon />
+      </span>
+      <span className={styles.moon}>
+        <MoonIcon />
+      </span>
     </button>
   );
 }

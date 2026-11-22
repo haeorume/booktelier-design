@@ -5,14 +5,22 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { bookDeps } from "@/data";
 import { EditorLinkDialog } from "@/components/EditorLinkDialog";
+import { Icon } from "@/components/Icon";
 import { TEMPLATE_ORDER, TEMPLATES } from "@/domain/templates";
 import { setTrackContext, track } from "@/events";
 import type { TemplateId } from "@/types";
+import { ServiceHeader } from "./home/ServiceHeader";
 import styles from "./page.module.css";
-import { Logo } from "@/components/Logo";
+
+/** 템플릿 카드의 한 줄 설명과 작은 지면 그림 제목(시안 .bf-template-copy · .bf-template-preview). */
+const TEMPLATE_COPY: Record<TemplateId, { copy: string; sample: string }> = {
+  novel: { copy: "긴 호흡의 본문을 편안하게 읽는 소설형 지면", sample: "문장을 따라, 깊게" },
+  essay: { copy: "글과 여백의 균형을 맞춘 에세이형 지면", sample: "일상 사이에, 여백" },
+  practical: { copy: "제목과 내용을 빠르게 구분하는 실용서형 지면", sample: "내용을 또렷하게" },
+};
 
 /**
- * 새 책 만들기(ST-01). 제목과 템플릿을 받아 만든다(FR-01, FR-10).
+ * 새 책 만들기(ST-01, 시안 11.22 '#create'). 제목과 템플릿을 받아 만든다(FR-01, FR-10).
  * 만든 책이 있는 브라우저가 /로 오면 편집자 홈으로 보낸다. /?new=1은 보내지 않는다(정할 것 1).
  */
 export function NewBook() {
@@ -61,52 +69,110 @@ export function NewBook() {
   }
 
   return (
-    <main className={styles.main}>
-      <p className={styles.brand}>
-        <Logo size="lg" withName />
-      </p>
-      <form
-        className={styles.form}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void submit();
-        }}
-      >
-        <h1 className={styles.title}>새 책 만들기</h1>
-        <label className={styles.label}>
-          책 제목
-          <input className={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={100} autoFocus />
-        </label>
-        <fieldset className={styles.templates}>
-          <legend className={styles.label}>템플릿</legend>
-          {TEMPLATE_ORDER.map((id) => (
-            <label key={id} className={styles.template} data-selected={template === id}>
-              <input type="radio" name="template" value={id} checked={template === id} onChange={() => setTemplate(id)} />
-              <span className={styles.templateName}>{TEMPLATES[id].label}</span>
-              <span className={styles.templateSpec}>
-                {TEMPLATES[id].layout.trim.replace("x", "×")}mm · {TEMPLATES[id].font === "serif" ? "명조" : "고딕"} {TEMPLATES[id].layout.font_size}pt · 행간 {TEMPLATES[id].layout.line_height}
-              </span>
-            </label>
-          ))}
-        </fieldset>
-        {serverBacked && (
-          <label className={styles.label}>
-            <span>
-              <input type="checkbox" checked={sample} onChange={(e) => setSample(e.target.checked)} /> 예시 원고로 시작
-            </span>
-          </label>
+    <div className={styles.page}>
+      <ServiceHeader role="editor" homeLink={hasBooks} />
+      <main className={styles.main}>
+        {hasBooks && (
+          <Link className={styles.back} href="/home">
+            <Icon name="left" size="sm" />
+            편집자 홈
+          </Link>
         )}
-        <div className={styles.actions}>
-          {hasBooks && (
-            <Link className={styles.secondary} href="/home">
-              편집자 홈
-            </Link>
-          )}
-          <button type="submit" className={styles.primary} disabled={empty || busy}>
-            만들기
-          </button>
+        <div className={styles.head}>
+          <span className={styles.eyebrow}>START A NEW STORY</span>
+          <h1 className={styles.title}>
+            <span className={styles.srOnly}>새 책 만들기 · </span>첫 장부터, 함께 시작해요.
+          </h1>
+          <p className={styles.lead}>제목과 기본 지면을 정하고, 빈 원고에서 작가와 디자이너를 초대하세요.</p>
+          <ol className={styles.journey} aria-label="진행 단계">
+            <li data-current="true">
+              <i>1</i>책 준비
+            </li>
+            <li aria-hidden="true" className={styles.journeyArrow}>
+              →
+            </li>
+            <li>
+              <i>2</i>빈 원고
+            </li>
+            <li aria-hidden="true" className={styles.journeyArrow}>
+              →
+            </li>
+            <li>
+              <i>3</i>참여자 초대
+            </li>
+          </ol>
         </div>
-      </form>
+        <form
+          className={styles.form}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit();
+          }}
+        >
+          <label className={styles.fieldLabel} htmlFor="new-book-title">
+            책 제목 <span className={styles.required}>필수</span>
+          </label>
+          <input
+            id="new-book-title"
+            className={styles.input}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={100}
+            placeholder="함께 만들 책의 제목"
+            autoComplete="off"
+            autoFocus
+          />
+          <p className={styles.caption}>작업을 시작한 뒤에도 제목과 지면을 바꿀 수 있어요.</p>
+          <fieldset className={styles.templates}>
+            <legend className={styles.legend}>조판 템플릿</legend>
+            <div className={styles.templateGrid}>
+              {TEMPLATE_ORDER.map((id) => {
+                const t = TEMPLATES[id];
+                return (
+                  <label key={id} className={styles.template} data-selected={template === id}>
+                    <input type="radio" name="template" value={id} checked={template === id} onChange={() => setTemplate(id)} />
+                    <span className={styles.preview} data-template={id} aria-hidden="true">
+                      <small>CHAPTER 01</small>
+                      <strong>{TEMPLATE_COPY[id].sample}</strong>
+                      <i />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <b>01</b>
+                    </span>
+                    <span className={styles.templateName}>
+                      {t.label}
+                      <i className={styles.radio} aria-hidden="true">
+                        <Icon name="check" />
+                      </i>
+                    </span>
+                    <span className={styles.templateCopy}>{TEMPLATE_COPY[id].copy}</span>
+                    <span className={styles.templateSpec}>
+                      {t.layout.trim.replace("x", "×")}mm · {t.font === "serif" ? "명조" : "고딕"} {t.layout.font_size}pt · 행간 {t.layout.line_height}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+          {serverBacked && (
+            <label className={styles.sample}>
+              <input type="checkbox" checked={sample} onChange={(e) => setSample(e.target.checked)} /> 예시 원고로 시작
+            </label>
+          )}
+          <div className={styles.footer}>
+            <p className={styles.note}>
+              <Icon name="check" size="xs" className={styles.noteIcon} />
+              선택한 템플릿은 조판 설정에서 조정할 수 있어요.
+            </p>
+            <button type="submit" className={styles.primary} disabled={empty || busy}>
+              만들기
+            </button>
+          </div>
+        </form>
+      </main>
       {created && (
         <EditorLinkDialog
           url={created.url}
@@ -118,6 +184,6 @@ export function NewBook() {
           }}
         />
       )}
-    </main>
+    </div>
   );
 }

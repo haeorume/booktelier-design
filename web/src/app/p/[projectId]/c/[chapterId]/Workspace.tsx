@@ -1,18 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChapterList } from "@/components/ChapterList";
 import { usePanelLayout, useSessionVersion } from "@/components/hooks";
 import { MessageView, NOT_FOUND } from "@/components/MessageView";
 import { ShareDialog } from "@/components/ShareDialog";
 import { TopBar } from "@/components/TopBar";
+import { ChapterTabs } from "@/components/workspace/Chrome";
 import { bookDeps, type ChapterInfo, type PresentPerson } from "@/data";
 import { mergeChapters } from "@/domain/live";
 import { can } from "@/domain/permissions";
 import { setTrackContext, track } from "@/events";
 import type { Chapter, Participant, Project, Role, RoleLink } from "@/types";
-import { ChapterWorkspace } from "./ChapterWorkspace";
+import { ChapterWorkspace, type WorkspaceCommands } from "./ChapterWorkspace";
 import { Preview } from "./preview/Preview";
 import styles from "./page.module.css";
 
@@ -54,9 +55,15 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   const [present, setPresent] = useState<PresentPerson[] | null>(() => (bookDeps().live ? [] : null));
   /** 같은 장 안에서 다른 사람의 작업 위치로 갈 때. n은 같은 문단을 다시 눌러도 움직이게 한다. */
   const [jump, setJump] = useState<{ paragraphId: string; n: number } | null>(null);
-  /** 상단 바의 자리(장 머리, 저장 상태). 상단 바가 그려진 뒤 작업 공간이 여기에 그려 넣어요. */
-  const [chapterSlot, setChapterSlot] = useState<HTMLElement | null>(null);
+  /** 상단 바의 저장 상태 자리. 상단 바가 그려진 뒤 작업 공간이 여기에 그려 넣어요. */
   const [saveSlot, setSaveSlot] = useState<HTMLElement | null>(null);
+  /** 시안 11.22 패널 묶음: 목차(원고 구조) · 도구(메뉴·서식 막대) */
+  const [navOpen, setNavOpen] = useState(true);
+  const [toolsOpen, setToolsOpen] = useState(true);
+  /** 장 탭 줄의 + 를 누른 횟수. 원고 구조가 장 추가 칸을 열어요. */
+  const [addRequest, setAddRequest] = useState(0);
+  const [sharedCount, setSharedCount] = useState(0);
+  const commands = useRef<WorkspaceCommands | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -204,10 +211,17 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
   if (current.kind === "no_role") return <MessageView title="받은 링크로 다시 들어와 주세요" body="이 브라우저에는 이 책의 역할이 없어요." />;
 
   const { project, chapter, chapters, me, participants, links, loadId } = current;
+  const togglePanel = () => {
+    // 펼 때 '하나씩' 배치(D-10)면 조판 설정을 닫아야 검토 패널이 보여요(지면 표시를 누를 때와 같아요, Codex 검수 11.22).
+    if (panelCollapsed && panelLayout === "single") setLayoutOpen(false);
+    setPanelCollapsed((v) => !v);
+  };
+  const openPreview = () => setPreviewAt(visiblePage());
+  const canAdd = can(me.role, "add_chapter");
   return (
     <div className={styles.workspace}>
       {/* 미리보기를 덮어 연 동안 아래 작업 공간은 누르거나 Tab으로 갈 수 없어요(inert, D-40). */}
-      <div className={styles.workspaceInner} inert={previewAt !== null}>
+      <div className={styles.workspaceInner} inert={previewAt !== null} aria-hidden={previewAt !== null || undefined}>
         <TopBar
           role={me.role}
           bookTitle={project.title}
@@ -220,23 +234,57 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
           present={present}
           chapterTitles={chapterTitles}
           onJump={onJump}
-          chapterSlotRef={setChapterSlot}
           saveSlotRef={setSaveSlot}
           previewHref={`/p/${project.id}/c/${chapter.id}/preview?from=top_bar`}
-          onPreview={() => setPreviewAt(visiblePage())}
+          onPreview={openPreview}
           panelCollapsed={panelCollapsed}
-          onTogglePanel={() => {
-            // 펼 때 '하나씩' 배치(D-10)면 조판 설정을 닫아야 검토 패널이 보여요(지면 표시를 누를 때와 같아요, Codex 검수 11.22).
-            if (panelCollapsed && panelLayout === "single") setLayoutOpen(false);
-            setPanelCollapsed((v) => !v);
-          }}
+          onTogglePanel={togglePanel}
+          navOpen={navOpen}
+          onToggleNav={() => setNavOpen((o) => !o)}
+          toolsOpen={toolsOpen}
+          onToggleTools={() => setToolsOpen((o) => !o)}
           layoutOpen={layoutOpen}
-          onShare={() => setSharing(true)}
-          onSnapshots={() => setSnapshotsOpen(true)}
           onToggleLayout={() => setLayoutOpen((o) => !o)}
+          onShowAll={() => {
+            setNavOpen(true);
+            setToolsOpen(true);
+            setPanelCollapsed(false);
+          }}
+          onOpenShared={() => commands.current?.openShared()}
+          onExport={() => commands.current?.exportText()}
+          onShare={() => setSharing(true)}
         />
         <div className={styles.columns}>
-          <ChapterList projectId={project.id} chapters={chapters} currentId={chapter.id} onAdd={can(me.role, "add_chapter") ? addChapter : undefined} />
+          {navOpen && (
+            <ChapterList
+              projectId={project.id}
+              chapters={chapters}
+              currentId={chapter.id}
+              onAdd={canAdd ? addChapter : undefined}
+              addRequest={addRequest}
+              sharedCount={sharedCount}
+              onOpenShared={() => commands.current?.openShared()}
+              onOpenRules={() => commands.current?.openRules()}
+              onCollapse={() => setNavOpen(false)}
+              storageLabel={bookDeps().live ? "서버에 함께 저장" : "내 브라우저에 저장"}
+            />
+          )}
+          <div className={styles.stage}>
+            <ChapterTabs
+              projectId={project.id}
+              chapters={chapters}
+              currentId={chapter.id}
+              homeHref={can(me.role, "open_editor_home") ? "/home" : null}
+              onAdd={
+                canAdd
+                  ? () => {
+                      setNavOpen(true);
+                      setAddRequest((n) => n + 1);
+                    }
+                  : undefined
+              }
+            />
+            <div className={styles.row}>
           {/* 역할이나 장이 바뀌면 편집 상태를 새로 시작한다. */}
           <ChapterWorkspace
             key={`${chapter.id}/${me.id}/${loadId}`}
@@ -249,18 +297,31 @@ export function Workspace({ projectId, chapterId }: { projectId: string; chapter
             onChapters={onChapters}
             onPresence={onPresence}
             jump={jump}
-            slots={{ chapter: chapterSlot, save: saveSlot }}
+            slots={{ save: saveSlot }}
             layoutOpen={layoutOpen}
             onLayoutOpenChange={setLayoutOpen}
             panelCollapsed={panelCollapsed}
             onPanelReveal={() => setPanelCollapsed(false)}
             snapshotsOpen={snapshotsOpen}
+            onSnapshotsOpen={() => setSnapshotsOpen(true)}
             onSnapshotsClose={() => setSnapshotsOpen(false)}
             onConflict={onConflict}
+            toolsOpen={toolsOpen}
+            onToolsOpenChange={setToolsOpen}
+            navOpen={navOpen}
+            onNavOpenChange={setNavOpen}
+            onPanelToggle={togglePanel}
+            onPreview={openPreview}
+            commandsRef={commands}
+            onSharedCount={setSharedCount}
           />
+            </div>
+          </div>
         </div>
         {sharing && me.role === "editor" && (
           <ShareDialog
+            bookTitle={project.title}
+            participants={participants}
             links={links}
             onCreate={async (role: Role) => {
               await bookDeps().library.createRoleLink(project.id, role);

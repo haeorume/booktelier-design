@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/components/Icon";
 import { can } from "@/domain/permissions";
 import { AI_ORIGIN_LABEL, EDIT_STATUS_LABEL, KIND_LABEL, ROLE_LABEL } from "@/domain/labels";
 import type { Comment, Participant, Role, SuggestedEdit } from "@/types";
@@ -37,24 +38,47 @@ function isOpen(item: SharedItem): boolean {
   return item.kind === "edit" ? item.edit.status === "pending" : item.comment.status === "open";
 }
 
-function Author({ id, participants }: { id: string; participants: Map<string, Participant> }) {
+/** 쓴 사람 줄(시안 .br-member-row): 이름 첫 글자 동그라미, 이름과 역할, 아래 작은 글씨. */
+function Author({ id, participants, note, size = "md" }: { id: string; participants: Map<string, Participant>; note?: string; size?: "md" | "sm" }) {
   const p = participants.get(id);
+  const name = p?.display_name ?? "알 수 없음";
   return (
-    <span className={styles.author}>
-      <span className={styles.authorName}>{p?.display_name ?? "알 수 없음"}</span>
-      {p && <span className={styles.roleBadge}>{ROLE_LABEL[p.role]}</span>}
+    <span className={styles.author} data-size={size}>
+      <span className={styles.avatar} aria-hidden="true">
+        {name.slice(0, 1)}
+      </span>
+      <span className={styles.authorText}>
+        <span className={styles.authorName}>
+          {name}
+          {p && <span className={styles.roleBadge}>{ROLE_LABEL[p.role]}</span>}
+        </span>
+        {note && <small>{note}</small>}
+      </span>
     </span>
   );
 }
 
 /**
  * 함께 봄 탭(WS-47). 사람이 주고받은 의견(WS-49)과 수정 제안(WS-48). 세 역할 모두 본다.
+ * 시안 함께 봄 카드(라일락 계열 .br-card[data-shared], .br-comment-thread) 모양이에요.
  * 수락·거절은 받은 사람(작가)에게만 보인다(D-14, D-15). 답글만 달린 건과 원고에 반영된 건은 다르게 보인다(FR-36).
  */
 export function SharedTab(p: Props) {
   const [scope, setScope] = useState<Scope>("all");
   const [kind, setKind] = useState<Kind>("all");
-  if (p.items.length === 0) return <p className={styles.empty}>아직 주고받은 의견과 수정 제안이 없어요.</p>;
+  if (p.items.length === 0) {
+    return (
+      <div className={styles.empty}>
+        <Icon name="comment" className={styles.emptyIcon} />
+        <strong>원고에 의견을 더해 보세요</strong>
+        <p>
+          아직 주고받은 의견과 수정 제안이 없어요.
+          <br />
+          지면에서 글자를 고르면 의견이나 수정 제안을 남길 수 있어요.
+        </p>
+      </div>
+    );
+  }
   const shown = p.items.filter((i) => (scope === "all" || isOpen(i)) && (kind === "all" || i.kind === kind));
   return (
     <>
@@ -64,17 +88,18 @@ export function SharedTab(p: Props) {
         </p>
       )}
       {/* 거르기(FR-36, L-63): 진행 중 / 전체, 의견 / 수정 제안 */}
-      <div className={styles.cardActions} role="group" aria-label="함께 봄 거르기">
+      <div className={styles.sharedFilters} role="group" aria-label="함께 봄 거르기">
         {(
           [
             ["open", "진행 중"],
             ["all", "전체"],
           ] as const
         ).map(([v, label]) => (
-          <button key={v} type="button" className={styles.button} aria-pressed={scope === v} onClick={() => setScope(v)}>
+          <button key={v} type="button" className={styles.chip} data-kind="all" aria-pressed={scope === v} onClick={() => setScope(v)}>
             {label}
           </button>
         ))}
+        <span className={styles.filterGap} aria-hidden="true" />
         {(
           [
             ["all", "모두"],
@@ -82,12 +107,16 @@ export function SharedTab(p: Props) {
             ["edit", "수정 제안"],
           ] as const
         ).map(([v, label]) => (
-          <button key={v} type="button" className={styles.button} aria-pressed={kind === v} onClick={() => setKind(v)}>
+          <button key={v} type="button" className={styles.chip} data-kind="all" aria-pressed={kind === v} onClick={() => setKind(v)}>
             {label}
           </button>
         ))}
       </div>
-      {shown.length === 0 && <p className={styles.empty}>거른 조건에 맞는 것이 없어요.</p>}
+      {shown.length === 0 && (
+        <div className={styles.empty}>
+          <strong>거른 조건에 맞는 것이 없어요.</strong>
+        </div>
+      )}
       <ul className={styles.cards}>
         {shown.map((item) =>
           item.kind === "edit" ? (
@@ -105,7 +134,7 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
   const decided = edit.status !== "pending";
   return (
     <li
-      className={`${styles.card} ${decided ? styles.decided : ""}`}
+      className={`${styles.card} ${styles.sharedCard}`}
       data-testid="edit-card"
       data-card="edit"
       data-card-id={edit.id}
@@ -115,24 +144,33 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
       onClick={() => onSelect(edit.id)}
       onKeyDown={(e) => e.key === "Enter" && e.target === e.currentTarget && onSelect(edit.id)}
     >
-      <div className={styles.cardHead}>
-        <span className={styles.typeTag}>수정 제안</span>
-        <span className={styles.statusChip} data-testid="edit-status">
+      <div className={styles.cardTop}>
+        <span className={styles.kind} data-kind="human">
+          수정 제안
+        </span>
+        <span className={styles.badge} data-testid="edit-status">
           {EDIT_STATUS_LABEL[edit.status]}
         </span>
         {edit.status === "accepted" && <span className={styles.reflected}>원고에 반영됨</span>}
       </div>
-      <Author id={edit.author_id} participants={participants} />
-      <p>
-        <del className={styles.editDel}>{edit.original}</del> → <ins className={styles.editIns}>{edit.replacement}</ins>
-      </p>
+      {edit.ai_origin_id && <span className={styles.origin}>{AI_ORIGIN_LABEL}</span>}
+      <div className={styles.memberRow}>
+        <Author id={edit.author_id} participants={participants} note="수정 제안 · 함께 봄" />
+      </div>
+      <div className={styles.original}>
+        <span className={styles.fieldLabel}>원문</span>
+        <del>{edit.original}</del>
+      </div>
+      <div className={styles.replacement}>
+        <span className={styles.fieldLabel}>수정안</span>
+        <ins>{edit.replacement}</ins>
+      </div>
       {(edit.kind || edit.reason) && (
-        <p className={styles.body} data-testid="edit-reason">
-          {edit.kind && <span className={styles.typeTag}>{KIND_LABEL[edit.kind]}</span>} {edit.reason}
+        <p className={styles.reason} data-testid="edit-reason">
+          {edit.kind && <strong>{KIND_LABEL[edit.kind]}</strong>} {edit.reason}
         </p>
       )}
-      {edit.ai_origin_id && <span className={styles.aiOrigin}>{AI_ORIGIN_LABEL}</span>}
-      {!decided && can(role, "accept_suggested_edit") && (
+      {!decided && can(role, "accept_suggested_edit") ? (
         <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
           <button type="button" className={styles.primaryButton} disabled={busy} onClick={() => onAccept(edit)}>
             수락
@@ -143,6 +181,8 @@ function EditCard({ edit, role, participants, selected, busy, onSelect, onAccept
             </button>
           )}
         </div>
+      ) : (
+        !decided && <p className={styles.awaiting}>받는 사람의 판단을 기다려요.</p>
       )}
     </li>
   );
@@ -157,7 +197,7 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
   const resolver = comment.resolved_by ? participants.get(comment.resolved_by) : undefined;
   return (
     <li
-      className={`${styles.card} ${resolved ? styles.decided : ""}`}
+      className={styles.thread}
       data-status={comment.status}
       data-testid="comment-card"
       data-card="comment"
@@ -167,37 +207,31 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
       onClick={() => onSelect(comment.id)}
       onKeyDown={(e) => e.key === "Enter" && e.target === e.currentTarget && onSelect(comment.id)}
     >
-      <div className={styles.cardHead}>
-        <span className={styles.typeTag}>의견</span>
-        {replies.length > 0 && <span className={styles.replyCount}>답글 {replies.length}</span>}
-        {unseen.has(comment.id) && <span className={styles.unseen}>새 의견</span>}
-        {resolved && (
-          <span className={styles.statusChip} data-testid="comment-status">
-            해결됨{resolver ? ` · ${resolver.display_name}` : ""}
-          </span>
-        )}
+      <div className={styles.memberRow}>
+        <Author id={comment.author_id} participants={participants} note="의견 · 함께 봄" />
+        <span className={styles.threadBadges}>
+          {unseen.has(comment.id) && <span className={styles.unseen}>새 의견</span>}
+          {replies.length > 0 && <span className={styles.badge}>답글 {replies.length}</span>}
+          {resolved && (
+            <span className={styles.threadStatus} data-testid="comment-status">
+              해결됨{resolver ? ` · ${resolver.display_name}` : ""}
+            </span>
+          )}
+        </span>
       </div>
-      <Author id={comment.author_id} participants={participants} />
-      {quote && <p className={styles.quoteLine}>“{quote}”</p>}
-      {detached && <p className={styles.quoteLine}>원문이 바뀌어 지면에 표시하지 않아요.</p>}
-      <p className={styles.body}>{comment.body}</p>
-      {comment.ai_origin_id && <span className={styles.aiOrigin}>{AI_ORIGIN_LABEL}</span>}
+      {comment.ai_origin_id && <span className={styles.origin}>{AI_ORIGIN_LABEL}</span>}
+      {quote && <blockquote className={styles.quote}>“{quote}”</blockquote>}
+      {detached && <p className={styles.detached}>원문이 바뀌어 지면에 표시하지 않아요.</p>}
+      <p className={styles.commentBody}>{comment.body}</p>
       {replies.length > 0 && (
         <ul className={styles.replies}>
           {replies.map((r) => (
             <li key={r.id} className={styles.reply} data-testid="reply">
-              <Author id={r.author_id} participants={participants} />
-              <p className={styles.body}>{r.body}</p>
+              <Author id={r.author_id} participants={participants} size="sm" />
+              <p className={styles.replyBody}>{r.body}</p>
             </li>
           ))}
         </ul>
-      )}
-      {canResolve && (
-        <div className={styles.cardActions} onClick={(e) => e.stopPropagation()}>
-          <button type="button" className={styles.button} onClick={() => onResolve(comment, !resolved)}>
-            {resolved ? "다시 열기" : "해결"}
-          </button>
-        </div>
       )}
       {can(role, "create_comment") && !resolved && (
         <form
@@ -215,11 +249,18 @@ function CommentCard({ comment, replies, quote, detached, participants, selected
             }
           }}
         >
-          <input className={styles.replyInput} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="답글" aria-label="답글" />
-          <button type="submit" className={styles.button} disabled={!reply.trim() || busy}>
+          <input className={styles.replyInput} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="답글을 남겨 주세요" aria-label="답글" />
+          <button type="submit" className={styles.replyButton} disabled={!reply.trim() || busy}>
             답글
           </button>
         </form>
+      )}
+      {canResolve && (
+        <div className={`${styles.cardActions} ${styles.threadActions}`} onClick={(e) => e.stopPropagation()}>
+          <button type="button" className={styles.textButton} onClick={() => onResolve(comment, !resolved)}>
+            {resolved ? "다시 열기" : "해결"}
+          </button>
+        </div>
       )}
     </li>
   );

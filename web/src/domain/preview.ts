@@ -111,10 +111,11 @@ export function pageCss(templateId: TemplateId, layout: Layout, titles: { book: 
   rules.push(`@page :first { @top-left { content: none; } @top-right { content: none; } }`);
   rules.push(
     `.bt-p { font-family: ${vars["--page-font"]}; font-size: ${vars["--page-font-size"]}; line-height: ${vars["--page-line-height"]}; text-align: ${vars["--page-text-align"]}; text-indent: ${vars["--page-text-indent"]}; margin: 0 0 0.6em; min-height: 1em; word-break: keep-all; white-space: break-spaces; color: var(--bt-ink); }`,
-    `.bt-chapter-head { margin-bottom: 2em; font-family: ${vars["--page-font"]}; font-size: ${vars["--page-font-size"]}; }`,
-    `.bt-eyebrow { font-family: var(--bt-font-ui); font-size: 8pt; font-weight: 600; letter-spacing: var(--bt-tracking-eyebrow); color: var(--bt-accent-text); margin: 0 0 0.6em; }`,
-    `.bt-chapter-title { font-size: 1.6em; font-weight: 600; line-height: 1.3; color: var(--bt-ink); margin: 0; }`,
-    `.bt-rule { display: block; width: 24px; height: 1px; margin-top: 1em; background: var(--bt-brand); }`,
+    // 장 머리는 작업 지면(ManuscriptEditor.module.css, 시안 11.22)과 같은 크기라 쪽 나누기가 같아요.
+    `.bt-chapter-head { margin-bottom: 29px; font-family: var(--bt-font-ui); }`,
+    `.bt-eyebrow { font-family: var(--bt-font-ui); font-size: 9px; font-weight: 400; line-height: 1.3; letter-spacing: 0.2em; color: var(--bt-accent-text); margin: 10px 0 17px; }`,
+    `.bt-chapter-title { font-family: var(--bt-font-ui); font-size: 28px; font-weight: 600; line-height: 1.5; letter-spacing: -0.01em; color: var(--bt-ink); margin: 0; }`,
+    `.bt-rule { display: block; width: 28px; height: 2px; margin-top: 25px; background: var(--bt-brand); opacity: 0.6; }`,
   );
   return rules.join("\n");
 }

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChapterHead } from "@/components/ChapterHead";
+import { ChapterActions, ChapterStatus } from "@/components/ChapterHead";
+import { FormatToolbar, MenuBar, Ruler, StatusBar, WorkHeader, type Density, type Menu } from "@/components/workspace/Chrome";
 import { ManuscriptEditor, type ChangeSource, type EditorHandle, type MarkClick } from "@/components/editor/ManuscriptEditor";
 import type { PickedText } from "@/components/editor/selection";
 import { ComposeDialog, type ComposeKind } from "@/components/review/ComposeDialog";
@@ -13,8 +14,9 @@ import { StyleRulesTab } from "@/components/review/StyleRulesTab";
 import { usePanelLayout } from "@/components/hooks";
 import { LayoutPanel } from "@/components/LayoutPanel";
 import { SnapshotDialog } from "@/components/SnapshotDialog";
-import { bookDeps, hasProjectEvent, type ChapterInfo, type Ctx, type PresentPerson } from "@/data";
+import { bookDeps, getClientSession, hasProjectEvent, type ChapterInfo, type Ctx, type PresentPerson } from "@/data";
 import type { LayoutChange } from "@/domain/layout";
+import { parseTrim } from "@/domain/templates";
 import { can } from "@/domain/permissions";
 import { nextChapterStatus, type ChapterAction } from "@/domain/transitions";
 import { track } from "@/events";
@@ -37,8 +39,8 @@ interface Props {
   onChapters: (changed: ChapterInfo[]) => void;
   /** 지금 이 책을 연 다른 사람(F4, A-31) */
   onPresence: (people: PresentPerson[]) => void;
-  /** 상단 바의 자리. 장 머리와 저장 상태를 여기 그려요(DESIGN.md 3장) */
-  slots: { chapter: HTMLElement | null; save: HTMLElement | null };
+  /** 상단 바의 자리. 저장 상태를 여기 그려요(DESIGN.md 3장) */
+  slots: { save: HTMLElement | null };
   /** 이 장 안에서 다른 사람의 작업 위치로 간다(FR-47 ②) */
   jump: { paragraphId: string; n: number } | null;
   layoutOpen: boolean;
@@ -48,17 +50,38 @@ interface Props {
   /** 지면의 밑줄·의견을 누르면 접힌 패널을 다시 펴요 */
   onPanelReveal: () => void;
   snapshotsOpen: boolean;
+  onSnapshotsOpen: () => void;
   onSnapshotsClose: () => void;
+  /** 시안 둘레: 메뉴·서식 막대 보기, 원고 구조 보기, 집중해서 보기 */
+  toolsOpen: boolean;
+  onToolsOpenChange: (open: boolean) => void;
+  navOpen: boolean;
+  onNavOpenChange: (open: boolean) => void;
+  onPanelToggle: () => void;
+  onPreview: () => void;
+  /** 원고 구조·상단 바가 검토 패널 탭을 열고 원고를 내려받게 이어 줘요 */
+  commandsRef: { current: WorkspaceCommands | null };
+  onSharedCount: (n: number) => void;
   /** 저장하려던 원고가 그사이 다른 곳에서 바뀌었다(409). 최신 원고로 다시 그린다(C-4). */
   onConflict: () => void;
 }
+
+/** 지면 둘레 책상 여백(시안 .page-space 좌우 27px) */
+const DESK_GUTTER = 27;
 
 /**
  * 한 장의 지면과 검토 패널. 원고 저장(useManuscriptSave), 내 AI 제안(useAiSuggestions),
  * 함께 봄(useShared)을 이어 붙인다(리뷰 R-3). 보내기 전 AI 제안은 주인 것만 온다(FR-23, D-29).
  */
+export interface WorkspaceCommands {
+  openShared(): void;
+  openRules(): void;
+  exportText(): void;
+}
+
 export function ChapterWorkspace(props: Props) {
-  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, slots, layoutOpen, onLayoutOpenChange, panelCollapsed, onPanelReveal, snapshotsOpen, onSnapshotsClose, onConflict } = props;
+  const { project, chapter, me, participants, onChapterChange, onProjectChange, onChapters, onPresence, jump, slots, layoutOpen, onLayoutOpenChange, panelCollapsed, onPanelReveal, snapshotsOpen, onSnapshotsOpen, onSnapshotsClose, onConflict } = props;
+  const { toolsOpen, onToolsOpenChange, navOpen, onNavOpenChange, onPanelToggle, onPreview, commandsRef, onSharedCount } = props;
   const panelLayout = usePanelLayout();
   const deps = useMemo(() => bookDeps(), []);
   const ctx: Ctx = useMemo(
@@ -76,6 +99,13 @@ export function ChapterWorkspace(props: Props) {
   const [previewLayout, setPreviewLayout] = useState<Layout | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const editor = useRef<EditorHandle>(null);
+  /* 시안 둘레의 화면 상태(이 브라우저에서만, 저장하지 않음) */
+  const [density, setDensity] = useState<Density>("detail");
+  const [headerOpen, setHeaderOpen] = useState(true);
+  const [guides, setGuides] = useState(true);
+  const [zoom, setZoom] = useState(100);
+  const [deskWidth, setDeskWidth] = useState(0);
+  const desk = useRef<HTMLDivElement>(null);
   const panel = useRef<ReviewPanelHandle>(null);
   const firstEditChecked = useRef(false);
 
@@ -222,20 +252,150 @@ export function ChapterWorkspace(props: Props) {
   }
 
   const { saveState } = save;
+
+  // 책상 폭을 재서 지면이 다 들어가게 줄여요(1280px·나란히에서도 잘리지 않게, QA-49). 상태 줄의 %는 그 위에 곱해요.
+  useEffect(() => {
+    const el = desk.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setDeskWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const activeLayout = previewLayout ?? project.layout;
+  const trimMm = parseTrim(activeLayout.trim)?.width ?? 148;
+  const pagePx = (trimMm * 96) / 25.4;
+  const fit = deskWidth > 0 ? Math.min(1, (deskWidth - DESK_GUTTER * 2) / pagePx) : 1;
+  const scale = Math.max(0.3, (zoom / 100) * fit);
+  const chars = doc.content.reduce((n, p) => n + (p.content ?? []).reduce((m, t) => m + t.text.length, 0), 0);
+
+  useEffect(() => onSharedCount(shared.pendingCount), [onSharedCount, shared.pendingCount]);
+
+  function exportText() {
+    const text = [chapter.title, "", ...doc.content.map((p) => (p.content ?? []).map((t) => t.text).join(""))].join("\n");
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project.title} - ${chapter.title}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  useEffect(() => {
+    commandsRef.current = {
+      openShared: () => {
+        if (panelLayout === "single") onLayoutOpenChange(false);
+        onPanelReveal();
+        panel.current?.revealShared();
+      },
+      openRules: () => {
+        if (panelLayout === "single") onLayoutOpenChange(false);
+        onPanelReveal();
+        panel.current?.revealRules?.();
+      },
+      exportText,
+    };
+  });
+
+  function undo() {
+    if (ai.lastAppliedRef.current) void ai.undo();
+    else editor.current?.undo();
+  }
+
+  const canEdit = editable && !save.locked;
+  const pickComment = picked && can(me.role, "create_comment") ? () => setComposing({ kind: "comment", picked }) : undefined;
+  const pickEdit = picked && can(me.role, "create_suggested_edit") ? () => setComposing({ kind: "suggested_edit", picked }) : undefined;
+  const runReview = can(me.role, "run_chapter_review")
+    ? () => {
+        if (panelLayout === "single") onLayoutOpenChange(false);
+        onPanelReveal();
+        void ai.runReview();
+      }
+    : undefined;
+  const menus: Menu[] = [
+    {
+      label: "파일",
+      items: [
+        { kind: "action", label: "미리보기", icon: "book", onSelect: onPreview },
+        ...(can(me.role, "view_snapshots") ? [{ kind: "action" as const, label: "검토본 열기", icon: "history" as const, onSelect: onSnapshotsOpen }] : []),
+        { kind: "line" },
+        { kind: "action", label: "지금 장 내보내기 TXT", icon: "download", onSelect: exportText },
+        { kind: "action", label: "인쇄 / PDF 저장", icon: "doc" },
+      ],
+    },
+    {
+      label: "편집",
+      items: [
+        { kind: "action", label: "되돌리기", icon: "undo", hint: "Ctrl Z", onSelect: canEdit ? undo : undefined },
+        { kind: "action", label: "다시 하기", icon: "redo", hint: "Ctrl Shift Z", onSelect: canEdit ? () => editor.current?.redo() : undefined },
+        { kind: "line" },
+        { kind: "action", label: "찾기·바꾸기", icon: "search" },
+        { kind: "action", label: "선택 문장에 의견", icon: "comment", onSelect: pickComment },
+      ],
+    },
+    {
+      label: "삽입",
+      items: [
+        { kind: "action", label: "이미지", icon: "image" },
+        { kind: "action", label: "표", icon: "grid" },
+        { kind: "action", label: "인용문", icon: "quote" },
+        { kind: "action", label: "구분선", icon: "minimize" },
+      ],
+    },
+    {
+      label: "서식",
+      items: [
+        { kind: "caption", label: "서식 막대" },
+        { kind: "check", label: "간단(막대 숨김)", checked: density === "simple", onToggle: () => setDensity("simple") },
+        { kind: "check", label: "기본(한 줄)", checked: density === "basic", onToggle: () => setDensity("basic") },
+        { kind: "check", label: "상세(두 줄)", checked: density === "detail", onToggle: () => setDensity("detail") },
+      ],
+    },
+    {
+      label: "검토",
+      items: [
+        { kind: "action", label: "장 검토 실행", icon: "spark", onSelect: runReview },
+        { kind: "action", label: "선택한 원문에 수정 제안", icon: "track", onSelect: pickEdit },
+        { kind: "action", label: "편집 의견 남기기", icon: "comment", onSelect: pickComment },
+        { kind: "line" },
+        { kind: "action", label: "의견과 적용 기록", icon: "history", onSelect: () => commandsRef.current?.openShared() },
+        { kind: "action", label: "표기 원칙", icon: "check", onSelect: () => commandsRef.current?.openRules() },
+      ],
+    },
+    {
+      label: "보기",
+      items: [
+        { kind: "caption", label: "패널 표시" },
+        { kind: "check", label: "왼쪽 탐색 패널", checked: navOpen, onToggle: () => onNavOpenChange(!navOpen) },
+        { kind: "check", label: "상단 작업 도구", checked: toolsOpen, onToggle: () => onToolsOpenChange(!toolsOpen) },
+        { kind: "check", label: "오른쪽 작업 패널", checked: !panelCollapsed, onToggle: onPanelToggle },
+        { kind: "check", label: "조판 안내선", checked: guides, onToggle: () => setGuides((g) => !g) },
+        { kind: "line" },
+        {
+          kind: "action",
+          label: "밝게 · 어둡게 바꾸기",
+          icon: "focus",
+          onSelect: () => {
+            // 지금 보이는 테마의 반대로(테마 스위치와 같은 판단: 고른 값, 없으면 컴퓨터 설정)
+            const chosen = document.documentElement.dataset.theme;
+            const dark = chosen ? chosen === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+            getClientSession().setTheme(dark ? "light" : "dark");
+          },
+        },
+      ],
+    },
+    {
+      label: "도움말",
+      items: [
+        { kind: "action", label: "되돌리기 Ctrl Z · 다시 하기 Ctrl Shift Z", icon: "info" },
+        { kind: "action", label: "글을 고르면 의견·수정 제안 메뉴가 떠요", icon: "comment" },
+      ],
+    },
+  ];
+  const focus = !navOpen && panelCollapsed && !toolsOpen;
+
   return (
     <>
-      {/* 장 상태·검토 요청·검토 완료와 저장 상태는 상단 바에 그려요(DESIGN.md 3장, WS-31·WS-14). */}
-      {slots.chapter &&
-        createPortal(
-          <ChapterHead
-            chapter={chapter}
-            role={me.role}
-            busy={chapterBusy}
-            onRequestReview={() => void changeChapter("request_review")}
-            onCompleteReview={() => void changeChapter("complete_review")}
-          />,
-          slots.chapter,
-        )}
+      {/* 저장 상태는 상단 바에, 장 상태·검토 요청·검토 완료는 작업 머리에 그려요(시안 11.22, WS-31·WS-14). */}
       {slots.save &&
         editable &&
         createPortal(
@@ -249,14 +409,72 @@ export function ChapterWorkspace(props: Props) {
           </p>,
           slots.save,
         )}
-      <div className={styles.desk}>
+      <div className={styles.main}>
+        {toolsOpen && (
+          <MenuBar
+            menus={menus}
+            focus={focus}
+            onFocusMode={() => {
+              // 집중해서 보기: 원고 구조·도구·검토 패널을 한 번에 접고, 다시 누르면 모두 펴요
+              onNavOpenChange(focus);
+              onToolsOpenChange(focus);
+              if (focus === panelCollapsed) onPanelToggle();
+            }}
+          />
+        )}
+        {headerOpen && (
+          <WorkHeader
+            role={me.role}
+            chapterOrder={chapter.order}
+            chapterTitle={chapter.title}
+            status={<ChapterStatus chapter={chapter} />}
+            actions={
+              <ChapterActions
+                chapter={chapter}
+                role={me.role}
+                busy={chapterBusy}
+                onRequestReview={() => void changeChapter("request_review")}
+                onCompleteReview={() => void changeChapter("complete_review")}
+                onSnapshots={can(me.role, "view_snapshots") ? onSnapshotsOpen : undefined}
+              />
+            }
+            layoutOpen={layoutOpen}
+            onMode={(mode) => onLayoutOpenChange(mode === "layout")}
+            density={density}
+            onDensity={setDensity}
+            onCollapse={() => setHeaderOpen(false)}
+          />
+        )}
+        {toolsOpen && (
+          <FormatToolbar
+            density={density}
+            canEdit={canEdit}
+            onUndo={undo}
+            onRedo={() => editor.current?.redo()}
+            onSuggest={pickEdit}
+            onComment={pickComment}
+            onAi={runReview}
+            guides={guides}
+            onGuides={() => setGuides((g) => !g)}
+            onCompare={can(me.role, "view_snapshots") ? onSnapshotsOpen : undefined}
+          />
+        )}
+        <div className={styles.desk} ref={desk} data-testid="desk">
+          {!headerOpen && (
+            <button type="button" className={styles.headerReveal} onClick={() => setHeaderOpen(true)}>
+              작업 머리 펴기
+            </button>
+          )}
+          <Ruler widthMm={trimMm} scale={scale} />
         <ManuscriptEditor
+          zoom={scale}
+          guides={guides}
           ref={editor}
           initialDoc={chapter.doc}
           // 서버가 원고를 바꾸는 요청을 기다리는 동안은 입력을 막는다(serverEdit).
           editable={editable && !save.locked}
           templateId={project.template_id}
-          layout={previewLayout ?? project.layout}
+          layout={activeLayout}
           chapterTitle={chapter.title}
           chapterOrder={chapter.order}
           bookTitle={project.title}
@@ -290,6 +508,13 @@ export function ChapterWorkspace(props: Props) {
             return true;
           }}
         />
+          <p className={styles.caption} aria-hidden="true">
+            <i />
+            문장에 집중하는 시간
+            <i />
+          </p>
+        </div>
+        <StatusBar mode={me.role === "designer" ? "Layout" : "Edit"} chars={chars} zoom={zoom} onZoom={setZoom} onPreview={onPreview} />
       </div>
       {/*
         오른쪽 패널(D-10, N-15). 하나씩(A안, 기본): 조판 설정을 열면 검토 패널이 닫힌다.
@@ -298,6 +523,9 @@ export function ChapterWorkspace(props: Props) {
       <div className={styles.reviewSlot} hidden={panelCollapsed || (layoutOpen && panelLayout === "single")} data-testid="review-slot">
         <ReviewPanel
           ref={panel}
+          chapterTitle={chapter.title}
+          onOpenLayout={() => onLayoutOpenChange(true)}
+          onClose={onPanelToggle}
           role={me.role}
           suggestions={ai.placement.placed.map((p) => p.suggestion)}
           sent={ai.sent}
@@ -361,6 +589,8 @@ export function ChapterWorkspace(props: Props) {
       )}
       {snapshotsOpen && (
         <SnapshotDialog
+          bookTitle={project.title}
+          chapterTitle={chapter.title}
           role={me.role}
           snapshots={snapshots}
           participants={shared.byId}

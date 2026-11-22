@@ -14,5 +14,5 @@ const noop = () => () => {};
 export default function JoinWithoutToken() {
   const token = useSyncExternalStore(noop, () => readInviteToken(tabStorage()), () => null);
   if (token) return <JoinView token={token} />;
-  return <MessageView title="받은 링크로 다시 들어와 주세요" body="링크를 보낸 편집자에게 받은 주소를 그대로 열어 주세요." />;
+  return <MessageView eyebrow="INVITATION NEEDED" title="받은 링크로 다시 들어와 주세요" body="링크를 보낸 편집자에게 받은 주소를 그대로 열어 주세요." />;
 }

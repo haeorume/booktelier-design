@@ -71,6 +71,9 @@ export function pageStyleVars(templateId: TemplateId, layout: Layout): Record<st
     // 쪽 경계 층(PageGuides)이 본문 단의 왼쪽·오른쪽 끝을 알게 따로도 둬요.
     "--page-margin-left": `${inner + layout.binding}mm`,
     "--page-margin-right": `${outer}mm`,
+    // 여백 안내선(시안 .page-guides)이 위·아래 여백도 알게 따로 둬요.
+    "--page-margin-top": `${top}mm`,
+    "--page-margin-bottom": `${bottom}mm`,
     "--page-line-height": String(layout.line_height),
     "--page-font-size": `${layout.font_size}pt`,
     // 본문 정렬(D-41). 가운데·오른쪽은 첫 줄 들여쓰기를 없애요(들여쓰면 가운데가 어긋나 보여요).

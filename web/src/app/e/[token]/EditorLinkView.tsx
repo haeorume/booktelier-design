@@ -37,5 +37,5 @@ export function EditorLinkView({ token }: { token: string }) {
   }, [token, router]);
 
   if (!failed) return null;
-  return <MessageView title="링크를 쓸 수 없어요" body="편집자 링크가 맞는지 확인해 주세요. 책을 만든 브라우저에서는 편집자 홈으로 들어올 수 있어요." />;
+  return <MessageView eyebrow="EDITOR LINK UNAVAILABLE" title="링크를 쓸 수 없어요" body="편집자 링크가 맞는지 확인해 주세요. 책을 만든 브라우저에서는 편집자 홈으로 들어올 수 있어요." />;
 }
